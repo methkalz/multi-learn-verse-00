@@ -10,18 +10,14 @@ import { EducationalTermsManager } from '@/components/content/EducationalTermsMa
 import { ContentGameLauncher } from '@/components/content/ContentGameLauncher';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const Grade11Management: React.FC = () => {
-  const { userProfile } = useAuth();
-  
+  const {
+    userProfile
+  } = useAuth();
+
   // تحديد ما إذا كان المستخدم مدير مدرسة أم معلم
   const canManageContent = userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <AppHeader 
-        title="إدارة محتوى الصف الحادي عشر" 
-        showBackButton={true} 
-        backPath="/content-management" 
-        showLogout={true} 
-      />
+  return <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      <AppHeader title="إدارة محتوى الصف الحادي عشر" showBackButton={true} backPath="/content-management" showLogout={true} />
       
       <main className="container mx-auto px-6 py-8 flex-1">
         <div className="max-w-7xl mx-auto space-y-8">
@@ -31,9 +27,7 @@ const Grade11Management: React.FC = () => {
               <BookOpen className="h-6 w-6" />
               <span className="font-semibold">الصف الحادي عشر</span>
             </div>
-            <p className="text-muted-foreground">
-              منصة شاملة للمحتوى التعليمي والألعاب التفاعلية
-            </p>
+            
           </div>
           
           {/* التبويبات الرئيسية */}
@@ -67,7 +61,6 @@ const Grade11Management: React.FC = () => {
       </main>
       
       <AppFooter />
-    </div>
-  );
+    </div>;
 };
 export default Grade11Management;
