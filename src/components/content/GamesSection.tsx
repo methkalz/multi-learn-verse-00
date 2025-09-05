@@ -78,16 +78,16 @@ const GamesSection: React.FC<GamesSectionProps> = ({ canManageContent }) => {
 
               {/* إحصائيات سريعة */}
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200 flex flex-col items-center justify-center">
                   <div className="text-xs text-muted-foreground mb-1">المستوى</div>
                   <div className="font-bold text-gray-700">متوسط</div>
                 </div>
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200 flex flex-col items-center justify-center">
                   <div className="text-xs text-muted-foreground mb-1">الوقت</div>
                   <div className="font-bold text-gray-700">5-10 د</div>
                 </div>
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-3 border border-yellow-200">
-                  <Trophy className="h-5 w-5 mx-auto text-yellow-600 mb-1" />
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-3 border border-yellow-200 flex flex-col items-center justify-center">
+                  <Trophy className="h-5 w-5 text-yellow-600 mb-1" />
                   <div className="text-xs font-bold text-yellow-700">نقاط</div>
                 </div>
               </div>
