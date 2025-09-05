@@ -238,7 +238,7 @@ export const ModernGameSelection: React.FC<ModernGameSelectionProps> = ({
             </div>
 
             {/* شريط الإحصائيات المبسط */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 text-center">
               <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-700/30 rounded-xl p-3 text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Trophy className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
