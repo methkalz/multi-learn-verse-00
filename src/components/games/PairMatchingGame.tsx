@@ -43,6 +43,14 @@ export const PairMatchingGame: React.FC<PairMatchingGameProps> = ({
     gameAudio
   } = usePairMatching(gameId);
 
+  // إضافة state لإجبار re-render عند تغيير إعدادات الصوت
+  const [audioSettings, setAudioSettings] = React.useState(gameAudio.settings);
+
+  // مراقبة تغييرات إعدادات الصوت
+  React.useEffect(() => {
+    setAudioSettings(gameAudio.settings);
+  }, [gameAudio.settings.volume, gameAudio.settings.isMuted]);
+
   const { playWinningSound, stopWinningSound, cleanup: cleanupWinningSound } = useWinningSound();
   const { playTribalWinSound, stopTribalWinSound, cleanup: cleanupTribalWinSound } = useTribalWinSound();
 
@@ -194,15 +202,35 @@ export const PairMatchingGame: React.FC<PairMatchingGameProps> = ({
 
           {showAudioSettings && <div className="mb-6 p-4 bg-muted rounded-lg">
               <h3 className="font-semibold mb-2">إعدادات الصوت</h3>
-              <div className="space-y-2">
+                <div className="space-y-2">
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" checked={!gameAudio.settings.isMuted} onChange={e => gameAudio.toggleMute()} />
+                  <input 
+                    type="checkbox" 
+                    checked={!audioSettings.isMuted} 
+                    onChange={() => {
+                      gameAudio.toggleMute();
+                      setAudioSettings(prev => ({ ...prev, isMuted: !prev.isMuted }));
+                    }} 
+                  />
                   تفعيل الأصوات
                 </label>
                 <div className="flex items-center gap-2">
                   <span>مستوى الصوت:</span>
-                  <input type="range" min="0" max="100" step="5" value={Math.round(gameAudio.settings.volume * 100)} onChange={e => gameAudio.setVolume(parseInt(e.target.value))} className="flex-1" />
-                  <span>{Math.round(gameAudio.settings.volume * 100)}%</span>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    step="5" 
+                    value={audioSettings.volume} 
+                    onChange={e => {
+                      const newVolume = parseInt(e.target.value);
+                      gameAudio.setVolume(newVolume);
+                      setAudioSettings(prev => ({ ...prev, volume: newVolume }));
+                    }} 
+                    className="flex-1"
+                    disabled={audioSettings.isMuted}
+                  />
+                  <span>{Math.round(audioSettings.volume)}%</span>
                 </div>
               </div>
             </div>}
@@ -237,15 +265,18 @@ export const PairMatchingGame: React.FC<PairMatchingGameProps> = ({
                     <div className="flex items-center gap-2">
                       <Volume2 className="h-4 w-4 text-muted-foreground" />
                       <Slider 
-                        value={[gameAudio.settings.volume]} 
-                        onValueChange={(value) => gameAudio.setVolume(value[0])} 
+                        value={[audioSettings.volume]} 
+                        onValueChange={(value) => {
+                          gameAudio.setVolume(value[0]);
+                          setAudioSettings(prev => ({ ...prev, volume: value[0] }));
+                        }} 
                         max={100} 
                         step={1} 
                         className="w-24"
-                        disabled={gameAudio.settings.isMuted}
+                        disabled={audioSettings.isMuted}
                       />
                       <span className="text-xs font-medium text-muted-foreground min-w-[35px] text-center">
-                        {gameAudio.settings.isMuted ? 'مكتوم' : `${Math.round(gameAudio.settings.volume)}%`}
+                        {audioSettings.isMuted ? 'مكتوم' : `${Math.round(audioSettings.volume)}%`}
                       </span>
                     </div>
                     <div className="h-4 w-px bg-border" />
@@ -254,7 +285,7 @@ export const PairMatchingGame: React.FC<PairMatchingGameProps> = ({
                       size="sm" 
                       onClick={gameAudio.testSound} 
                       className="h-8 w-8 p-0 hover:bg-primary/10"
-                      disabled={gameAudio.settings.isMuted}
+                      disabled={audioSettings.isMuted}
                     >
                       <Play className="h-3 w-3" />
                     </Button>
@@ -273,10 +304,13 @@ export const PairMatchingGame: React.FC<PairMatchingGameProps> = ({
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={gameAudio.toggleMute} 
-                  className={`h-8 w-8 p-0 ${gameAudio.settings.isMuted ? 'text-red-500 hover:text-red-600' : 'text-green-600 hover:text-green-700'}`}
+                  onClick={() => {
+                    gameAudio.toggleMute();
+                    setAudioSettings(prev => ({ ...prev, isMuted: !prev.isMuted }));
+                  }} 
+                  className={`h-8 w-8 p-0 ${audioSettings.isMuted ? 'text-red-500 hover:text-red-600' : 'text-green-600 hover:text-green-700'}`}
                 >
-                  {gameAudio.settings.isMuted ? (
+                  {audioSettings.isMuted ? (
                     <VolumeX className="h-4 w-4" />
                   ) : (
                     <Volume2 className="h-4 w-4" />
