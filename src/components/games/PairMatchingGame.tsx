@@ -232,22 +232,55 @@ export const PairMatchingGame: React.FC<PairMatchingGameProps> = ({
             <div className="flex items-center gap-3">
               {/* إعدادات الصوت */}
               <div className="flex items-center gap-2">
-                {showAudioSettings && <div className="flex items-center gap-3 p-2 bg-background/80 rounded-lg border border-border/50 backdrop-blur-sm">
-                    <Slider value={[gameAudio.settings.volume]} onValueChange={value => gameAudio.setVolume(value[0])} max={100} step={5} className="w-20" />
-                    <span className="text-xs text-muted-foreground min-w-[30px]">
-                      {gameAudio.settings.volume}%
-                    </span>
-                    <Button variant="ghost" size="sm" onClick={gameAudio.testSound} className="h-8 w-8 p-0">
+                {showAudioSettings && (
+                  <div className="flex items-center gap-3 p-3 bg-background/90 rounded-lg border border-border/50 backdrop-blur-sm shadow-md">
+                    <div className="flex items-center gap-2">
+                      <Volume2 className="h-4 w-4 text-muted-foreground" />
+                      <Slider 
+                        value={[gameAudio.settings.volume]} 
+                        onValueChange={(value) => gameAudio.setVolume(value[0])} 
+                        max={100} 
+                        step={1} 
+                        className="w-24"
+                        disabled={gameAudio.settings.isMuted}
+                      />
+                      <span className="text-xs font-medium text-muted-foreground min-w-[35px] text-center">
+                        {gameAudio.settings.isMuted ? 'مكتوم' : `${Math.round(gameAudio.settings.volume)}%`}
+                      </span>
+                    </div>
+                    <div className="h-4 w-px bg-border" />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={gameAudio.testSound} 
+                      className="h-8 w-8 p-0 hover:bg-primary/10"
+                      disabled={gameAudio.settings.isMuted}
+                    >
                       <Play className="h-3 w-3" />
                     </Button>
-                  </div>}
+                  </div>
+                )}
                 
-                <Button variant="ghost" size="sm" onClick={() => setShowAudioSettings(!showAudioSettings)} className="h-8 w-8 p-0">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowAudioSettings(!showAudioSettings)} 
+                  className={`h-8 w-8 p-0 ${showAudioSettings ? 'bg-primary/10 text-primary' : ''}`}
+                >
                   <Settings className="h-4 w-4" />
                 </Button>
                 
-                <Button variant="ghost" size="sm" onClick={gameAudio.toggleMute} className="h-8 w-8 p-0">
-                  {gameAudio.settings.isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={gameAudio.toggleMute} 
+                  className={`h-8 w-8 p-0 ${gameAudio.settings.isMuted ? 'text-red-500 hover:text-red-600' : 'text-green-600 hover:text-green-700'}`}
+                >
+                  {gameAudio.settings.isMuted ? (
+                    <VolumeX className="h-4 w-4" />
+                  ) : (
+                    <Volume2 className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
               
