@@ -238,13 +238,13 @@ export const ModernGameSelection: React.FC<ModernGameSelectionProps> = ({
             </div>
 
             {/* شريط الإحصائيات المبسط */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 text-center">
               <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-700/30 rounded-xl p-3 text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Trophy className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">مكتملة</span>
                 </div>
-                <div className="text-xl font-bold text-emerald-800 dark:text-emerald-200">
+                <div className="text-xl font-bold text-emerald-800 dark:text-emerald-200 text-center">
                   {gameStats.completedGames}
                 </div>
               </div>
@@ -254,7 +254,7 @@ export const ModernGameSelection: React.FC<ModernGameSelectionProps> = ({
                   <Play className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   <span className="text-sm font-medium text-blue-700 dark:text-blue-300">متاحة</span>
                 </div>
-                <div className="text-xl font-bold text-blue-800 dark:text-blue-200">
+                <div className="text-xl font-bold text-blue-800 dark:text-blue-200 text-center">
                   {gameStats.availableGames}
                 </div>
               </div>
@@ -264,7 +264,7 @@ export const ModernGameSelection: React.FC<ModernGameSelectionProps> = ({
                   <Star className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   <span className="text-sm font-medium text-purple-700 dark:text-purple-300">مستويات</span>
                 </div>
-                <div className="text-xl font-bold text-purple-800 dark:text-purple-200">
+                <div className="text-xl font-bold text-purple-800 dark:text-purple-200 text-center">
                   {gameStats.totalLevels}
                 </div>
               </div>
@@ -274,7 +274,7 @@ export const ModernGameSelection: React.FC<ModernGameSelectionProps> = ({
                   <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                   <span className="text-sm font-medium text-amber-700 dark:text-amber-300">التقدم</span>
                 </div>
-                <div className="text-xl font-bold text-amber-800 dark:text-amber-200">
+                <div className="text-xl font-bold text-amber-800 dark:text-amber-200 text-center">
                   {Math.round(gameStats.progressPercent)}%
                 </div>
               </div>
