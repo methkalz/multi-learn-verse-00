@@ -40,14 +40,6 @@ const GamesSection: React.FC<GamesSectionProps> = ({ canManageContent }) => {
 
   return (
     <div className="space-y-8">
-      {/* عنوان القسم */}
-      <div className="text-center">
-        <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 px-6 py-3 rounded-full shadow-sm border border-purple-200">
-          <Gamepad2 className="h-5 w-5" />
-          <span className="font-semibold">الألعاب التفاعلية</span>
-        </div>
-      </div>
-
       {/* شبكة الألعاب */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         {games.map((game) => (

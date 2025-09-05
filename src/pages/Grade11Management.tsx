@@ -23,11 +23,16 @@ const Grade11Management: React.FC = () => {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* عنوان الصفحة */}
           <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-3 bg-green-100 text-green-700 px-6 py-3 rounded-full">
-              <BookOpen className="h-6 w-6" />
-              <span className="font-semibold">الصف الحادي عشر</span>
+            <div className="flex items-center justify-center gap-6 flex-wrap">
+              <div className="inline-flex items-center gap-3 bg-green-100 text-green-700 px-6 py-3 rounded-full">
+                <BookOpen className="h-6 w-6" />
+                <span className="font-semibold">الصف الحادي عشر</span>
+              </div>
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 px-6 py-3 rounded-full shadow-sm border border-purple-200">
+                <Gamepad2 className="h-5 w-5" />
+                <span className="font-semibold">الألعاب التفاعلية</span>
+              </div>
             </div>
-            
           </div>
           
           {/* التبويبات الرئيسية */}
