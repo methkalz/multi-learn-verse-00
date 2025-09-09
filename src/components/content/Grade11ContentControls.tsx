@@ -13,8 +13,8 @@ interface Grade11ContentControlsProps {
   onAddSection: () => void;
   onExpandAll: () => void;
   onCollapseAll: () => void;
-  filterType: 'all' | 'sections' | 'topics' | 'lessons';
-  onFilterChange: (filter: 'all' | 'sections' | 'topics' | 'lessons') => void;
+  filterType: 'all' | 'sections' | 'topics' | 'lessons' | 'lessons-with-media';
+  onFilterChange: (filter: 'all' | 'sections' | 'topics' | 'lessons' | 'lessons-with-media') => void;
 }
 
 const Grade11ContentControls: React.FC<Grade11ContentControlsProps> = ({
@@ -63,13 +63,14 @@ const Grade11ContentControls: React.FC<Grade11ContentControlsProps> = ({
             <Filter className="h-4 w-4 text-muted-foreground" />
             <select 
               value={filterType} 
-              onChange={(e) => onFilterChange(e.target.value as 'all' | 'sections' | 'topics' | 'lessons')}
+              onChange={(e) => onFilterChange(e.target.value as 'all' | 'sections' | 'topics' | 'lessons' | 'lessons-with-media')}
               className="bg-transparent border-none outline-none text-sm"
             >
               <option value="all">جميع المحتويات</option>
               <option value="sections">الأقسام فقط</option>
               <option value="topics">المواضيع فقط</option>
               <option value="lessons">الدروس فقط</option>
+              <option value="lessons-with-media">الدروس مع الوسائط</option>
             </select>
           </div>
 

@@ -72,7 +72,7 @@ const Grade11Content = () => {
   
   // New state for enhanced UI
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'sections' | 'topics' | 'lessons'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'sections' | 'topics' | 'lessons' | 'lessons-with-media'>('all');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   
   // Drag and drop states
@@ -249,6 +249,19 @@ const Grade11Content = () => {
           )
         )
       );
+    }
+
+    // Apply filter type
+    if (filterType === 'lessons-with-media') {
+      filtered = filtered.map(section => ({
+        ...section,
+        topics: section.topics.map(topic => ({
+          ...topic,
+          lessons: topic.lessons?.filter(lesson => 
+            lesson.media && lesson.media.length > 0
+          ) || []
+        })).filter(topic => topic.lessons.length > 0)
+      })).filter(section => section.topics.length > 0);
     }
 
     return filtered;
