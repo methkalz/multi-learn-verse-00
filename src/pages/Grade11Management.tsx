@@ -9,6 +9,7 @@ import GamesSection from '@/components/content/GamesSection';
 import { EducationalTermsManager } from '@/components/content/EducationalTermsManager';
 import { ContentGameLauncher } from '@/components/content/ContentGameLauncher';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 const Grade11Management: React.FC = () => {
   const {
     userProfile
@@ -16,7 +17,9 @@ const Grade11Management: React.FC = () => {
 
   // تحديد ما إذا كان المستخدم مدير مدرسة أم معلم
   const canManageContent = userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
-  return <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+  
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <AppHeader title="إدارة محتوى الصف الحادي عشر" showBackButton={true} backPath="/content-management" showLogout={true} />
       
       <main className="container mx-auto px-6 py-8 flex-1">
@@ -66,6 +69,7 @@ const Grade11Management: React.FC = () => {
       </main>
       
       <AppFooter />
-    </div>;
+    </div>
+  );
 };
 export default Grade11Management;
