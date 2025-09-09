@@ -878,10 +878,10 @@ const PackageManagementPage = () => {
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• فيديوهات تعليمية</p>
-                    <p>• ملفات ووثائق</p>
-                    <p>• تمارين وواجبات</p>
-                    <p>• مواد تفاعلية</p>
+                    <p>• مقاطع فيديو تعليمية</p>
+                    <p>• ملفات وورد للعمل عليها</p>
+                    <p>• معاينة المحتوى للطلاب</p>
+                    <p>• إدارة شاملة للوسائط</p>
                   </div>
                 </div>
 
@@ -908,10 +908,10 @@ const PackageManagementPage = () => {
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• دروس متقدمة</p>
-                    <p>• امتحانات ومراجعات</p>
-                    <p>• مشاريع تطبيقية</p>
-                    <p>• مصادر إضافية</p>
+                    <p>• دروس نصية منظمة</p>
+                    <p>• ألعاب تفاعلية ومسابقات</p>
+                    <p>• اختبارات وامتحانات</p>
+                    <p>• مكتبة ملفات ومقاطع فيديو</p>
                   </div>
                 </div>
 
@@ -938,10 +938,10 @@ const PackageManagementPage = () => {
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <p>• مشاريع التخرج</p>
-                    <p>• مكتبة الملفات</p>
-                    <p>• امتحانات التوجيهي</p>
-                    <p>• التحضير الجامعي</p>
+                    <p>• مشاريع التخرج النهائية</p>
+                    <p>• محرر المستندات المتقدم</p>
+                    <p>• مكتبة الملفات المساعدة</p>
+                    <p>• أدوات التخرج</p>
                   </div>
                 </div>
               </div>
