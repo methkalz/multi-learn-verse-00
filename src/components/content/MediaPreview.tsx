@@ -86,36 +86,56 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({ media, onClose }) => {
         );
 
       case 'lottie':
+        console.log('=== LOTTIE PREVIEW DEBUG ===');
+        console.log('Media for preview:', media);
+        console.log('Lottie settings in preview:', lottieSettings);
+        
+        let animationData = null;
         try {
-          const animationData = media.metadata?.animation_data;
-          if (animationData) {
-            return (
-              <div className="flex justify-center items-center h-96">
-                <div className="w-96 h-96 md:w-96 md:h-96 sm:w-80 sm:h-80">
-                  <Lottie
-                    animationData={animationData}
-                    loop={lottieSettings.loop}
-                    autoplay={media.metadata?.autoplay !== false}
-                    initialSegment={[0, null]}
-                    style={{ width: '100%', height: '100%' }}
-                    rendererSettings={{
-                      preserveAspectRatio: 'xMidYMid slice'
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          } else {
-            return (
-              <div className="flex justify-center items-center h-96 bg-muted rounded-lg">
-                <p className="text-muted-foreground">لا يمكن عرض ملف Lottie</p>
-              </div>
-            );
+          if (media.metadata?.animation_data) {
+            console.log('Using animation_data from metadata');
+            animationData = typeof media.metadata.animation_data === 'string' 
+              ? JSON.parse(media.metadata.animation_data) 
+              : media.metadata.animation_data;
+          } else if (media.metadata?.lottie_data) {
+            console.log('Using lottie_data from metadata');
+            animationData = typeof media.metadata.lottie_data === 'string' 
+              ? JSON.parse(media.metadata.lottie_data) 
+              : media.metadata.lottie_data;
           }
         } catch (error) {
+          console.error('Error parsing Lottie data in preview:', error);
+        }
+
+        console.log('Animation data for preview:', animationData);
+
+        if (animationData && Object.keys(animationData).length > 0) {
+          const loopSetting = lottieSettings?.loop !== undefined ? lottieSettings.loop : true;
           return (
-            <div className="flex justify-center items-center h-96 bg-muted rounded-lg">
-              <p className="text-muted-foreground">خطأ في عرض ملف Lottie</p>
+            <div className="flex justify-center items-center h-96">
+              <div className="w-80 h-80 lg:w-96 lg:h-96">
+                <Lottie
+                  animationData={animationData}
+                  loop={loopSetting}
+                  autoplay={media.metadata?.autoplay !== false}
+                  style={{ width: '100%', height: '100%' }}
+                  rendererSettings={{
+                    preserveAspectRatio: 'xMidYMid slice'
+                  }}
+                  onLoadedData={() => console.log('Lottie preview loaded successfully')}
+                  onError={(error) => console.error('Lottie preview error:', error)}
+                />
+              </div>
+            </div>
+          );
+        } else {
+          return (
+            <div className="flex justify-center items-center h-64 bg-red-50 border border-red-200 rounded-lg">
+              <div className="text-center">
+                <div className="text-red-500 text-lg mb-2">⚠️</div>
+                <p className="text-red-600 font-medium">لا يمكن تحميل الرسوم المتحركة</p>
+                <p className="text-xs text-red-500 mt-1">تحقق من صحة بيانات اللوتي</p>
+              </div>
             </div>
           );
         }

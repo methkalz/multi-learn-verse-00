@@ -113,33 +113,68 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
         );
 
       case 'lottie':
+        console.log('=== LOTTIE DEBUG ===');
+        console.log('Media metadata:', metadata);
+        console.log('Lottie settings:', lottieSettings);
+        
         try {
-          const animationData = metadata.animation_data || JSON.parse(metadata.lottie_data || '{}');
+          let animationData = null;
+          
+          // Try different ways to get animation data
+          if (metadata.animation_data) {
+            console.log('Using metadata.animation_data');
+            animationData = typeof metadata.animation_data === 'string' 
+              ? JSON.parse(metadata.animation_data) 
+              : metadata.animation_data;
+          } else if (metadata.lottie_data) {
+            console.log('Using metadata.lottie_data');
+            animationData = typeof metadata.lottie_data === 'string' 
+              ? JSON.parse(metadata.lottie_data) 
+              : metadata.lottie_data;
+          } else if (media.file_path && media.file_path.includes('.json')) {
+            console.log('Lottie file path detected, but no animation data in metadata');
+            return (
+              <div className="relative rounded-lg bg-amber-50 p-4 text-center">
+                <Play className="h-8 w-8 mx-auto mb-2 text-amber-500" />
+                <p className="text-sm text-amber-700">يتطلب تحميل ملف اللوتي من الرابط</p>
+              </div>
+            );
+          }
+
+          console.log('Final animation data:', animationData);
+          
+          if (!animationData || Object.keys(animationData).length === 0) {
+            throw new Error('No valid animation data found');
+          }
+
+          const loopSetting = lottieSettings?.loop !== undefined ? lottieSettings.loop : true;
+          console.log('Loop setting:', loopSetting);
+
           return (
             <div className="relative rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center p-4">
-              <div className="w-96 h-96 md:w-96 md:h-96 sm:w-80 sm:h-80">
+              <div className="w-80 h-80 lg:w-96 lg:h-96 md:w-80 md:h-80 sm:w-72 sm:h-72">
                 <Lottie
                   animationData={animationData}
-                  loop={lottieSettings.loop}
+                  loop={loopSetting}
                   autoplay={true}
-                  initialSegment={[0, null]}
                   style={{ width: '100%', height: '100%' }}
-                  onComplete={() => {
-                    // Speed is controlled via the animation data or ref
-                  }}
                   rendererSettings={{
                     preserveAspectRatio: 'xMidYMid slice'
                   }}
+                  onLoadedData={() => console.log('Lottie loaded successfully')}
+                  onError={(error) => console.error('Lottie error:', error)}
                 />
               </div>
             </div>
           );
         } catch (error) {
+          console.error('Lottie parsing error:', error);
           logger.error('Error loading Lottie animation', error as Error);
           return (
-            <div className="relative rounded-lg bg-gray-100 p-4 text-center">
-              <Play className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <p className="text-sm text-gray-500">خطأ في تحميل الرسوم المتحركة</p>
+            <div className="relative rounded-lg bg-red-50 border border-red-200 p-4 text-center">
+              <Play className="h-8 w-8 mx-auto mb-2 text-red-400" />
+              <p className="text-sm text-red-600">خطأ في تحميل الرسوم المتحركة</p>
+              <p className="text-xs text-red-500 mt-1">تحقق من صحة ملف اللوتي</p>
             </div>
           );
         }
