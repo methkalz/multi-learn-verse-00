@@ -125,16 +125,16 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({ media, onClose }) => {
           const loopSetting = lottieSettings?.loop !== undefined ? lottieSettings.loop : true;
 
           return (
-            <div className="flex justify-center items-center h-96">
-              <div className="w-80 h-80 lg:w-96 lg:h-96">
+            <div className="flex justify-center items-center min-h-[300px] max-h-[80vh] p-4">
+              <div className="w-full max-w-4xl min-h-[200px] max-h-[70vh] flex items-center justify-center">
                 <Lottie
                   lottieRef={lottieRef}
                   animationData={animationData}
                   loop={loopSetting}
                   autoplay={media.metadata?.autoplay !== false}
-                  style={{ width: '100%', height: '100%' }}
+                  style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }}
                   rendererSettings={{
-                    preserveAspectRatio: 'xMidYMid slice'
+                    preserveAspectRatio: 'xMidYMid meet'
                   }}
                   onLoadedData={() => {
                     console.log('Lottie preview loaded successfully');

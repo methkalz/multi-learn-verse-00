@@ -301,15 +301,15 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
 
     return (
       <div className="relative rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center p-4">
-        <div className="w-80 h-80 lg:w-96 lg:h-96 md:w-80 md:h-80 sm:w-72 sm:h-72">
+        <div className="w-full max-w-2xl min-h-[200px] max-h-[600px] flex items-center justify-center">
           <Lottie
             lottieRef={lottieRef}
             animationData={animationData}
             loop={loop}
             autoplay={true}
-            style={{ width: '100%', height: '100%' }}
+            style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }}
             rendererSettings={{
-              preserveAspectRatio: 'xMidYMid slice'
+              preserveAspectRatio: 'xMidYMid meet'
             }}
             onLoadedData={() => {
               console.log('Lottie loaded successfully');
