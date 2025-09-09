@@ -190,66 +190,64 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
                 </TabsList>
 
                 <TabsContent value="upload" className="space-y-4">
-
-                  {/* رفع ملف */}
-                  {(selectedTab === 'upload' || formData.source_type === 'upload') && (
-                <div>
-                  <Label htmlFor="lottie-upload">رفع ملف Lottie</Label>
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                    {animationData ? (
-                      <div className="space-y-3">
-                        <div className="w-32 h-32 mx-auto">
-                          <Lottie
-                            animationData={animationData}
-                            loop={formData.loop}
-                            autoplay={formData.autoplay}
-                            style={{ width: '100%', height: '100%' }}
-                          />
+                  <div>
+                    <Label htmlFor="lottie-upload">رفع ملف Lottie</Label>
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                      {animationData ? (
+                        <div className="space-y-3">
+                          <div className="w-32 h-32 mx-auto">
+                            <Lottie
+                              animationData={animationData}
+                              loop={formData.loop}
+                              autoplay={formData.autoplay}
+                              style={{ width: '100%', height: '100%' }}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setAnimationData(null);
+                              handleInputChange('file_url', '');
+                              setJsonError('');
+                            }}
+                          >
+                            <X className="h-4 w-4 ml-1" />
+                            إزالة
+                          </Button>
                         </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setAnimationData(null);
-                            handleInputChange('file_url', '');
-                            setJsonError('');
-                          }}
-                        >
-                          <X className="h-4 w-4 ml-1" />
-                          إزالة
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <Play className="h-8 w-8 mx-auto text-muted-foreground" />
-                        <div>
-                          <Label htmlFor="lottie-upload" className="cursor-pointer">
-                            <span className="text-primary hover:underline">
-                              اختر ملف Lottie
-                            </span>
-                            <span className="text-muted-foreground"> أو اسحبه هنا</span>
-                          </Label>
-                          <Input
-                            id="lottie-upload"
-                            type="file"
-                            accept=".json"
-                            className="hidden"
-                            onChange={handleFileUpload}
-                          />
+                      ) : (
+                        <div className="space-y-3">
+                          <Play className="h-8 w-8 mx-auto text-muted-foreground" />
+                          <div>
+                            <Label htmlFor="lottie-upload" className="cursor-pointer">
+                              <span className="text-primary hover:underline">
+                                اختر ملف Lottie
+                              </span>
+                              <span className="text-muted-foreground"> أو اسحبه هنا</span>
+                            </Label>
+                            <Input
+                              id="lottie-upload"
+                              type="file"
+                              accept=".json"
+                              className="hidden"
+                              onChange={handleFileUpload}
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            ملف JSON من LottieFiles أو After Effects
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          ملف JSON من LottieFiles أو After Effects
-                        </p>
+                      )}
+                    </div>
+                    
+                    {jsonError && (
+                      <div className="text-sm text-destructive mt-2">
+                        {jsonError}
                       </div>
                     )}
                   </div>
-                  
-                  {jsonError && (
-                    <div className="text-sm text-destructive mt-2">
-                      {jsonError}
-                    </div>
-                  )}
                 </TabsContent>
 
                 <TabsContent value="url" className="space-y-4">

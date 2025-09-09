@@ -45,12 +45,17 @@ export const useSharedMediaLibrary = () => {
           media_type,
           metadata,
           created_at,
-          updated_at,
+          order_index,
           lesson_id,
           grade11_lessons!inner(
+            title,
             topic_id,
             grade11_topics!inner(
-              section_id
+              title,
+              section_id,
+              grade11_sections!inner(
+                title
+              )
             )
           )
         `)
@@ -88,9 +93,16 @@ export const useSharedMediaLibrary = () => {
             .eq('file_path', file.file_path);
 
           return {
-            ...file,
-            section_id: file.grade11_lessons?.grade11_topics?.section_id,
-            topic_id: file.grade11_lessons?.topic_id,
+            id: file.id,
+            file_name: file.file_name,
+            file_path: file.file_path,
+            media_type: file.media_type,
+            metadata: file.metadata,
+            created_at: file.created_at,
+            updated_at: file.created_at, // Use created_at as fallback
+            lesson_id: file.lesson_id,
+            section_id: file.grade11_lessons?.grade11_topics?.grade11_sections?.title || '',
+            topic_id: file.grade11_lessons?.topic_id || '',
             usage_count: count || 1
           };
         })
@@ -232,9 +244,9 @@ export const useSharedMediaLibrary = () => {
 
       return data?.map(item => ({
         lessonId: item.lesson_id,
-        lessonTitle: item.grade11_lessons.title,
-        topicTitle: item.grade11_lessons.grade11_topics.title,
-        sectionTitle: item.grade11_lessons.grade11_topics.grade11_sections.title
+        lessonTitle: item.grade11_lessons?.title || 'درس غير محدد',
+        topicTitle: item.grade11_lessons?.grade11_topics?.title || 'موضوع غير محدد',
+        sectionTitle: item.grade11_lessons?.grade11_topics?.grade11_sections?.title || 'قسم غير محدد'
       })) || [];
     } catch (error) {
       logger.error('Error getting media usage info', error as Error);

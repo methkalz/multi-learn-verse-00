@@ -149,232 +149,259 @@ const LessonVideoForm: React.FC<LessonVideoFormProps> = ({ onSave, onCancel }) =
             </DialogTitle>
           </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* معلومات الفيديو */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">معلومات الفيديو</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="title">عنوان الفيديو</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="أدخل عنوان الفيديو"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">وصف الفيديو</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="أدخل وصف للفيديو"
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* مصدر الفيديو */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">مصدر الفيديو</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="upload" className="flex items-center gap-2">
-                    <Upload className="h-4 w-4" />
-                    رفع جديد
-                  </TabsTrigger>
-                  <TabsTrigger value="url" className="flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
-                    رابط خارجي
-                  </TabsTrigger>
-                  <TabsTrigger value="library" className="flex items-center gap-2">
-                    <FolderOpen className="h-4 w-4" />
-                    من المكتبة
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="upload" className="space-y-4">
-                  <div className="grid grid-cols-1 gap-3">
-                    <Button
-                      type="button"
-                      variant={formData.source_type === 'upload' ? 'default' : 'outline'}
-                      onClick={() => handleInputChange('source_type', 'upload')}
-                      className="flex items-center gap-2"
-                    >
-                      <Upload className="h-4 w-4" />
-                      رفع ملف من الجهاز
-                    </Button>
-                  </div>
-
-                  {/* رفع ملف */}
-                  {formData.source_type === 'upload' && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* معلومات الفيديو */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">معلومات الفيديو</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="video-upload">رفع ملف الفيديو</Label>
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                    {formData.video_url ? (
-                      <div className="space-y-3">
-                        <video
-                          src={formData.video_url}
-                          controls
-                          className="w-full max-h-48 rounded"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            handleInputChange('video_url', '');
-                            handleInputChange('duration', '');
-                          }}
-                        >
-                          <X className="h-4 w-4 ml-1" />
-                          إزالة
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-                        <div>
-                          <Label htmlFor="video-upload" className="cursor-pointer">
-                            <span className="text-primary hover:underline">
-                              اختر ملف فيديو
-                            </span>
-                            <span className="text-muted-foreground"> أو اسحبه هنا</span>
-                          </Label>
-                          <Input
-                            id="video-upload"
-                            type="file"
-                            accept="video/*"
-                            className="hidden"
-                            onChange={handleFileUpload}
-                          />
+                  <Label htmlFor="title">عنوان الفيديو</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    placeholder="أدخل عنوان الفيديو"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="description">وصف الفيديو</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="أدخل وصف للفيديو"
+                    rows={3}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* مصدر الفيديو */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">مصدر الفيديو</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="upload" className="flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      رفع جديد
+                    </TabsTrigger>
+                    <TabsTrigger value="url" className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      رابط خارجي
+                    </TabsTrigger>
+                    <TabsTrigger value="library" className="flex items-center gap-2">
+                      <FolderOpen className="h-4 w-4" />
+                      من المكتبة
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="upload" className="space-y-4">
+                    <div className="grid grid-cols-1 gap-3">
+                      <Button
+                        type="button"
+                        variant={formData.source_type === 'upload' ? 'default' : 'outline'}
+                        onClick={() => handleInputChange('source_type', 'upload')}
+                        className="flex items-center gap-2"
+                      >
+                        <Upload className="h-4 w-4" />
+                        رفع ملف من الجهاز
+                      </Button>
+                    </div>
+
+                    {formData.source_type === 'upload' && (
+                      <div>
+                        <Label htmlFor="video-upload">رفع ملف الفيديو</Label>
+                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                          {formData.video_url ? (
+                            <div className="space-y-3">
+                              <video
+                                src={formData.video_url}
+                                controls
+                                className="w-full max-h-48 rounded"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  handleInputChange('video_url', '');
+                                  handleInputChange('duration', '');
+                                }}
+                              >
+                                <X className="h-4 w-4 ml-1" />
+                                إزالة
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                              <div>
+                                <Label htmlFor="video-upload" className="cursor-pointer">
+                                  <span className="text-primary hover:underline">
+                                    اختر ملف فيديو
+                                  </span>
+                                  <span className="text-muted-foreground"> أو اسحبه هنا</span>
+                                </Label>
+                                <Input
+                                  id="video-upload"
+                                  type="file"
+                                  accept="video/*"
+                                  className="hidden"
+                                  onChange={handleFileUpload}
+                                />
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                أنواع مدعومة: MP4, AVI, MOV
+                              </p>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          أنواع مدعومة: MP4, AVI, MOV
-                        </p>
                       </div>
                     )}
-                  </div>
-                </div>
-              )}
+                  </TabsContent>
 
-              {/* رابط خارجي */}
-              {formData.source_type !== 'upload' && (
-                  <div>
-                    <Label htmlFor="video_url">
-                      {formData.source_type === 'youtube' && 'رابط يوتيوب'}
-                      {formData.source_type === 'google_drive' && 'رابط جوجل درايف'}
-                      {formData.source_type === 'url' && 'رابط الفيديو'}
-                    </Label>
-                    <Input
-                      id="video_url"
-                      value={formData.video_url}
-                      onChange={(e) => handleUrlInput(e.target.value)}
-                      placeholder={
-                        formData.source_type === 'youtube' 
-                          ? 'https://www.youtube.com/watch?v=...'
-                          : formData.source_type === 'google_drive'
-                          ? 'https://drive.google.com/file/d/...'
-                          : 'https://example.com/video.mp4'
-                      }
-                      required
-                    />
-                  </div>
-
-                  {/* معاينة الفيديو */}
-                  {formData.video_url && (
-                    <div>
-                      <Label>معاينة الفيديو</Label>
-                      <div className="mt-2">
-                        {formData.source_type === 'youtube' || formData.source_type === 'google_drive' ? (
-                          <iframe
-                            src={formData.video_url}
-                            className="w-full h-48 rounded border"
-                            allow="autoplay; encrypted-media"
-                          />
-                        ) : (
-                          <video
-                            src={formData.video_url}
-                            controls
-                            className="w-full max-h-48 rounded"
-                          />
-                        )}
-                      </div>
+                  <TabsContent value="url" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        type="button"
+                        variant={formData.source_type === 'youtube' ? 'default' : 'outline'}
+                        onClick={() => handleInputChange('source_type', 'youtube')}
+                        className="flex items-center gap-2"
+                      >
+                        <Youtube className="h-4 w-4" />
+                        يوتيوب
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={formData.source_type === 'google_drive' ? 'default' : 'outline'}
+                        onClick={() => handleInputChange('source_type', 'google_drive')}
+                        className="flex items-center gap-2"
+                      >
+                        <HardDrive className="h-4 w-4" />
+                        جوجل درايف
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={formData.source_type === 'url' ? 'default' : 'outline'}
+                        onClick={() => handleInputChange('source_type', 'url')}
+                        className="flex items-center gap-2"
+                      >
+                        <Globe className="h-4 w-4" />
+                        رابط مباشر
+                      </Button>
                     </div>
-                  )}
-                </TabsContent>
 
-                <TabsContent value="library" className="space-y-4">
-                  <div className="text-center py-8">
-                    <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground mb-4">
-                      اختر فيديو من الملفات المرفوعة سابقاً
-                    </p>
-                    <Button onClick={() => setShowMediaPicker(true)}>
-                      تصفح المكتبة
-                    </Button>
-                  </div>
-
-                  {/* عرض الفيديو المختار */}
-                  {formData.source_type === 'library' && formData.video_url && (
                     <div>
-                      <Label>الفيديو المختار</Label>
-                      <div className="mt-2 p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Video className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-medium">{formData.title}</p>
-                            <p className="text-sm text-muted-foreground">من المكتبة المشتركة</p>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              handleInputChange('video_url', '');
-                              handleInputChange('source_type', 'upload');
-                              setSelectedTab('upload');
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                      <Label htmlFor="video_url">
+                        {formData.source_type === 'youtube' && 'رابط يوتيوب'}
+                        {formData.source_type === 'google_drive' && 'رابط جوجل درايف'}
+                        {formData.source_type === 'url' && 'رابط الفيديو'}
+                      </Label>
+                      <Input
+                        id="video_url"
+                        value={formData.video_url}
+                        onChange={(e) => handleUrlInput(e.target.value)}
+                        placeholder={
+                          formData.source_type === 'youtube' 
+                            ? 'https://www.youtube.com/watch?v=...'
+                            : formData.source_type === 'google_drive'
+                            ? 'https://drive.google.com/file/d/...'
+                            : 'https://example.com/video.mp4'
+                        }
+                        required
+                      />
+                    </div>
+
+                    {formData.video_url && (
+                      <div>
+                        <Label>معاينة الفيديو</Label>
+                        <div className="mt-2">
+                          {formData.source_type === 'youtube' || formData.source_type === 'google_drive' ? (
+                            <iframe
+                              src={formData.video_url}
+                              className="w-full h-48 rounded border"
+                              allow="autoplay; encrypted-media"
+                            />
+                          ) : (
+                            <video
+                              src={formData.video_url}
+                              controls
+                              className="w-full max-h-48 rounded"
+                            />
+                          )}
                         </div>
                       </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="library" className="space-y-4">
+                    <div className="text-center py-8">
+                      <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground mb-4">
+                        اختر فيديو من الملفات المرفوعة سابقاً
+                      </p>
+                      <Button onClick={() => setShowMediaPicker(true)}>
+                        تصفح المكتبة
+                      </Button>
                     </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
 
-          {/* أزرار التحكم */}
-          <div className="flex gap-3 justify-end">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              إلغاء
-            </Button>
-            <Button type="submit" disabled={!formData.title || !formData.video_url}>
-              إضافة الفيديو
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+                    {formData.source_type === 'library' && formData.video_url && (
+                      <div>
+                        <Label>الفيديو المختار</Label>
+                        <div className="mt-2 p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Video className="h-5 w-5 text-primary" />
+                            <div>
+                              <p className="font-medium">{formData.title}</p>
+                              <p className="text-sm text-muted-foreground">من المكتبة المشتركة</p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                handleInputChange('video_url', '');
+                                handleInputChange('source_type', 'upload');
+                                setSelectedTab('upload');
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
 
-    <SharedMediaPicker
-      isOpen={showMediaPicker}
-      onClose={() => setShowMediaPicker(false)}
-      onSelectMedia={handleSelectFromLibrary}
-      mediaType="video"
-    />
-  </>
+            {/* أزرار التحكم */}
+            <div className="flex gap-3 justify-end">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                إلغاء
+              </Button>
+              <Button type="submit" disabled={!formData.title || !formData.video_url}>
+                إضافة الفيديو
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <SharedMediaPicker
+        isOpen={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        onSelectMedia={handleSelectFromLibrary}
+        mediaType="video"
+      />
+    </>
   );
 };
 
