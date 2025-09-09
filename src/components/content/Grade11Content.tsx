@@ -35,6 +35,7 @@ const Grade11Content = () => {
     deleteLesson,
     addLessonMedia,
     deleteLessonMedia,
+    updateLessonMedia,
     reorderSections,
     reorderTopics,
     reorderLessons
@@ -484,6 +485,7 @@ const Grade11Content = () => {
           onSave={handleSaveLesson}
           onAddMedia={addLessonMedia}
           onDeleteMedia={deleteLessonMedia}
+          onUpdateMedia={updateLessonMedia}
           onCancel={handleCloseForm}
         />
       )}

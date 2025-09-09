@@ -14,6 +14,7 @@ interface Grade11LessonFormProps {
   onSave: (lessonData: Omit<Grade11Lesson, 'id' | 'created_at' | 'updated_at' | 'media'>) => void;
   onAddMedia?: (mediaData: Omit<Grade11LessonMedia, 'id' | 'created_at'>) => Promise<any>;
   onDeleteMedia?: (mediaId: string) => Promise<void>;
+  onUpdateMedia?: (mediaId: string, updates: Partial<Grade11LessonMedia>) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -23,6 +24,7 @@ const Grade11LessonForm: React.FC<Grade11LessonFormProps> = ({
   onSave,
   onAddMedia,
   onDeleteMedia,
+  onUpdateMedia,
   onCancel
 }) => {
   const [formData, setFormData] = useState({
@@ -122,6 +124,7 @@ const Grade11LessonForm: React.FC<Grade11LessonFormProps> = ({
                 media={lesson.media || []}
                 onAddMedia={onAddMedia}
                 onDeleteMedia={onDeleteMedia}
+                onUpdateMedia={onUpdateMedia}
               />
             )}
             {!lesson?.id && (

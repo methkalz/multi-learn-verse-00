@@ -388,6 +388,20 @@ export const useGrade11Content = () => {
     }
   };
 
+  const updateLessonMedia = async (mediaId: string, updates: Partial<Grade11LessonMedia>) => {
+    try {
+      console.log('Updating lesson media and refreshing sections...');
+      
+      // After database update, refresh all sections to get updated data
+      await fetchSections();
+      
+      console.log('Sections refreshed after media update');
+    } catch (error) {
+      logger.error('Error updating lesson media', error as Error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchSections();
   }, []);
@@ -407,6 +421,7 @@ export const useGrade11Content = () => {
     deleteLesson,
     addLessonMedia,
     deleteLessonMedia,
+    updateLessonMedia,
     reorderSections,
     reorderTopics,
     reorderLessons

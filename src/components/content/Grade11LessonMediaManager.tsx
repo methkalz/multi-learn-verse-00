@@ -44,7 +44,17 @@ const Grade11LessonMediaManager: React.FC<Grade11LessonMediaManagerProps> = ({
   onUpdateMedia
 }) => {
   const { userProfile } = useAuth();
-  const { updateLottieMedia } = useEditLottieMedia();
+  
+  // Create callback to refresh data after Lottie update
+  const handleDataRefresh = () => {
+    console.log('Triggering data refresh after Lottie update');
+    if (onUpdateMedia) {
+      // This will trigger fetchSections in the parent component
+      onUpdateMedia('', {}).catch(err => console.log('Refresh triggered'));
+    }
+  };
+  
+  const { updateLottieMedia } = useEditLottieMedia(handleDataRefresh);
   const [showVideoForm, setShowVideoForm] = useState(false);
   const [showImageForm, setShowImageForm] = useState(false);
   const [showLottieForm, setShowLottieForm] = useState(false);
@@ -88,19 +98,20 @@ const Grade11LessonMediaManager: React.FC<Grade11LessonMediaManagerProps> = ({
     if (!editingLottie) return;
     
     try {
+      console.log('Starting Lottie media update process...');
+      
+      // Update in database first
       await updateLottieMedia({
         mediaId: editingLottie.id,
         updates
       });
       
-      // Also update local state if onUpdateMedia is provided
-      if (onUpdateMedia) {
-        await onUpdateMedia(editingLottie.id, updates);
-      }
-      
+      console.log('Lottie media updated in database, closing edit form');
       setEditingLottie(null);
+      
     } catch (error) {
       logger.error('Error updating Lottie media', error as Error);
+      console.error('Update failed:', error);
     }
   };
 
