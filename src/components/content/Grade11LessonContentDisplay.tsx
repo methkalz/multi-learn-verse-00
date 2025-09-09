@@ -168,10 +168,12 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
             throw new Error('No valid animation data found');
           }
 
-          const loopSetting = lottieSettings?.loop !== undefined ? lottieSettings.loop : true;
-          const speedSetting = metadata.speed || lottieSettings?.speed || 1;
+          // Use metadata speed as single source of truth, fallback to 1
+          const speedSetting = typeof metadata.speed === 'number' ? metadata.speed : 1;
+          const loopSetting = typeof metadata.loop === 'boolean' ? metadata.loop : (lottieSettings?.loop !== undefined ? lottieSettings.loop : true);
+          
+          console.log('Speed sources - metadata.speed:', metadata.speed, 'final speedSetting:', speedSetting);
           console.log('Loop setting:', loopSetting);
-          console.log('Speed setting:', speedSetting);
 
           return <LottieDisplay 
             animationData={animationData}

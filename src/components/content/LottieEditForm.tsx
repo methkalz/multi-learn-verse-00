@@ -30,9 +30,9 @@ export const LottieEditForm = ({ media, isOpen, onClose, onUpdate }: LottieEditF
     file_name: media.file_name || '',
     title: media.metadata?.title || media.file_name || '',
     description: media.metadata?.description || '',
-    speed: media.metadata?.speed || 1,
-    loop: media.metadata?.loop !== false,
-    autoplay: media.metadata?.autoplay !== false
+    speed: typeof media.metadata?.speed === 'number' ? media.metadata.speed : 1,
+    loop: typeof media.metadata?.loop === 'boolean' ? media.metadata.loop : true,
+    autoplay: typeof media.metadata?.autoplay === 'boolean' ? media.metadata.autoplay : true
   });
 
   // Apply speed changes to Lottie in real-time
@@ -87,10 +87,12 @@ export const LottieEditForm = ({ media, isOpen, onClose, onUpdate }: LottieEditF
         ...media.metadata,
         title: formData.title,
         description: formData.description,
-        speed: formData.speed,
-        loop: formData.loop,
-        autoplay: formData.autoplay
+        speed: Number(formData.speed), // Ensure it's saved as number
+        loop: Boolean(formData.loop),
+        autoplay: Boolean(formData.autoplay)
       };
+      
+      console.log('Saving Lottie metadata with speed:', updatedMetadata.speed);
 
       await onUpdate({
         file_name: formData.file_name,
@@ -185,17 +187,18 @@ export const LottieEditForm = ({ media, isOpen, onClose, onUpdate }: LottieEditF
                 <Slider
                   value={[formData.speed]}
                   onValueChange={(value) => {
-                    const newSpeed = value[0];
+                    const newSpeed = Math.max(0.1, Math.min(5, value[0])); // Validate speed range
+                    console.log('Speed changed to:', newSpeed);
                     setFormData(prev => ({ ...prev, speed: newSpeed }));
                   }}
-                  min={0.25}
-                  max={3}
-                  step={0.25}
+                  min={0.1}
+                  max={5}
+                  step={0.1}
                   className="w-full"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>0.25x</span>
-                  <span>3x</span>
+                  <span>0.1x</span>
+                  <span>5x</span>
                 </div>
               </div>
 
