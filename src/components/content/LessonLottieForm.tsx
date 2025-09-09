@@ -17,7 +17,7 @@ interface LessonLottieFormProps {
   onCancel: () => void;
 }
 
-// مكون معاينة Lottie مع التحكم في السرعة
+// مكون معاينة Lottie مبسط
 interface LottiePreviewProps {
   animationData: any;
   speed: number;
@@ -35,32 +35,19 @@ const LottiePreview: React.FC<LottiePreviewProps> = ({
   width = '100%', 
   height = '100%' 
 }) => {
-  const lottieRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (lottieRef.current) {
-      console.log('تطبيق سرعة Lottie:', speed);
-      lottieRef.current.setSpeed(speed);
-    }
-  }, [speed]);
-
-  useEffect(() => {
-    if (lottieRef.current) {
-      if (loop) {
-        lottieRef.current.setLoop(true);
-      } else {
-        lottieRef.current.setLoop(false);
-      }
-    }
-  }, [loop]);
-
+  console.log('عرض Lottie بالإعدادات:', { speed, loop, autoplay });
+  
   return (
     <Lottie
-      lottieRef={lottieRef}
       animationData={animationData}
       loop={loop}
       autoplay={autoplay}
-      style={{ width, height }}
+      style={{ 
+        width, 
+        height,
+        // تطبيق السرعة عبر CSS animation
+        animationDuration: `${1/speed}s`
+      }}
     />
   );
 };
