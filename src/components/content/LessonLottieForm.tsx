@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,54 @@ interface LessonLottieFormProps {
   onSave: (lottieData: any) => void;
   onCancel: () => void;
 }
+
+// مكون معاينة Lottie مع التحكم في السرعة
+interface LottiePreviewProps {
+  animationData: any;
+  speed: number;
+  loop: boolean;
+  autoplay: boolean;
+  width?: string;
+  height?: string;
+}
+
+const LottiePreview: React.FC<LottiePreviewProps> = ({ 
+  animationData, 
+  speed, 
+  loop, 
+  autoplay, 
+  width = '100%', 
+  height = '100%' 
+}) => {
+  const lottieRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (lottieRef.current) {
+      console.log('تطبيق سرعة Lottie:', speed);
+      lottieRef.current.setSpeed(speed);
+    }
+  }, [speed]);
+
+  useEffect(() => {
+    if (lottieRef.current) {
+      if (loop) {
+        lottieRef.current.setLoop(true);
+      } else {
+        lottieRef.current.setLoop(false);
+      }
+    }
+  }, [loop]);
+
+  return (
+    <Lottie
+      lottieRef={lottieRef}
+      animationData={animationData}
+      loop={loop}
+      autoplay={autoplay}
+      style={{ width, height }}
+    />
+  );
+};
 
 const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -117,11 +165,31 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // التأكد من صحة البيانات
+    const speedValue = Number(formData.speed);
+    if (speedValue < 0.1 || speedValue > 3) {
+      logger.error('سرعة غير صحيحة: ' + speedValue);
+      return;
+    }
+
+    console.log('حفظ بيانات Lottie:', {
+      speed: speedValue,
+      loop: formData.loop,
+      autoplay: formData.autoplay
+    });
+
     onSave({
       ...formData,
       file_path: formData.file_url,
       file_name: formData.title,
-      animation_data: animationData
+      animation_data: animationData,
+      metadata: {
+        speed: speedValue,
+        loop: formData.loop,
+        autoplay: formData.autoplay,
+        animation_data: animationData
+      }
     });
   };
 
@@ -196,11 +264,11 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
                       {animationData ? (
                         <div className="space-y-3">
                           <div className="w-32 h-32 mx-auto">
-                            <Lottie
+                            <LottiePreview
                               animationData={animationData}
+                              speed={formData.speed}
                               loop={formData.loop}
                               autoplay={formData.autoplay}
-                              style={{ width: '100%', height: '100%' }}
                             />
                           </div>
                           <Button
@@ -274,11 +342,11 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
                         <Label>معاينة الملف</Label>
                         <div className="mt-2 border rounded-lg p-4 flex justify-center">
                           <div className="w-32 h-32">
-                            <Lottie
+                            <LottiePreview
                               animationData={animationData}
+                              speed={formData.speed}
                               loop={formData.loop}
                               autoplay={formData.autoplay}
-                              style={{ width: '100%', height: '100%' }}
                             />
                           </div>
                         </div>
@@ -325,11 +393,11 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
                         {animationData && (
                           <div className="flex justify-center">
                             <div className="w-32 h-32">
-                              <Lottie
+                              <LottiePreview
                                 animationData={animationData}
+                                speed={formData.speed}
                                 loop={formData.loop}
                                 autoplay={formData.autoplay}
-                                style={{ width: '100%', height: '100%' }}
                               />
                             </div>
                           </div>
@@ -380,9 +448,18 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
                     max="3"
                     step="0.1"
                     value={formData.speed}
-                    onChange={(e) => handleInputChange('speed', parseFloat(e.target.value))}
+                    onChange={(e) => {
+                      const newSpeed = parseFloat(e.target.value);
+                      console.log('تغيير سرعة Lottie إلى:', newSpeed);
+                      handleInputChange('speed', newSpeed);
+                    }}
                     className="w-full mt-1"
                   />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>0.1x</span>
+                    <span>1x (عادي)</span>
+                    <span>3x</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
