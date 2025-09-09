@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import Lottie from 'lottie-react';
 import { Grade11LessonWithMedia } from '@/hooks/useGrade11Content';
+import { useSharedLottieSettings } from '@/hooks/useSharedLottieSettings';
 import MediaPreview from './MediaPreview';
 import CodeBlock from './CodeBlock';
 import TypewriterCodeBlock from './TypewriterCodeBlock';
@@ -27,6 +28,7 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [previewMedia, setPreviewMedia] = useState<any>(null);
+  const { lottieSettings } = useSharedLottieSettings();
 
   const getMediaIcon = (mediaType: string) => {
     switch (mediaType) {
@@ -115,12 +117,19 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
           const animationData = metadata.animation_data || JSON.parse(metadata.lottie_data || '{}');
           return (
             <div className="relative rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center p-4">
-              <div className="w-48 h-48">
+              <div className="w-96 h-96 md:w-96 md:h-96 sm:w-80 sm:h-80">
                 <Lottie
                   animationData={animationData}
-                  loop={true}
+                  loop={lottieSettings.loop}
                   autoplay={true}
+                  initialSegment={[0, null]}
                   style={{ width: '100%', height: '100%' }}
+                  onComplete={() => {
+                    // Speed is controlled via the animation data or ref
+                  }}
+                  rendererSettings={{
+                    preserveAspectRatio: 'xMidYMid slice'
+                  }}
                 />
               </div>
             </div>

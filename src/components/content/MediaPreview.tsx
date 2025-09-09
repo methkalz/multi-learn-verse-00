@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Download, ExternalLink } from 'lucide-react';
 import { Grade11LessonMedia } from '@/hooks/useGrade11Content';
+import { useSharedLottieSettings } from '@/hooks/useSharedLottieSettings';
 import Lottie from 'lottie-react';
 
 interface MediaPreviewProps {
@@ -12,6 +13,7 @@ interface MediaPreviewProps {
 }
 
 const MediaPreview: React.FC<MediaPreviewProps> = ({ media, onClose }) => {
+  const { lottieSettings } = useSharedLottieSettings();
   const getMediaTypeBadge = (type: string) => {
     const typeMap = {
       video: { label: 'فيديو', color: 'bg-blue-100 text-blue-800' },
@@ -89,12 +91,16 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({ media, onClose }) => {
           if (animationData) {
             return (
               <div className="flex justify-center items-center h-96">
-                <div className="w-64 h-64">
+                <div className="w-96 h-96 md:w-96 md:h-96 sm:w-80 sm:h-80">
                   <Lottie
                     animationData={animationData}
-                    loop={media.metadata?.loop !== false}
+                    loop={lottieSettings.loop}
                     autoplay={media.metadata?.autoplay !== false}
+                    initialSegment={[0, null]}
                     style={{ width: '100%', height: '100%' }}
+                    rendererSettings={{
+                      preserveAspectRatio: 'xMidYMid slice'
+                    }}
                   />
                 </div>
               </div>
