@@ -1,27 +1,28 @@
-import { lazy } from 'react';
+import React, { lazy } from 'react';
 import { SimpleErrorBoundary } from '@/lib/error-boundary';
+import { retryDynamicImport } from '@/utils/chunkRetry';
 
-// Lazy load components for better performance
-export const LazyDashboard = lazy(() => import('@/pages/Dashboard'));
-export const LazyAuth = lazy(() => import('@/pages/Auth'));
-export const LazySuperAdminAuth = lazy(() => import('@/pages/SuperAdminAuth'));
-export const LazySchoolManagement = lazy(() => import('@/pages/SchoolManagement'));
-export const LazySchoolAdminManagement = lazy(() => import('@/pages/SchoolAdminManagement'));
-export const LazyPluginManagement = lazy(() => import('@/pages/PluginManagement'));
-export const LazyPackageManagement = lazy(() => import('@/pages/PackageManagement'));
-export const LazyAcademicYears = lazy(() => import('@/pages/AcademicYears'));
-export const LazyCalendarManagement = lazy(() => import('@/pages/CalendarManagement'));
-export const LazySchoolClasses = lazy(() => import('@/pages/SchoolClasses'));
-export const LazyUserManagement = lazy(() => import('@/pages/UserManagement'));
-export const LazySystemSettings = lazy(() => import('@/pages/SystemSettings'));
-export const LazyContentManagement = lazy(() => import('@/pages/ContentManagement'));
-export const LazyGrade10Management = lazy(() => import('@/pages/Grade10Management'));
-export const LazyGrade11Management = lazy(() => import('@/pages/Grade11Management'));
-export const LazyGrade12Management = lazy(() => import('@/pages/Grade12Management'));
-export const LazyStudentManagement = lazy(() => import('@/pages/StudentManagement'));
-export const LazyTest = lazy(() => import('@/pages/Test'));
-export const LazyQuestionManagement = lazy(() => import('@/pages/QuestionManagement'));
-export const LazyPairMatchingPage = lazy(() => import('@/pages/PairMatchingPage'));
+// Enhanced lazy loading with retry logic for chunk loading failures
+export const LazyDashboard = lazy(() => retryDynamicImport(() => import('@/pages/Dashboard')));
+export const LazyAuth = lazy(() => retryDynamicImport(() => import('@/pages/Auth')));
+export const LazySuperAdminAuth = lazy(() => retryDynamicImport(() => import('@/pages/SuperAdminAuth')));
+export const LazySchoolManagement = lazy(() => retryDynamicImport(() => import('@/pages/SchoolManagement')));
+export const LazySchoolAdminManagement = lazy(() => retryDynamicImport(() => import('@/pages/SchoolAdminManagement')));
+export const LazyPluginManagement = lazy(() => retryDynamicImport(() => import('@/pages/PluginManagement')));
+export const LazyPackageManagement = lazy(() => retryDynamicImport(() => import('@/pages/PackageManagement')));
+export const LazyAcademicYears = lazy(() => retryDynamicImport(() => import('@/pages/AcademicYears')));
+export const LazyCalendarManagement = lazy(() => retryDynamicImport(() => import('@/pages/CalendarManagement')));
+export const LazySchoolClasses = lazy(() => retryDynamicImport(() => import('@/pages/SchoolClasses')));
+export const LazyUserManagement = lazy(() => retryDynamicImport(() => import('@/pages/UserManagement')));
+export const LazySystemSettings = lazy(() => retryDynamicImport(() => import('@/pages/SystemSettings')));
+export const LazyContentManagement = lazy(() => retryDynamicImport(() => import('@/pages/ContentManagement')));
+export const LazyGrade10Management = lazy(() => retryDynamicImport(() => import('@/pages/Grade10Management')));
+export const LazyGrade11Management = lazy(() => retryDynamicImport(() => import('@/pages/Grade11Management')));
+export const LazyGrade12Management = lazy(() => retryDynamicImport(() => import('@/pages/Grade12Management')));
+export const LazyStudentManagement = lazy(() => retryDynamicImport(() => import('@/pages/StudentManagement')));
+export const LazyTest = lazy(() => retryDynamicImport(() => import('@/pages/Test')));
+export const LazyQuestionManagement = lazy(() => retryDynamicImport(() => import('@/pages/QuestionManagement')));
+export const LazyPairMatchingPage = lazy(() => retryDynamicImport(() => import('@/pages/PairMatchingPage')));
 
 // HOC for lazy components with error boundary
 export const withLazyLoading = (Component: React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>) => {

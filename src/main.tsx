@@ -18,6 +18,10 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { setupGlobalChunkErrorHandler } from './utils/chunkRetry'
+
+// Setup global chunk error handling before app initialization
+setupGlobalChunkErrorHandler();
 
 // Create root element using React 18 API
 const root = createRoot(document.getElementById("root")!);
