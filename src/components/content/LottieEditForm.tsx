@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,7 @@ export const LottieEditForm = ({ media, isOpen, onClose, onUpdate }: LottieEditF
   const { userProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [lottieKey, setLottieKey] = useState(0);
+  const lottieRef = useRef<any>(null);
   
   const [formData, setFormData] = useState({
     file_name: media.file_name || '',
@@ -33,6 +34,14 @@ export const LottieEditForm = ({ media, isOpen, onClose, onUpdate }: LottieEditF
     loop: media.metadata?.loop !== false,
     autoplay: media.metadata?.autoplay !== false
   });
+
+  // Apply speed changes to Lottie in real-time
+  useEffect(() => {
+    if (lottieRef.current && formData.speed !== undefined) {
+      console.log('Applying speed to preview:', formData.speed);
+      lottieRef.current.setSpeed(formData.speed);
+    }
+  }, [formData.speed]);
 
   // Only super admin can edit
   const canEdit = userProfile?.role === 'superadmin';
@@ -178,8 +187,6 @@ export const LottieEditForm = ({ media, isOpen, onClose, onUpdate }: LottieEditF
                   onValueChange={(value) => {
                     const newSpeed = value[0];
                     setFormData(prev => ({ ...prev, speed: newSpeed }));
-                    // Force Lottie to re-render with new speed
-                    setLottieKey(prev => prev + 1);
                   }}
                   min={0.25}
                   max={3}
@@ -231,10 +238,18 @@ export const LottieEditForm = ({ media, isOpen, onClose, onUpdate }: LottieEditF
                   <div className="flex items-center justify-center">
                     <Lottie
                       key={lottieKey}
+                      lottieRef={lottieRef}
                       animationData={animationData}
                       loop={formData.loop}
                       autoplay={formData.autoplay}
                       style={{ width: 200, height: 200 }}
+                      onLoadedData={() => {
+                        console.log('Preview Lottie loaded');
+                        if (lottieRef.current && formData.speed !== 1) {
+                          console.log('Setting preview speed on load:', formData.speed);
+                          lottieRef.current.setSpeed(formData.speed);
+                        }
+                      }}
                     />
                   </div>
                 ) : (

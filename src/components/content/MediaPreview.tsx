@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,18 @@ interface MediaPreviewProps {
 
 const MediaPreview: React.FC<MediaPreviewProps> = ({ media, onClose }) => {
   const { lottieSettings } = useSharedLottieSettings();
+  const lottieRef = useRef<any>(null);
+  
+  // Get speed setting for Lottie
+  const speedSetting = media.metadata?.speed || lottieSettings?.speed || 1;
+  
+  // Apply speed when it changes
+  useEffect(() => {
+    if (lottieRef.current && speedSetting !== undefined && media.media_type === 'lottie') {
+      console.log('Applying speed to media preview:', speedSetting);
+      lottieRef.current.setSpeed(speedSetting);
+    }
+  }, [speedSetting, media.media_type]);
   const getMediaTypeBadge = (type: string) => {
     const typeMap = {
       video: { label: 'فيديو', color: 'bg-blue-100 text-blue-800' },
@@ -111,10 +123,12 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({ media, onClose }) => {
 
         if (animationData && Object.keys(animationData).length > 0) {
           const loopSetting = lottieSettings?.loop !== undefined ? lottieSettings.loop : true;
+
           return (
             <div className="flex justify-center items-center h-96">
               <div className="w-80 h-80 lg:w-96 lg:h-96">
                 <Lottie
+                  lottieRef={lottieRef}
                   animationData={animationData}
                   loop={loopSetting}
                   autoplay={media.metadata?.autoplay !== false}
@@ -122,7 +136,13 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({ media, onClose }) => {
                   rendererSettings={{
                     preserveAspectRatio: 'xMidYMid slice'
                   }}
-                  onLoadedData={() => console.log('Lottie preview loaded successfully')}
+                  onLoadedData={() => {
+                    console.log('Lottie preview loaded successfully');
+                    if (lottieRef.current && speedSetting !== 1) {
+                      console.log('Setting speed on media preview load:', speedSetting);
+                      lottieRef.current.setSpeed(speedSetting);
+                    }
+                  }}
                   onError={(error) => console.error('Lottie preview error:', error)}
                 />
               </div>

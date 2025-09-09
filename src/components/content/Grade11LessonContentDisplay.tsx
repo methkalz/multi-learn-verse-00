@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Play, Image, Video, FileText, Maximize2, Minimize2, ExternalLink, Code, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -169,25 +169,15 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
           }
 
           const loopSetting = lottieSettings?.loop !== undefined ? lottieSettings.loop : true;
+          const speedSetting = metadata.speed || lottieSettings?.speed || 1;
           console.log('Loop setting:', loopSetting);
+          console.log('Speed setting:', speedSetting);
 
-          return (
-            <div className="relative rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center p-4">
-              <div className="w-80 h-80 lg:w-96 lg:h-96 md:w-80 md:h-80 sm:w-72 sm:h-72">
-                <Lottie
-                  animationData={animationData}
-                  loop={loopSetting}
-                  autoplay={true}
-                  style={{ width: '100%', height: '100%' }}
-                  rendererSettings={{
-                    preserveAspectRatio: 'xMidYMid slice'
-                  }}
-                  onLoadedData={() => console.log('Lottie loaded successfully')}
-                  onError={(error) => console.error('Lottie error:', error)}
-                />
-              </div>
-            </div>
-          );
+          return <LottieDisplay 
+            animationData={animationData}
+            loop={loopSetting}
+            speed={speedSetting}
+          />;
         } catch (error) {
           console.error('Lottie parsing error:', error);
           logger.error('Error loading Lottie animation', error as Error);
@@ -295,6 +285,43 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
 
   // Sort media by order_index
   const sortedMedia = lesson.media?.sort((a, b) => a.order_index - b.order_index) || [];
+
+  // Lottie Display Component with speed control
+  const LottieDisplay = ({ animationData, loop, speed }: { animationData: any, loop: boolean, speed: number }) => {
+    const lottieRef = useRef<any>(null);
+    
+    useEffect(() => {
+      if (lottieRef.current && speed !== undefined) {
+        console.log('Applying speed to Lottie:', speed);
+        lottieRef.current.setSpeed(speed);
+      }
+    }, [speed]);
+
+    return (
+      <div className="relative rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-80 h-80 lg:w-96 lg:h-96 md:w-80 md:h-80 sm:w-72 sm:h-72">
+          <Lottie
+            lottieRef={lottieRef}
+            animationData={animationData}
+            loop={loop}
+            autoplay={true}
+            style={{ width: '100%', height: '100%' }}
+            rendererSettings={{
+              preserveAspectRatio: 'xMidYMid slice'
+            }}
+            onLoadedData={() => {
+              console.log('Lottie loaded successfully');
+              if (lottieRef.current && speed !== 1) {
+                console.log('Setting speed on load:', speed);
+                lottieRef.current.setSpeed(speed);
+              }
+            }}
+            onError={(error) => console.error('Lottie error:', error)}
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-4">
