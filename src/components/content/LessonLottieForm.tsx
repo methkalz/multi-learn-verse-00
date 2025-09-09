@@ -5,9 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, X, Play, Globe } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Upload, X, Play, Globe, FolderOpen } from 'lucide-react';
 import Lottie from 'lottie-react';
 import { logger } from '@/lib/logger';
+import SharedMediaPicker from './SharedMediaPicker';
+import type { SharedMediaFile } from '@/hooks/useSharedMediaLibrary';
 
 interface LessonLottieFormProps {
   onSave: (lottieData: any) => void;
@@ -28,6 +31,8 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
   const [animationData, setAnimationData] = useState<any>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [jsonError, setJsonError] = useState<string>('');
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('upload');
 
   const handleInputChange = (field: string, value: string | boolean | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -91,6 +96,25 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
     }
   };
 
+  const handleSelectFromLibrary = (mediaFile: SharedMediaFile) => {
+    setFormData(prev => ({
+      ...prev,
+      title: prev.title || mediaFile.file_name,
+      file_url: mediaFile.file_path,
+      source_type: 'library',
+      loop: mediaFile.metadata?.loop ?? true,
+      autoplay: mediaFile.metadata?.autoplay ?? true,
+      speed: mediaFile.metadata?.speed ?? 1
+    }));
+    
+    if (mediaFile.metadata?.animation_data) {
+      setAnimationData(mediaFile.metadata.animation_data);
+    }
+    
+    setShowMediaPicker(false);
+    setSelectedTab('library');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
@@ -102,14 +126,15 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
   };
 
   return (
-    <Dialog open={true} onOpenChange={onCancel}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Play className="h-5 w-5" />
-            إضافة ملف Lottie للدرس
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={true} onOpenChange={onCancel}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5" />
+              إضافة ملف Lottie للدرس
+            </DialogTitle>
+          </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* معلومات الملف */}
@@ -148,33 +173,26 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
               <CardTitle className="text-lg">مصدر الملف</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* اختيار نوع المصدر */}
-              <div>
-                <Label>نوع المصدر</Label>
-                <div className="flex gap-3 mt-2">
-                  <Button
-                    type="button"
-                    variant={formData.source_type === 'upload' ? 'default' : 'outline'}
-                    onClick={() => handleInputChange('source_type', 'upload')}
-                    className="flex items-center gap-2"
-                  >
+              <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="upload" className="flex items-center gap-2">
                     <Upload className="h-4 w-4" />
-                    رفع ملف
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={formData.source_type === 'url' ? 'default' : 'outline'}
-                    onClick={() => handleInputChange('source_type', 'url')}
-                    className="flex items-center gap-2"
-                  >
+                    رفع جديد
+                  </TabsTrigger>
+                  <TabsTrigger value="url" className="flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    رابط مباشر
-                  </Button>
-                </div>
-              </div>
+                    رابط خارجي
+                  </TabsTrigger>
+                  <TabsTrigger value="library" className="flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4" />
+                    من المكتبة
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* رفع ملف */}
-              {formData.source_type === 'upload' && (
+                <TabsContent value="upload" className="space-y-4">
+
+                  {/* رفع ملف */}
+                  {(selectedTab === 'upload' || formData.source_type === 'upload') && (
                 <div>
                   <Label htmlFor="lottie-upload">رفع ملف Lottie</Label>
                   <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
@@ -232,45 +250,97 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
                       {jsonError}
                     </div>
                   )}
-                </div>
-              )}
+                </TabsContent>
 
-              {/* رابط خارجي */}
-              {formData.source_type === 'url' && (
-                <div>
-                  <Label htmlFor="lottie_url">رابط ملف Lottie</Label>
-                  <Input
-                    id="lottie_url"
-                    value={formData.file_url}
-                    onChange={(e) => handleUrlInput(e.target.value)}
-                    placeholder="https://example.com/animation.json"
-                    required
-                  />
-                  
-                  {jsonError && (
-                    <div className="text-sm text-destructive mt-2">
-                      {jsonError}
-                    </div>
-                  )}
-                  
-                  {/* معاينة الملف */}
-                  {animationData && (
-                    <div className="mt-3">
-                      <Label>معاينة الملف</Label>
-                      <div className="mt-2 border rounded-lg p-4 flex justify-center">
-                        <div className="w-32 h-32">
-                          <Lottie
-                            animationData={animationData}
-                            loop={formData.loop}
-                            autoplay={formData.autoplay}
-                            style={{ width: '100%', height: '100%' }}
-                          />
+                <TabsContent value="url" className="space-y-4">
+                  {/* رابط خارجي */}
+                  <div>
+                    <Label htmlFor="lottie_url">رابط ملف Lottie</Label>
+                    <Input
+                      id="lottie_url"
+                      value={formData.file_url}
+                      onChange={(e) => handleUrlInput(e.target.value)}
+                      placeholder="https://example.com/animation.json"
+                      required
+                    />
+                    
+                    {jsonError && (
+                      <div className="text-sm text-destructive mt-2">
+                        {jsonError}
+                      </div>
+                    )}
+                    
+                    {/* معاينة الملف */}
+                    {animationData && (
+                      <div className="mt-3">
+                        <Label>معاينة الملف</Label>
+                        <div className="mt-2 border rounded-lg p-4 flex justify-center">
+                          <div className="w-32 h-32">
+                            <Lottie
+                              animationData={animationData}
+                              loop={formData.loop}
+                              autoplay={formData.autoplay}
+                              style={{ width: '100%', height: '100%' }}
+                            />
+                          </div>
                         </div>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="library" className="space-y-4">
+                  <div className="text-center py-8">
+                    <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">
+                      اختر ملف Lottie من الملفات المرفوعة سابقاً
+                    </p>
+                    <Button onClick={() => setShowMediaPicker(true)}>
+                      تصفح المكتبة
+                    </Button>
+                  </div>
+
+                  {/* عرض الملف المختار */}
+                  {formData.source_type === 'library' && formData.file_url && (
+                    <div>
+                      <Label>الملف المختار</Label>
+                      <div className="mt-2 p-4 border rounded-lg">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Play className="h-5 w-5 text-primary" />
+                          <div>
+                            <p className="font-medium">{formData.title}</p>
+                            <p className="text-sm text-muted-foreground">من المكتبة المشتركة</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setAnimationData(null);
+                              handleInputChange('file_url', '');
+                              handleInputChange('source_type', 'upload');
+                              setSelectedTab('upload');
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {animationData && (
+                          <div className="flex justify-center">
+                            <div className="w-32 h-32">
+                              <Lottie
+                                animationData={animationData}
+                                loop={formData.loop}
+                                autoplay={formData.autoplay}
+                                style={{ width: '100%', height: '100%' }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
-                </div>
-              )}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 
@@ -332,6 +402,14 @@ const LessonLottieForm: React.FC<LessonLottieFormProps> = ({ onSave, onCancel })
         </form>
       </DialogContent>
     </Dialog>
+
+    <SharedMediaPicker
+      isOpen={showMediaPicker}
+      onClose={() => setShowMediaPicker(false)}
+      onSelectMedia={handleSelectFromLibrary}
+      mediaType="lottie"
+    />
+  </>
   );
 };
 

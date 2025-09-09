@@ -5,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, X, Video, Youtube, Globe, HardDrive } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Upload, X, Video, Youtube, Globe, HardDrive, FolderOpen } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import SharedMediaPicker from './SharedMediaPicker';
+import type { SharedMediaFile } from '@/hooks/useSharedMediaLibrary';
 
 interface LessonVideoFormProps {
   onSave: (videoData: any) => void;
@@ -25,6 +28,8 @@ const LessonVideoForm: React.FC<LessonVideoFormProps> = ({ onSave, onCancel }) =
 
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingDuration, setIsLoadingDuration] = useState(false);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('upload');
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -111,6 +116,19 @@ const LessonVideoForm: React.FC<LessonVideoFormProps> = ({ onSave, onCancel }) =
     }
   };
 
+  const handleSelectFromLibrary = (mediaFile: SharedMediaFile) => {
+    setFormData(prev => ({
+      ...prev,
+      title: prev.title || mediaFile.file_name,
+      video_url: mediaFile.file_path,
+      source_type: 'library',
+      duration: mediaFile.metadata?.duration || '',
+      thumbnail_url: mediaFile.metadata?.thumbnail_url || ''
+    }));
+    setShowMediaPicker(false);
+    setSelectedTab('library');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
@@ -121,14 +139,15 @@ const LessonVideoForm: React.FC<LessonVideoFormProps> = ({ onSave, onCancel }) =
   };
 
   return (
-    <Dialog open={true} onOpenChange={onCancel}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5" />
-            إضافة فيديو للدرس
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={true} onOpenChange={onCancel}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              إضافة فيديو للدرس
+            </DialogTitle>
+          </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* معلومات الفيديو */}
@@ -167,51 +186,37 @@ const LessonVideoForm: React.FC<LessonVideoFormProps> = ({ onSave, onCancel }) =
               <CardTitle className="text-lg">مصدر الفيديو</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* اختيار نوع المصدر */}
-              <div>
-                <Label>نوع المصدر</Label>
-                <div className="grid grid-cols-2 gap-3 mt-2">
-                  <Button
-                    type="button"
-                    variant={formData.source_type === 'upload' ? 'default' : 'outline'}
-                    onClick={() => handleInputChange('source_type', 'upload')}
-                    className="flex items-center gap-2"
-                  >
+              <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="upload" className="flex items-center gap-2">
                     <Upload className="h-4 w-4" />
-                    رفع ملف
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={formData.source_type === 'youtube' ? 'default' : 'outline'}
-                    onClick={() => handleInputChange('source_type', 'youtube')}
-                    className="flex items-center gap-2"
-                  >
-                    <Youtube className="h-4 w-4" />
-                    يوتيوب
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={formData.source_type === 'google_drive' ? 'default' : 'outline'}
-                    onClick={() => handleInputChange('source_type', 'google_drive')}
-                    className="flex items-center gap-2"
-                  >
-                    <HardDrive className="h-4 w-4" />
-                    جوجل درايف
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={formData.source_type === 'url' ? 'default' : 'outline'}
-                    onClick={() => handleInputChange('source_type', 'url')}
-                    className="flex items-center gap-2"
-                  >
+                    رفع جديد
+                  </TabsTrigger>
+                  <TabsTrigger value="url" className="flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    رابط مباشر
-                  </Button>
-                </div>
-              </div>
+                    رابط خارجي
+                  </TabsTrigger>
+                  <TabsTrigger value="library" className="flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4" />
+                    من المكتبة
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* رفع ملف */}
-              {formData.source_type === 'upload' && (
+                <TabsContent value="upload" className="space-y-4">
+                  <div className="grid grid-cols-1 gap-3">
+                    <Button
+                      type="button"
+                      variant={formData.source_type === 'upload' ? 'default' : 'outline'}
+                      onClick={() => handleInputChange('source_type', 'upload')}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      رفع ملف من الجهاز
+                    </Button>
+                  </div>
+
+                  {/* رفع ملف */}
+                  {formData.source_type === 'upload' && (
                 <div>
                   <Label htmlFor="video-upload">رفع ملف الفيديو</Label>
                   <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
@@ -264,49 +269,89 @@ const LessonVideoForm: React.FC<LessonVideoFormProps> = ({ onSave, onCancel }) =
 
               {/* رابط خارجي */}
               {formData.source_type !== 'upload' && (
-                <div>
-                  <Label htmlFor="video_url">
-                    {formData.source_type === 'youtube' && 'رابط يوتيوب'}
-                    {formData.source_type === 'google_drive' && 'رابط جوجل درايف'}
-                    {formData.source_type === 'url' && 'رابط الفيديو'}
-                  </Label>
-                  <Input
-                    id="video_url"
-                    value={formData.video_url}
-                    onChange={(e) => handleUrlInput(e.target.value)}
-                    placeholder={
-                      formData.source_type === 'youtube' 
-                        ? 'https://www.youtube.com/watch?v=...'
-                        : formData.source_type === 'google_drive'
-                        ? 'https://drive.google.com/file/d/...'
-                        : 'https://example.com/video.mp4'
-                    }
-                    required
-                  />
-                </div>
-              )}
-
-              {/* معاينة الفيديو */}
-              {formData.video_url && formData.source_type !== 'upload' && (
-                <div>
-                  <Label>معاينة الفيديو</Label>
-                  <div className="mt-2">
-                    {formData.source_type === 'youtube' || formData.source_type === 'google_drive' ? (
-                      <iframe
-                        src={formData.video_url}
-                        className="w-full h-48 rounded border"
-                        allow="autoplay; encrypted-media"
-                      />
-                    ) : (
-                      <video
-                        src={formData.video_url}
-                        controls
-                        className="w-full max-h-48 rounded"
-                      />
-                    )}
+                  <div>
+                    <Label htmlFor="video_url">
+                      {formData.source_type === 'youtube' && 'رابط يوتيوب'}
+                      {formData.source_type === 'google_drive' && 'رابط جوجل درايف'}
+                      {formData.source_type === 'url' && 'رابط الفيديو'}
+                    </Label>
+                    <Input
+                      id="video_url"
+                      value={formData.video_url}
+                      onChange={(e) => handleUrlInput(e.target.value)}
+                      placeholder={
+                        formData.source_type === 'youtube' 
+                          ? 'https://www.youtube.com/watch?v=...'
+                          : formData.source_type === 'google_drive'
+                          ? 'https://drive.google.com/file/d/...'
+                          : 'https://example.com/video.mp4'
+                      }
+                      required
+                    />
                   </div>
-                </div>
-              )}
+
+                  {/* معاينة الفيديو */}
+                  {formData.video_url && (
+                    <div>
+                      <Label>معاينة الفيديو</Label>
+                      <div className="mt-2">
+                        {formData.source_type === 'youtube' || formData.source_type === 'google_drive' ? (
+                          <iframe
+                            src={formData.video_url}
+                            className="w-full h-48 rounded border"
+                            allow="autoplay; encrypted-media"
+                          />
+                        ) : (
+                          <video
+                            src={formData.video_url}
+                            controls
+                            className="w-full max-h-48 rounded"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="library" className="space-y-4">
+                  <div className="text-center py-8">
+                    <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">
+                      اختر فيديو من الملفات المرفوعة سابقاً
+                    </p>
+                    <Button onClick={() => setShowMediaPicker(true)}>
+                      تصفح المكتبة
+                    </Button>
+                  </div>
+
+                  {/* عرض الفيديو المختار */}
+                  {formData.source_type === 'library' && formData.video_url && (
+                    <div>
+                      <Label>الفيديو المختار</Label>
+                      <div className="mt-2 p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Video className="h-5 w-5 text-primary" />
+                          <div>
+                            <p className="font-medium">{formData.title}</p>
+                            <p className="text-sm text-muted-foreground">من المكتبة المشتركة</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              handleInputChange('video_url', '');
+                              handleInputChange('source_type', 'upload');
+                              setSelectedTab('upload');
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 
@@ -322,6 +367,14 @@ const LessonVideoForm: React.FC<LessonVideoFormProps> = ({ onSave, onCancel }) =
         </form>
       </DialogContent>
     </Dialog>
+
+    <SharedMediaPicker
+      isOpen={showMediaPicker}
+      onClose={() => setShowMediaPicker(false)}
+      onSelectMedia={handleSelectFromLibrary}
+      mediaType="video"
+    />
+  </>
   );
 };
 
