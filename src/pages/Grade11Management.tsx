@@ -9,17 +9,36 @@ import GamesSection from '@/components/content/GamesSection';
 import { EducationalTermsManager } from '@/components/content/EducationalTermsManager';
 import { ContentGameLauncher } from '@/components/content/ContentGameLauncher';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Grade11ErrorBoundary } from '@/components/error-boundaries/Grade11ErrorBoundary';
 
 const Grade11Management: React.FC = () => {
+  console.log('🎯 Grade11Management component rendering...');
+  
   const {
     userProfile
   } = useAuth();
 
+  console.log('🔍 User profile in Grade11Management:', userProfile?.role);
+
+  // Validate all imports are loaded correctly
+  React.useEffect(() => {
+    console.log('🔍 Validating Grade11Management dependencies:', {
+      Grade11Content: !!Grade11Content,
+      Grade11ContentViewer: !!Grade11ContentViewer,
+      GamesSection: !!GamesSection,
+      useAuth: !!useAuth,
+      userProfile: !!userProfile
+    });
+  }, [userProfile]);
+
   // تحديد ما إذا كان المستخدم مدير مدرسة أم معلم
   const canManageContent = userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
   
+  console.log('✅ Grade11Management permissions check:', { canManageContent });
+  
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <Grade11ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <AppHeader title="إدارة محتوى الصف الحادي عشر" showBackButton={true} backPath="/content-management" showLogout={true} />
       
       <main className="container mx-auto px-6 py-8 flex-1">
@@ -68,8 +87,9 @@ const Grade11Management: React.FC = () => {
         </div>
       </main>
       
-      <AppFooter />
-    </div>
+        <AppFooter />
+      </div>
+    </Grade11ErrorBoundary>
   );
 };
 export default Grade11Management;

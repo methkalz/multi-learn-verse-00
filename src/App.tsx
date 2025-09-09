@@ -118,7 +118,26 @@ const App = () => {
                    {/* Content management routes - hierarchical structure */}
                    <Route path="/content-management" element={<LazyContentManagement />} />
                    <Route path="/content-management/grade-10" element={<LazyGrade10Management />} />
-                   <Route path="/content-management/grade-11" element={<LazyGrade11Management />} />
+                   <Route path="/content-management/grade-11" element={
+                     <ErrorBoundary fallback={
+                       <div className="min-h-screen flex items-center justify-center p-4" dir="rtl">
+                         <div className="text-center">
+                           <h2 className="text-xl font-bold text-red-600 mb-2">خطأ في تحميل الصف الحادي عشر</h2>
+                           <p className="text-muted-foreground mb-4">حدث خطأ أثناء تحميل هذه الصفحة</p>
+                           <button 
+                             onClick={() => window.location.reload()}
+                             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+                           >
+                             إعادة تحميل
+                           </button>
+                         </div>
+                       </div>
+                     }>
+                       <Suspense fallback={<PageLoading message="جاري تحميل محتوى الصف الحادي عشر..." />}>
+                         <LazyGrade11Management />
+                       </Suspense>
+                     </ErrorBoundary>
+                   } />
                    <Route path="/content-management/grade-12" element={<LazyGrade12Management />} />
                    
                    {/* Pair matching game route */}

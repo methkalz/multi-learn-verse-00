@@ -71,6 +71,55 @@ export const createLazyComponentWithRetry = <T extends React.ComponentType<any>>
 };
 
 /**
+ * Enhanced lazy component creator with custom fallback and error handling
+ */
+export const createLazyComponentWithFallback = <T extends React.ComponentType<any>>(
+  importFunction: () => Promise<{ default: T }>,
+  componentName: string,
+  retryConfig?: RetryConfig
+) => {
+  return React.lazy(async (): Promise<{ default: T }> => {
+    try {
+      console.log(`🔄 Loading component: ${componentName}`);
+      const result = await retryDynamicImport(importFunction, retryConfig);
+      console.log(`✅ Successfully loaded component: ${componentName}`);
+      return result;
+    } catch (error) {
+      console.error(`❌ Failed to load component: ${componentName}`, error);
+      
+      // Return a fallback component instead of throwing
+      const FallbackComponent: React.ComponentType<any> = () => 
+        React.createElement('div', 
+          { 
+            className: 'min-h-screen flex items-center justify-center p-4',
+            dir: 'rtl'
+          },
+          React.createElement('div', 
+            { className: 'text-center space-y-4' },
+            React.createElement('h2', 
+              { className: 'text-xl font-bold text-red-600' },
+              `خطأ في تحميل ${componentName}`
+            ),
+            React.createElement('p', 
+              { className: 'text-muted-foreground' },
+              'حدث خطأ أثناء تحميل هذه الصفحة. الرجاء المحاولة مرة أخرى.'
+            ),
+            React.createElement('button',
+              {
+                className: 'px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors',
+                onClick: () => window.location.reload()
+              },
+              'إعادة تحميل الصفحة'
+            )
+          )
+        );
+
+      return { default: FallbackComponent as T };
+    }
+  });
+};
+
+/**
  * Global chunk error handler for Vite
  * This catches chunk loading errors at the window level
  */

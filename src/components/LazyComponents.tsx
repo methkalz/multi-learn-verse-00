@@ -1,6 +1,6 @@
 import React, { lazy } from 'react';
 import { SimpleErrorBoundary } from '@/lib/error-boundary';
-import { retryDynamicImport } from '@/utils/chunkRetry';
+import { retryDynamicImport, createLazyComponentWithFallback } from '@/utils/chunkRetry';
 
 // Enhanced lazy loading with retry logic for chunk loading failures
 export const LazyDashboard = lazy(() => retryDynamicImport(() => import('@/pages/Dashboard')));
@@ -17,7 +17,11 @@ export const LazyUserManagement = lazy(() => retryDynamicImport(() => import('@/
 export const LazySystemSettings = lazy(() => retryDynamicImport(() => import('@/pages/SystemSettings')));
 export const LazyContentManagement = lazy(() => retryDynamicImport(() => import('@/pages/ContentManagement')));
 export const LazyGrade10Management = lazy(() => retryDynamicImport(() => import('@/pages/Grade10Management')));
-export const LazyGrade11Management = lazy(() => retryDynamicImport(() => import('@/pages/Grade11Management')));
+export const LazyGrade11Management = createLazyComponentWithFallback(
+  () => import('@/pages/Grade11Management'),
+  'Grade11Management',
+  { maxRetries: 5, delay: 1500, backoffMultiplier: 2 }
+);
 export const LazyGrade12Management = lazy(() => retryDynamicImport(() => import('@/pages/Grade12Management')));
 export const LazyStudentManagement = lazy(() => retryDynamicImport(() => import('@/pages/StudentManagement')));
 export const LazyTest = lazy(() => retryDynamicImport(() => import('@/pages/Test')));
