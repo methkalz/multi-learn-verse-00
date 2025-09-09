@@ -14,13 +14,17 @@ import {
   Youtube,
   Globe,
   HardDrive,
-  Code
+  Code,
+  Settings
 } from 'lucide-react';
 import { Grade11LessonMedia } from '@/hooks/useGrade11Content';
+import { useAuth } from '@/hooks/useAuth';
+import { useEditLottieMedia } from '@/hooks/useEditLottieMedia';
 import LessonVideoForm from './LessonVideoForm';
 import LessonImageForm from './LessonImageForm';
 import LessonLottieForm from './LessonLottieForm';
 import LessonCodeForm from './LessonCodeForm';
+import { LottieEditForm } from './LottieEditForm';
 import MediaPreview from './MediaPreview';
 import { logger } from '@/lib/logger';
 
@@ -29,19 +33,26 @@ interface Grade11LessonMediaManagerProps {
   media: Grade11LessonMedia[];
   onAddMedia?: (mediaData: Omit<Grade11LessonMedia, 'id' | 'created_at'>) => Promise<any>;
   onDeleteMedia?: (mediaId: string) => Promise<void>;
+  onUpdateMedia?: (mediaId: string, updates: Partial<Grade11LessonMedia>) => Promise<void>;
 }
 
 const Grade11LessonMediaManager: React.FC<Grade11LessonMediaManagerProps> = ({
   lessonId,
   media,
   onAddMedia,
-  onDeleteMedia
+  onDeleteMedia,
+  onUpdateMedia
 }) => {
+  const { userProfile } = useAuth();
+  const { updateLottieMedia } = useEditLottieMedia();
   const [showVideoForm, setShowVideoForm] = useState(false);
   const [showImageForm, setShowImageForm] = useState(false);
   const [showLottieForm, setShowLottieForm] = useState(false);
   const [showCodeForm, setShowCodeForm] = useState(false);
   const [previewMedia, setPreviewMedia] = useState<Grade11LessonMedia | null>(null);
+  const [editingLottie, setEditingLottie] = useState<Grade11LessonMedia | null>(null);
+
+  const canEditLottie = userProfile?.role === 'superadmin';
 
   const getMediaIcon = (type: string, sourceType?: string) => {
     if (type === 'video') {
@@ -71,6 +82,26 @@ const Grade11LessonMediaManager: React.FC<Grade11LessonMediaManagerProps> = ({
         {config.label}
       </Badge>
     );
+  };
+
+  const handleUpdateLottieMedia = async (updates: Partial<Grade11LessonMedia>) => {
+    if (!editingLottie) return;
+    
+    try {
+      await updateLottieMedia({
+        mediaId: editingLottie.id,
+        updates
+      });
+      
+      // Also update local state if onUpdateMedia is provided
+      if (onUpdateMedia) {
+        await onUpdateMedia(editingLottie.id, updates);
+      }
+      
+      setEditingLottie(null);
+    } catch (error) {
+      logger.error('Error updating Lottie media', error as Error);
+    }
   };
 
   const handleAddMedia = async (mediaData: any, type: 'video' | 'image' | 'lottie' | 'code') => {
@@ -208,33 +239,45 @@ const Grade11LessonMediaManager: React.FC<Grade11LessonMediaManagerProps> = ({
                     </div>
                   </div>
 
-                  {/* أزرار التحكم */}
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPreviewMedia(item)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <Move className="h-4 w-4" />
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDeleteMedia && onDeleteMedia(item.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                   {/* أزرار التحكم */}
+                   <div className="flex gap-2">
+                     <Button
+                       variant="ghost"
+                       size="sm"
+                       onClick={() => setPreviewMedia(item)}
+                     >
+                       <Eye className="h-4 w-4" />
+                     </Button>
+                     
+                     {/* زر تعديل إعدادات اللوتي - ظاهر فقط للسوبر آدمن */}
+                     {item.media_type === 'lottie' && canEditLottie && (
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => setEditingLottie(item)}
+                         className="text-muted-foreground hover:text-foreground"
+                       >
+                         <Settings className="h-4 w-4" />
+                       </Button>
+                     )}
+                     
+                     <Button
+                       variant="ghost"
+                       size="sm"
+                       className="text-muted-foreground hover:text-foreground"
+                     >
+                       <Move className="h-4 w-4" />
+                     </Button>
+                     
+                     <Button
+                       variant="ghost"
+                       size="sm"
+                       onClick={() => onDeleteMedia && onDeleteMedia(item.id)}
+                       className="text-destructive hover:text-destructive"
+                     >
+                       <Trash2 className="h-4 w-4" />
+                     </Button>
+                   </div>
                 </div>
               ))}
             </div>
@@ -277,6 +320,16 @@ const Grade11LessonMediaManager: React.FC<Grade11LessonMediaManagerProps> = ({
         <MediaPreview
           media={previewMedia}
           onClose={() => setPreviewMedia(null)}
+        />
+      )}
+
+      {/* نموذج تعديل اللوتي */}
+      {editingLottie && (
+        <LottieEditForm
+          media={editingLottie}
+          isOpen={true}
+          onClose={() => setEditingLottie(null)}
+          onUpdate={handleUpdateLottieMedia}
         />
       )}
     </div>

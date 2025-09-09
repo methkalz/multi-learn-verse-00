@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { Play, Image, Video, FileText, Maximize2, Minimize2, ExternalLink, Code } from 'lucide-react';
+import { Play, Image, Video, FileText, Maximize2, Minimize2, ExternalLink, Code, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import Lottie from 'lottie-react';
-import { Grade11LessonWithMedia } from '@/hooks/useGrade11Content';
+import { Grade11LessonWithMedia, Grade11LessonMedia } from '@/hooks/useGrade11Content';
 import { useSharedLottieSettings } from '@/hooks/useSharedLottieSettings';
+import { useAuth } from '@/hooks/useAuth';
+import { useEditLottieMedia } from '@/hooks/useEditLottieMedia';
+import { LottieEditForm } from './LottieEditForm';
 import MediaPreview from './MediaPreview';
 import CodeBlock from './CodeBlock';
 import TypewriterCodeBlock from './TypewriterCodeBlock';
@@ -26,9 +29,27 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
   showControls = true,
   hideHeader = false
 }) => {
+  const { userProfile } = useAuth();
+  const { updateLottieMedia } = useEditLottieMedia();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [previewMedia, setPreviewMedia] = useState<any>(null);
+  const [editingLottie, setEditingLottie] = useState<any>(null);
   const { lottieSettings } = useSharedLottieSettings();
+
+  const handleUpdateLottieMedia = async (updates: Partial<Grade11LessonMedia>) => {
+    if (!editingLottie) return;
+    
+    try {
+      await updateLottieMedia({
+        mediaId: editingLottie.id,
+        updates
+      });
+      
+      setEditingLottie(null);
+    } catch (error) {
+      logger.error('Error updating Lottie media', error as Error);
+    }
+  };
 
   const getMediaIcon = (mediaType: string) => {
     switch (mediaType) {
@@ -356,6 +377,23 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
         <MediaPreview
           media={previewMedia}
           onClose={() => setPreviewMedia(null)}
+        />
+      )}
+      {/* معاينة الوسائط */}
+      {previewMedia && (
+        <MediaPreview 
+          media={previewMedia} 
+          onClose={() => setPreviewMedia(null)} 
+        />
+      )}
+
+      {/* نموذج تعديل اللوتي */}
+      {editingLottie && (
+        <LottieEditForm
+          media={editingLottie}
+          isOpen={true}
+          onClose={() => setEditingLottie(null)}
+          onUpdate={handleUpdateLottieMedia}
         />
       )}
     </div>

@@ -59,6 +59,16 @@ export const useSharedLottieSettings = () => {
   // Save settings mutation
   const saveSettingsMutation = useMutation({
     mutationFn: async (settings: Partial<SharedLottieSettings>) => {
+      // Check if user has permission (RLS will handle this, but we add client-side check for UX)
+      const { data: userRole } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (userRole?.role !== 'superadmin') {
+        throw new Error('غير مصرح لك بتعديل إعدادات اللوتي');
+      }
       const { data: existingData } = await supabase
         .from('loading_settings')
         .select('id')
