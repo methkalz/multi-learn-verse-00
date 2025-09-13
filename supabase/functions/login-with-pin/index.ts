@@ -33,11 +33,7 @@ Deno.serve(async (req) => {
     // Find valid PIN
     const { data: pinData, error: pinError } = await supabase
       .from('admin_access_pins')
-      .select(`
-        *,
-        target_profile:profiles!admin_access_pins_target_user_id_fkey(user_id, full_name, role, email),
-        generator_profile:profiles!admin_access_pins_generated_by_fkey(user_id, full_name, role)
-      `)
+      .select('*')
       .eq('pin_code', pinCode)
       .eq('is_used', false)
       .gt('expires_at', new Date().toISOString())
@@ -47,6 +43,34 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Invalid or expired PIN' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Get target user profile
+    const { data: targetProfile, error: targetError } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, role, email')
+      .eq('user_id', pinData.target_user_id)
+      .single()
+
+    if (targetError || !targetProfile) {
+      return new Response(
+        JSON.stringify({ error: 'Target user not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Get generator profile
+    const { data: generatorProfile, error: generatorError } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, role')
+      .eq('user_id', pinData.generated_by)
+      .single()
+
+    if (generatorError || !generatorProfile) {
+      return new Response(
+        JSON.stringify({ error: 'Generator user not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -62,7 +86,7 @@ Deno.serve(async (req) => {
     // Generate a temporary session for the target user
     const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
-      email: pinData.target_profile.email,
+      email: targetProfile.email,
       options: {
         redirectTo: `${req.headers.get('origin') || 'http://localhost:8080'}/dashboard?admin_access=true`
       }
@@ -83,8 +107,8 @@ Deno.serve(async (req) => {
         entity_id: pinData.id,
         payload_json: {
           target_user_id: pinData.target_user_id,
-          target_user_name: pinData.target_profile.full_name,
-          target_user_role: pinData.target_profile.role,
+          target_user_name: targetProfile.full_name,
+          target_user_role: targetProfile.role,
           used_at: new Date().toISOString(),
           pin_created_at: pinData.created_at
         }
@@ -97,12 +121,12 @@ Deno.serve(async (req) => {
         success: true,
         redirectUrl: sessionData.properties?.action_link,
         targetUser: {
-          id: pinData.target_profile.user_id,
-          name: pinData.target_profile.full_name,
-          role: pinData.target_profile.role
+          id: targetProfile.user_id,
+          name: targetProfile.full_name,
+          role: targetProfile.role
         },
         sessionInfo: {
-          generatedBy: pinData.generator_profile.full_name,
+          generatedBy: generatorProfile.full_name,
           generatedAt: pinData.created_at
         }
       }),
