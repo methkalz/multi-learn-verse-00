@@ -36,8 +36,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import AppHeader from '@/components/shared/AppHeader';
-import AppFooter from '@/components/shared/AppFooter';
 import GradeContentViewer from '@/components/content/GradeContentViewer';
 import { TeacherDashboardStats } from '@/components/dashboard/TeacherDashboardStats';
 import { toast } from '@/hooks/use-toast';
@@ -462,13 +460,7 @@ const TeacherDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5" dir="rtl">
-      <AppHeader 
-        title="لوحة تحكم المعلم" 
-        showBackButton={false} 
-        showLogout={true} 
-      />
-
-      <main className="container mx-auto px-6 py-8 space-y-8">
+      <div className="container mx-auto px-6 py-8 space-y-8">
         {/* الترحيب المحسن */}
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 rounded-2xl -z-10"></div>
@@ -785,9 +777,7 @@ const TeacherDashboard: React.FC = () => {
             )}
           </div>
         )}
-      </main>
-
-      <AppFooter />
+      </div>
     </div>
   );
 };
