@@ -374,23 +374,52 @@ const UserManagement: React.FC = () => {
       // Find user details first
       const userDetails = users.find(u => u.user_id === userToDelete);
       
+      console.log('Deleting user:', userDetails);
+      
       // إذا كان المستخدم طالب، احذفه من جدول students أولاً (cascade delete سيحذف من class_students)
       if (userDetails?.role === 'student') {
+        console.log('Deleting from students table...');
         const { error: studentError } = await supabase
           .from('students')
           .delete()
           .eq('user_id', userToDelete);
 
-        if (studentError) throw studentError;
+        if (studentError) {
+          console.error('Error deleting from students:', studentError);
+          throw studentError;
+        }
+        
+        // Also delete by email as fallback
+        const { error: studentEmailError } = await supabase
+          .from('students')
+          .delete()
+          .eq('email', userDetails?.email);
+
+        if (studentEmailError) {
+          console.error('Error deleting student by email:', studentEmailError);
+        }
       }
       
       // Delete user profile (this will cascade to other related data)
+      console.log('Deleting from profiles table...');
       const { error } = await supabase
         .from('profiles')
         .delete()
         .eq('user_id', userToDelete);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting from profiles:', error);
+        throw error;
+      }
+      
+      // Delete from auth.users using admin API
+      console.log('Deleting from auth.users...');
+      const { error: authError } = await supabase.auth.admin.deleteUser(userToDelete);
+      
+      if (authError) {
+        console.error('Error deleting from auth.users:', authError);
+        // Don't throw error for auth deletion as it might not be critical
+      }
       
       toast({
         title: "تم حذف المستخدم نهائياً",
