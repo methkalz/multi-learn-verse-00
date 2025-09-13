@@ -435,7 +435,7 @@ const TeacherDashboard: React.FC = () => {
   };
 
   const quickActions = [
-    { name: 'إدارة الطلاب', icon: Users, path: '/student-management', color: 'blue' },
+    { name: 'إدارة الطلاب', icon: Users, path: '/students', color: 'blue' },
     { name: 'مضامين الصفوف', icon: BookOpen, path: '/content-management', color: 'green' },
     { name: 'التقويم والأحداث', icon: Calendar, path: '/calendar-management', color: 'purple' },
     { name: 'إدارة الصفوف', icon: School, path: '/school-classes', color: 'orange' }
@@ -461,14 +461,14 @@ const TeacherDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5" dir="rtl">
       <AppHeader 
         title="لوحة تحكم المعلم" 
         showBackButton={false} 
         showLogout={true} 
       />
 
-      <main className="container mx-auto px-6 py-8 flex-1 space-y-8">
+      <main className="container mx-auto px-6 py-8 space-y-8">
         {/* الترحيب المحسن */}
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 rounded-2xl -z-10"></div>

@@ -110,10 +110,11 @@ const App = () => {
                   <Route path="/users" element={<LazyUserManagement />} />
                   <Route path="/system-settings" element={<LazySystemSettings />} />
                   
-                  {/* Academic management routes */}
-                  <Route path="/academic-years" element={<LazyAcademicYears />} />
-                  <Route path="/calendar-management" element={<LazyCalendarManagement />} />
-                  <Route path="/students" element={<LazyStudentManagement />} />
+                   {/* Academic management routes */}
+                   <Route path="/academic-years" element={<LazyAcademicYears />} />
+                   <Route path="/calendar-management" element={<LazyCalendarManagement />} />
+                   <Route path="/students" element={<LazyStudentManagement />} />
+                   <Route path="/student-management" element={<LazyStudentManagement />} />
                   
                    {/* Content management routes - hierarchical structure */}
                    <Route path="/content-management" element={<LazyContentManagement />} />
