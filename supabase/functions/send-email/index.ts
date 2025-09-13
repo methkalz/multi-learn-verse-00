@@ -67,7 +67,7 @@ serve(async (req: Request) => {
               .login-button {
                 display: inline-block;
                 padding: 15px 30px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #0B5394 0%, #1E88E5 100%);
                 color: white;
                 text-decoration: none;
                 border-radius: 8px;
@@ -79,7 +79,7 @@ serve(async (req: Request) => {
               }
               .login-button:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+                box-shadow: 0 8px 25px rgba(11, 83, 148, 0.3);
               }
             </style>
           </head>
@@ -92,7 +92,7 @@ serve(async (req: Request) => {
               </div>
 
               <!-- Header Section -->
-              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <div style="background: linear-gradient(135deg, #0B5394 0%, #1E88E5 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
                 <h1 style="margin: 0; font-size: 32px; font-weight: 700; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">أهلاً وسهلاً</h1>
               </div>
               
@@ -103,11 +103,11 @@ serve(async (req: Request) => {
                 </h2>
                 
                 <p style="color: #555; line-height: 1.8; margin-bottom: 20px; font-size: 16px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">
-                  مرحباً بك في <strong style="font-weight: 700; color: #667eea;">التقنية ببساطة</strong>
+                  مرحباً بك في <strong style="font-weight: 700; color: #0B5394;">التقنية ببساطة</strong>
                 </p>
                 
                 ${username && password ? `
-                <div style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; border-right: 4px solid #667eea;">
+                <div style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; border-right: 4px solid #0B5394;">
                   <h3 style="color: #333; margin-top: 0; margin-bottom: 18px; font-size: 20px; font-weight: 600; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">بيانات تسجيل الدخول:</h3>
                   <p style="margin: 8px 0; color: #555; font-size: 16px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;"><strong style="font-weight: 600;">البريد الإلكتروني:</strong> ${username}</p>
                   <p style="margin: 8px 0; color: #555; font-size: 16px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;"><strong style="font-weight: 600;">كلمة المرور:</strong> ${password}</p>
@@ -115,7 +115,7 @@ serve(async (req: Request) => {
                 
                 <!-- Login Button -->
                 <div style="text-align: center; margin: 25px 0;">
-                  <a href="http://www.edu-net.me" class="login-button" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; text-align: center;">
+                  <a href="http://www.edu-net.me" class="login-button" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #0B5394 0%, #1E88E5 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; text-align: center;">
                     تسجيل الدخول للموقع
                   </a>
                 </div>
@@ -128,7 +128,7 @@ serve(async (req: Request) => {
                 <div style="text-align: center; margin-top: 35px; padding-top: 20px; border-top: 1px solid #eee;">
                   <p style="color: #666; font-size: 15px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; margin: 0;">
                     مع أطيب التحيات،<br>
-                    <strong style="font-weight: 700; color: #667eea;">التقنية ببساطة</strong>
+                    <strong style="font-weight: 700; color: #0B5394;">التقنية ببساطة</strong>
                   </p>
                 </div>
               </div>
