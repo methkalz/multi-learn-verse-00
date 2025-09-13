@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,12 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { School, Users, BookOpen, Settings, Package, Calendar, TrendingUp, Shield, CreditCard, Clock, Activity, Globe } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { School, Users, BookOpen, Settings, Package, Calendar, TrendingUp, Shield, CreditCard, Clock, Activity, Globe, RefreshCw, AlertTriangle } from 'lucide-react';
 import { SchoolCalendarWidget } from '@/components/calendar/SchoolCalendarWidget';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { TeacherManagement } from './TeacherManagement';
 import { logger } from '@/lib/logger';
+import { useToast } from '@/hooks/use-toast';
+import EnhancedDashboardStats from '@/components/dashboard/EnhancedDashboardStats';
+import PackageStatusCard from '@/components/dashboard/PackageStatusCard';
 interface SchoolStats {
   totalStudents: number;
   totalTeachers: number;
@@ -52,74 +56,142 @@ const SchoolAdminDashboard = () => {
   });
   const [schoolPackage, setSchoolPackage] = useState<SchoolPackage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showTeacherManagement, setShowTeacherManagement] = useState(false);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const { toast } = useToast();
   useEffect(() => {
     if (userProfile?.school_id) {
       fetchSchoolStats();
       fetchSchoolPackage();
+      fetchRecentActivities();
     }
   }, [userProfile?.school_id]);
-  const fetchSchoolStats = async () => {
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userProfile?.school_id && !loading) {
+        refreshData();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [userProfile?.school_id, loading]);
+  const fetchSchoolStats = async (isRefresh = false) => {
     try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
       const schoolId = userProfile?.school_id;
       if (!schoolId) return;
 
-      // Get students count from students table
-      const {
-        count: studentsCount
-      } = await supabase.from('students').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('school_id', schoolId);
+      // Enhanced error handling with individual queries
+      let studentsCount = 0;
+      let teachersCount = 0;
+      let totalClassesCount = 0;
+      let activeClassesCount = 0;
+      let totalPluginsCount = 0;
+      let activePluginsCount = 0;
 
-      // Get teachers count from profiles table
-      const {
-        count: teachersCount
-      } = await supabase.from('profiles').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('school_id', schoolId).eq('role', 'teacher');
+      // Get students count
+      try {
+        const { count } = await supabase
+          .from('students')
+          .select('*', { count: 'exact', head: true })
+          .eq('school_id', schoolId);
+        studentsCount = count || 0;
+      } catch (error) {
+        logger.warn('Error fetching students count', { error: (error as Error).message });
+      }
+
+      // Get teachers count
+      try {
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('school_id', schoolId)
+          .eq('role', 'teacher');
+        teachersCount = count || 0;
+      } catch (error) {
+        logger.warn('Error fetching teachers count', { error: (error as Error).message });
+      }
 
       // Get classes stats
-      const {
-        count: totalClassesCount
-      } = await supabase.from('classes').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('school_id', schoolId);
-      const {
-        count: activeClassesCount
-      } = await supabase.from('classes').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('school_id', schoolId).eq('status', 'active');
+      try {
+        const { count: totalCount } = await supabase
+          .from('classes')
+          .select('*', { count: 'exact', head: true })
+          .eq('school_id', schoolId);
+        totalClassesCount = totalCount || 0;
 
-      // Get plugins count (this might need adjustment based on your schema)
-      const {
-        count: totalPluginsCount
-      } = await supabase.from('plugins').select('*', {
-        count: 'exact',
-        head: true
-      });
-      const {
-        count: activePluginsCount
-      } = await supabase.from('school_plugins').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('school_id', schoolId).eq('status', 'enabled');
-      setStats({
-        totalStudents: studentsCount || 0,
-        totalTeachers: teachersCount || 0,
-        totalClasses: totalClassesCount || 0,
-        activeClasses: activeClassesCount || 0,
-        archivedClasses: (totalClassesCount || 0) - (activeClassesCount || 0),
-        activePlugins: activePluginsCount || 0,
-        totalPlugins: totalPluginsCount || 0
-      });
+        const { count: activeCount } = await supabase
+          .from('classes')
+          .select('*', { count: 'exact', head: true })
+          .eq('school_id', schoolId)
+          .eq('status', 'active');
+        activeClassesCount = activeCount || 0;
+      } catch (error) {
+        logger.warn('Error fetching classes count', { error: (error as Error).message });
+      }
+
+      // Get plugins count with fallback
+      try {
+        const { count: totalPlugins } = await supabase
+          .from('plugins')
+          .select('*', { count: 'exact', head: true });
+        totalPluginsCount = totalPlugins || 0;
+
+        const { count: activePlugins } = await supabase
+          .from('school_plugins')
+          .select('*', { count: 'exact', head: true })
+          .eq('school_id', schoolId)
+          .eq('status', 'enabled');
+        activePluginsCount = activePlugins || 0;
+      } catch (error) {
+        logger.warn('Plugins tables not available', { error: (error as Error).message });
+        // Fallback values
+        totalPluginsCount = 0;
+        activePluginsCount = 0;
+      }
+
+      const newStats = {
+        totalStudents: studentsCount,
+        totalTeachers: teachersCount,
+        totalClasses: totalClassesCount,
+        activeClasses: activeClassesCount,
+        archivedClasses: Math.max(totalClassesCount - activeClassesCount, 0),
+        activePlugins: activePluginsCount,
+        totalPlugins: totalPluginsCount
+      };
+
+      setStats(newStats);
+      
+      if (isRefresh) {
+        toast({
+          title: "تم التحديث بنجاح",
+          description: "تم تحديث الإحصائيات بنجاح",
+        });
+      }
+
     } catch (error) {
+      const errorMessage = 'خطأ في جلب إحصائيات المدرسة';
+      setError(errorMessage);
       logger.error('Error fetching school stats', error as Error);
+      
+      toast({
+        title: "خطأ في التحديث",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
   const fetchSchoolPackage = async () => {
@@ -159,16 +231,26 @@ const SchoolAdminDashboard = () => {
     }
   };
   const getUsagePercentage = (used: number, max: number) => {
-    if (!max) return 0;
-    return Math.min(used / max * 100, 100);
+    if (!max || max <= 0) return 0;
+    if (used < 0) return 0;
+    return Math.min((used / max) * 100, 100);
   };
   const getDaysRemaining = () => {
     if (!schoolPackage?.end_date) return null;
-    const endDate = new Date(schoolPackage.end_date);
-    const today = new Date();
-    const diffTime = endDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+    
+    try {
+      const endDate = new Date(schoolPackage.end_date);
+      const today = new Date();
+      
+      // Check for invalid dates
+      if (isNaN(endDate.getTime()) || isNaN(today.getTime())) return null;
+      
+      const diffTime = endDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return Math.max(diffDays, 0);
+    } catch {
+      return null;
+    }
   };
   const getDaysRemainingDisplay = () => {
     // إذا كانت الباقة بأيام غير محدودة (duration_days = null أو -1)
@@ -192,106 +274,182 @@ const SchoolAdminDashboard = () => {
     if (!schoolPackage?.duration_days || schoolPackage.duration_days === -1) {
       return "اشتراك دائم";
     }
-    return format(endDate, 'dd.M.yyyy');
+    return format(endDate, 'dd.M.yyyy', { locale: ar });
   };
+
+  const fetchRecentActivities = async () => {
+    try {
+      const schoolId = userProfile?.school_id;
+      if (!schoolId) return;
+
+      // Get recent audit logs for activities
+      const { data: auditLogs } = await supabase
+        .from('audit_log')
+        .select('action, created_at_utc, entity')
+        .order('created_at_utc', { ascending: false })
+        .limit(5);
+
+      if (auditLogs) {
+        const activities = auditLogs.map(log => ({
+          title: getActionLabel(log.action),
+          time: formatTimeAgo(log.created_at_utc),
+          color: getActionColor(log.action),
+          icon: getActionIcon(log.action)
+        }));
+        setRecentActivities(activities);
+      }
+    } catch (error) {
+      logger.error('Error fetching recent activities', error as Error);
+      // Fallback to mock data
+      setRecentActivities([
+        { title: 'تم إضافة طالب جديد', time: 'منذ 5 دقائق', color: 'green-neon', icon: Users },
+        { title: 'تم إنشاء صف جديد', time: 'منذ 15 دقيقة', color: 'blue-electric', icon: BookOpen },
+        { title: 'تم تحديث المحتوى', time: 'منذ ساعة', color: 'orange-fire', icon: Activity },
+      ]);
+    }
+  };
+
+  const getActionLabel = (action: string) => {
+    const labels: Record<string, string> = {
+      'USER_CREATED': 'تم إنشاء مستخدم جديد',
+      'STUDENT_ENROLLED': 'تم تسجيل طالب جديد',
+      'CLASS_CREATED': 'تم إنشاء صف جديد',
+      'CONTENT_UPLOADED': 'تم رفع محتوى جديد',
+    };
+    return labels[action] || action;
+  };
+
+  const getActionColor = (action: string) => {
+    const colors: Record<string, string> = {
+      'USER_CREATED': 'green-neon',
+      'STUDENT_ENROLLED': 'blue-electric',
+      'CLASS_CREATED': 'orange-fire',
+      'CONTENT_UPLOADED': 'purple-mystic',
+    };
+    return colors[action] || 'green-neon';
+  };
+
+  const getActionIcon = (action: string) => {
+    const icons: Record<string, any> = {
+      'USER_CREATED': Users,
+      'STUDENT_ENROLLED': Users,
+      'CLASS_CREATED': BookOpen,
+      'CONTENT_UPLOADED': Activity,
+    };
+    return icons[action] || Activity;
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffMins < 1) return 'الآن';
+      if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+      if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+      return `منذ ${diffDays} يوم`;
+    } catch {
+      return 'منذ وقت قريب';
+    }
+  };
+
+  const refreshData = useCallback(() => {
+    fetchSchoolStats(true);
+    fetchSchoolPackage();
+    fetchRecentActivities();
+  }, [userProfile?.school_id]);
+
+  const getPackageStatusColor = () => {
+    if (!schoolPackage) return 'gray';
+    
+    const daysRemaining = getDaysRemaining();
+    if (daysRemaining === null) return 'green'; // Unlimited
+    if (daysRemaining <= 7) return 'red';
+    if (daysRemaining <= 30) return 'yellow';
+    return 'green';
+  };
+  const StatsLoadingSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <Card key={i} className="glass-card">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-8 w-8 rounded-full" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-20 mb-2" />
+            <Skeleton className="h-4 w-24" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
   if (loading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center animate-fade-in-up">
-          <div className="w-16 h-16 mx-auto mb-4 gradient-electric rounded-full animate-gentle-float flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+    return (
+      <div className="min-h-screen bg-background pattern-dots flex flex-col" dir="rtl">
+        <div className="container mx-auto px-6 py-6 space-y-8">
+          <div className="flex items-center justify-between mb-6">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-10 w-24" />
           </div>
-          <p className="text-lg text-muted-foreground">جاري التحميل...</p>
+          <StatsLoadingSkeleton />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1 space-y-6">
+              <Skeleton className="h-64 w-full rounded-lg" />
+              <Skeleton className="h-48 w-full rounded-lg" />
+            </div>
+            <div className="lg:col-span-2">
+              <Skeleton className="h-96 w-full rounded-lg" />
+            </div>
+          </div>
         </div>
-      </div>;
+      </div>
+    );
   }
   if (showTeacherManagement) {
     return <TeacherManagement onBack={() => setShowTeacherManagement(false)} />;
   }
   return <div className="min-h-screen bg-background pattern-dots flex flex-col" dir="rtl">
-      {/* Modern Header مع الإعدادات المخصصة والتأثيرات */}
+      {/* Modern Header */}
       <header className="glass-card sticky top-0 z-50 soft-shadow backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg gradient-electric flex items-center justify-center">
+                <School className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">لوحة تحكم مدير المدرسة</h1>
+                <p className="text-sm text-muted-foreground">إدارة شاملة للمؤسسة التعليمية</p>
+              </div>
+            </div>
+            
+            {getPackageStatusColor() === 'red' && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-red-50 text-red-700 rounded-lg">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm font-medium">الباقة تنتهي قريباً!</span>
+              </div>
+            )}
+          </div>
+        </div>
       </header>
 
       <div className="container mx-auto px-6 py-6 space-y-8">
-        {/* Stats Grid */}
-        <section className="animate-fade-in-up">
-          <div className="flex items-center mb-6">
-            <h2 className="text-2xl font-bold font-cairo text-foreground">📊 الإحصائيات</h2>
-            <div className="accent-dot mr-3 animate-gentle-float"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Students Card */}
-            <Card className="glass-card card-hover animate-scale-hover">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <Users className="h-8 w-8 text-primary icon-glow icon-bounce" />
-                  <span className="text-sm text-green-600 font-semibold bg-green-50 px-2 py-1 rounded-full soft-shadow">
-                    +{stats.totalStudents}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gradient mb-2">{stats.totalStudents}</div>
-                <p className="text-muted-foreground text-sm">إجمالي الطلاب</p>
-              </CardContent>
-            </Card>
-
-            {/* Teachers Card */}
-            <Card className="glass-card card-hover animate-scale-hover" style={{
-            animationDelay: '100ms'
-          }}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <Users className="h-8 w-8 text-secondary icon-glow icon-bounce" />
-                  <span className="text-sm text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded-full soft-shadow">
-                    +{stats.totalTeachers}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gradient mb-2">{stats.totalTeachers}</div>
-                <p className="text-muted-foreground text-sm">إجمالي المعلمين</p>
-              </CardContent>
-            </Card>
-
-            {/* Classes Card */}
-            <Card className="glass-card card-hover animate-scale-hover" style={{
-            animationDelay: '200ms'
-          }}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <BookOpen className="h-8 w-8 text-orange-500 icon-glow icon-bounce" />
-                  <span className="text-sm text-orange-600 font-semibold bg-orange-50 px-2 py-1 rounded-full soft-shadow">
-                    {stats.activeClasses}/{stats.totalClasses}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gradient mb-2">{stats.totalClasses}</div>
-                <p className="text-muted-foreground text-sm">إجمالي الصفوف</p>
-              </CardContent>
-            </Card>
-
-            {/* Plugins Card */}
-            <Card className="glass-card card-hover animate-scale-hover" style={{
-            animationDelay: '300ms'
-          }}>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <Package className="h-8 w-8 text-purple-500 icon-glow icon-bounce" />
-                  <span className="text-sm text-purple-600 font-semibold bg-purple-50 px-2 py-1 rounded-full soft-shadow">
-                    {stats.activePlugins}/{stats.totalPlugins}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gradient mb-2">{stats.activePlugins}</div>
-                <p className="text-muted-foreground text-sm">الإضافات النشطة</p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+        {/* Enhanced Stats Section */}
+        <EnhancedDashboardStats
+          stats={stats}
+          loading={loading}
+          refreshing={refreshing}
+          error={error}
+          onRefresh={refreshData}
+        />
 
         {/* Quick Actions */}
         <section className="animate-fade-in-up" style={{
@@ -334,7 +492,7 @@ const SchoolAdminDashboard = () => {
         </section>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up -mt-[200px]" style={{
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up" style={{
         animationDelay: '300ms'
       }}>
           {/* Right Column - Calendar and School Admin Info */}
