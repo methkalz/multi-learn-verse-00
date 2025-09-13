@@ -78,35 +78,67 @@ export const TeacherContentSettingsForm: React.FC = () => {
   const loadSchools = async () => {
     try {
       setLoading(true);
-      const { data: schoolsData, error } = await supabase
+      
+      // جلب المدارس مع بيانات الباقات الفعلية
+      const { data: schoolsData, error: schoolsError } = await supabase
+        .from('schools')
+        .select(`
+          id, 
+          name,
+          school_packages!inner(
+            id,
+            status,
+            packages!inner(
+              id,
+              name,
+              available_grade_contents
+            )
+          )
+        `)
+        .eq('school_packages.status', 'active')
+        .order('name');
+
+      if (schoolsError) throw schoolsError;
+
+      // تحويل البيانات إلى الشكل المطلوب
+      const schoolsWithPackages = (schoolsData || []).map((school: any) => {
+        const activePackage = school.school_packages?.[0]?.packages;
+        
+        return {
+          id: school.id,
+          name: school.name,
+          active_package: activePackage ? {
+            name: activePackage.name,
+            available_grade_contents: activePackage.available_grade_contents || []
+          } : null
+        };
+      });
+
+      // إضافة المدارس التي لا تملك باقات نشطة
+      const { data: allSchoolsData, error: allSchoolsError } = await supabase
         .from('schools')
         .select('id, name')
         .order('name');
 
-      if (error) throw error;
+      if (allSchoolsError) throw allSchoolsError;
 
-      // Get package details separately for each school
-      const schoolsWithPackages = await Promise.all(
-        (schoolsData || []).map(async (school) => {
-          // Mock package data for now
-          return {
-            ...school,
-            active_package: {
-              name: "الباقة الأساسية",
-              available_grade_contents: ['10', '11', '12']
-            }
-          };
-        })
-      );
+      // دمج المدارس مع الباقات والمدارس بدون باقات
+      const allSchoolsWithPackages = (allSchoolsData || []).map((school: any) => {
+        const schoolWithPackage = schoolsWithPackages.find(s => s.id === school.id);
+        return schoolWithPackage || {
+          id: school.id,
+          name: school.name,
+          active_package: null
+        };
+      });
 
-      if (error) throw error;
-      setSchools(schoolsWithPackages);
+      setSchools(allSchoolsWithPackages);
     } catch (error) {
-      logger.error('Error loading schools', error as Error);
+      logger.error('Error loading schools with packages', error as Error);
       toast({
         variant: "destructive",
         title: "خطأ في تحميل المدارس",
-        description: "فشل في جلب قائمة المدارس"
+        description: "فشل في جلب قائمة المدارس والباقات"
       });
     } finally {
       setLoading(false);
