@@ -99,7 +99,9 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
     assigned_classes: []
   });
   
-  const [sendWelcomeEmail, setSendWelcomeEmail] = useState(false);
+  const [sendWelcomeEmail, setSendWelcomeEmail] = useState(true);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
 
   useEffect(() => {
     loadData();
@@ -220,6 +222,10 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
     }
 
     setLoading(true);
+    if (sendWelcomeEmail) {
+      setEmailStatus('sending');
+      setEmailErrorMessage('');
+    }
 
     try {
       // Generate password if not provided
@@ -239,17 +245,43 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
 
       if (error) {
         logger.error('Error creating teacher', error);
+        if (sendWelcomeEmail) {
+          setEmailStatus('error');
+          setEmailErrorMessage('فشل في إرسال البريد الإلكتروني');
+        }
         throw new Error(error.message || "فشل في إنشاء المعلم");
       }
 
       if (!data?.success) {
+        if (sendWelcomeEmail) {
+          setEmailStatus('error');
+          setEmailErrorMessage(data?.emailError || 'فشل في إرسال البريد الإلكتروني');
+        }
         throw new Error(data?.error || "فشل في إنشاء المعلم");
       }
 
-      toast({
-        title: "تم إضافة المعلم بنجاح",
-        description: `تم إضافة ${newTeacher.full_name} كمعلم جديد`
-      });
+      // Check email status from response
+      if (sendWelcomeEmail) {
+        if (data?.emailSent) {
+          setEmailStatus('success');
+          toast({
+            title: "تم إضافة المعلم بنجاح",
+            description: `تم إضافة ${newTeacher.full_name} كمعلم جديد وإرسال بريد ترحيبي إلى ${newTeacher.email}`
+          });
+        } else {
+          setEmailStatus('error');
+          setEmailErrorMessage(data?.emailError || 'فشل في إرسال البريد الإلكتروني');
+          toast({
+            title: "تم إضافة المعلم بنجاح",
+            description: `تم إضافة ${newTeacher.full_name} كمعلم جديد ولكن فشل في إرسال البريد الإلكتروني`
+          });
+        }
+      } else {
+        toast({
+          title: "تم إضافة المعلم بنجاح", 
+          description: `تم إضافة ${newTeacher.full_name} كمعلم جديد`
+        });
+      }
 
       // Reset form
       setNewTeacher({
@@ -259,7 +291,9 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
         password: '',
         assigned_classes: []
       });
-      setSendWelcomeEmail(false);
+      setSendWelcomeEmail(true);
+      setEmailStatus('idle');
+      setEmailErrorMessage('');
       setShowAddForm(false);
       
       // Reload data
@@ -580,15 +614,52 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
             <Separator />
 
             {/* Welcome Email Option */}
-            <div className="flex items-center space-x-reverse space-x-3">
-              <Checkbox
-                checked={sendWelcomeEmail}
-                onCheckedChange={(checked) => setSendWelcomeEmail(checked === true)}
-              />
-              <div className="flex items-center space-x-reverse space-x-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <Label>إرسال بريد ترحيبي مع بيانات الدخول</Label>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-reverse space-x-3">
+                <Checkbox
+                  checked={sendWelcomeEmail}
+                  onCheckedChange={(checked) => setSendWelcomeEmail(checked === true)}
+                />
+                <div className="flex items-center space-x-reverse space-x-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <Label>إرسال بريد ترحيبي مع بيانات الدخول</Label>
+                </div>
               </div>
+              
+              {/* Email Status Display */}
+              {sendWelcomeEmail && emailStatus !== 'idle' && (
+                <div className={`p-3 rounded-lg border ${
+                  emailStatus === 'sending' ? 'bg-blue-50 border-blue-200' :
+                  emailStatus === 'success' ? 'bg-green-50 border-green-200' :
+                  'bg-red-50 border-red-200'
+                }`}>
+                  <div className="flex items-center space-x-reverse space-x-2">
+                    {emailStatus === 'sending' && (
+                      <>
+                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-sm text-blue-700 font-medium">جاري إرسال البريد الإلكتروني...</span>
+                      </>
+                    )}
+                    {emailStatus === 'success' && (
+                      <>
+                        <Check className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-700 font-medium">تم إرسال البريد الإلكتروني بنجاح</span>
+                      </>
+                    )}
+                    {emailStatus === 'error' && (
+                      <>
+                        <AlertCircle className="h-4 w-4 text-red-600" />
+                        <div className="text-sm text-red-700">
+                          <p className="font-medium">فشل في إرسال البريد الإلكتروني</p>
+                          {emailErrorMessage && (
+                            <p className="text-xs mt-1">{emailErrorMessage}</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3">

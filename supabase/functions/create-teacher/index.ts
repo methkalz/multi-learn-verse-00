@@ -200,27 +200,34 @@ serve(async (req) => {
     }
 
     // Send welcome email if requested
+    let emailSent = false;
+    let emailError = null;
+    
     if (sendWelcomeEmail) {
       try {
-        await supabaseAdmin.functions.invoke('send-email', {
+        const emailResponse = await supabaseAdmin.functions.invoke('send-email', {
           body: {
-            to: email,
-            subject: 'مرحباً بك كمعلم جديد',
-            html: `
-              <div style="direction: rtl; text-align: right; font-family: Arial, sans-serif;">
-                <h2>مرحباً ${fullName}</h2>
-                <p>تم إنشاء حسابك كمعلم بنجاح!</p>
-                <p><strong>البريد الإلكتروني:</strong> ${email}</p>
-                <p><strong>كلمة المرور:</strong> ${password}</p>
-                <p>يرجى تسجيل الدخول وتغيير كلمة المرور عند أول استخدام.</p>
-                <p>مع أطيب التحيات</p>
-              </div>
-            `
+            studentEmail: email,
+            studentName: fullName,
+            username: email,
+            password: password,
+            userType: 'teacher'
           }
         });
-        console.log('Welcome email sent successfully');
-      } catch (emailError) {
-        console.error('Error sending welcome email:', emailError);
+        
+        if (emailResponse.error) {
+          throw new Error(emailResponse.error.message || 'فشل في إرسال البريد الإلكتروني');
+        }
+        
+        if (emailResponse.data?.success) {
+          emailSent = true;
+          console.log('Welcome email sent successfully');
+        } else {
+          throw new Error(emailResponse.data?.message || 'فشل في إرسال البريد الإلكتروني');
+        }
+      } catch (error: any) {
+        console.error('Error sending welcome email:', error);
+        emailError = error.message;
         // Continue execution - email failure shouldn't fail the entire operation
       }
     }
@@ -245,6 +252,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
+        emailSent: emailSent,
+        emailError: emailError,
         teacher: {
           id: newUser.user.id,
           email: email,
