@@ -90,7 +90,7 @@ export const TeacherContentSettingsForm: React.FC = () => {
             status,
             packages!inner(
               id,
-              name,
+              name_ar,
               available_grade_contents
             )
           )
@@ -108,7 +108,7 @@ export const TeacherContentSettingsForm: React.FC = () => {
           id: school.id,
           name: school.name,
           active_package: activePackage ? {
-            name: activePackage.name,
+            name: activePackage.name_ar,
             available_grade_contents: activePackage.available_grade_contents || []
           } : null
         };
