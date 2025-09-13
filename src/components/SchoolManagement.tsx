@@ -200,10 +200,24 @@ const SchoolManagement = () => {
     fetchPackages();
   }, []);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const onSubmitSchool = async (data: SchoolForm) => {
     logger.debug('بدء معالجة نموذج المدرسة', { data, editingSchool: !!editingSchool });
     
     try {
+      setIsSubmitting(true);
+
+      // Validate user role
+      if (userProfile?.role !== 'superadmin') {
+        toast({
+          variant: "destructive",
+          title: "خطأ في الصلاحية",
+          description: "يجب أن تكون مدير نظام لتعديل المدارس",
+        });
+        return;
+      }
+
       // Validate based on mode (create vs edit)
       if (!editingSchool) {
         validateForCreate(data);
@@ -230,7 +244,7 @@ const SchoolManagement = () => {
 
         // Update package if changed
         if (data.package_id) {
-          logger.info('تحديث باقة المدرسة', { 
+          logger.info('بدء تحديث باقة المدرسة', { 
             schoolId: editingSchool.id,
             newPackageId: data.package_id 
           });
@@ -238,22 +252,28 @@ const SchoolManagement = () => {
           // Check if package exists and is active
           const { data: packageData, error: packageCheckError } = await supabase
             .from('packages')
-            .select('id, name, is_active')
+            .select('id, name_ar, is_active')
             .eq('id', data.package_id)
             .eq('is_active', true)
             .single();
 
           if (packageCheckError || !packageData) {
-            logger.error('الباقة المحددة غير موجودة أو غير نشطة', new Error(packageCheckError?.message || 'Package not found'), { 
+            const errorMsg = packageCheckError?.message || 'الباقة غير موجودة';
+            logger.error('الباقة المحددة غير متاحة', new Error(errorMsg), { 
               packageId: data.package_id 
             });
-            throw new Error('الباقة المحددة غير متاحة');
+            toast({
+              variant: "destructive",
+              title: "خطأ في الباقة",
+              description: `الباقة المحددة غير متاحة: ${errorMsg}`,
+            });
+            return;
           }
 
-          // Check current package subscription
+          // Get current package subscription
           const { data: currentPackage, error: currentPackageError } = await supabase
             .from('school_packages')
-            .select('id, package_id')
+            .select('id, package_id, packages(name_ar)')
             .eq('school_id', editingSchool.id)
             .maybeSingle();
 
@@ -261,59 +281,106 @@ const SchoolManagement = () => {
             logger.error('خطأ في فحص الباقة الحالية', new Error(currentPackageError.message), { 
               schoolId: editingSchool.id 
             });
-            throw new Error('فشل في فحص الباقة الحالية');
+            toast({
+              variant: "destructive",
+              title: "خطأ في فحص الباقة الحالية",
+              description: `فشل في فحص الباقة: ${currentPackageError.message}`,
+            });
+            return;
           }
 
-          if (currentPackage) {
-            // Update existing package subscription
-            const { error: updateError } = await supabase
-              .from('school_packages')
-              .update({
-                package_id: data.package_id,
-                status: 'active',
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', currentPackage.id);
+          // Check if package is actually different
+          if (currentPackage && currentPackage.package_id === data.package_id) {
+            toast({
+              title: "تنبيه",
+              description: "الباقة المحددة هي نفس الباقة الحالية",
+            });
+            setIsSubmitting(false);
+            setDialogOpen(false);
+            setEditingSchool(null);
+            return;
+          }
 
-            if (updateError) {
-              logger.error('خطأ في تحديث اشتراك الباقة', new Error(updateError.message), { 
+          try {
+            if (currentPackage) {
+              // Update existing package subscription
+              logger.info('تحديث اشتراك الباقة الموجود', { 
+                currentPackageId: currentPackage.package_id,
+                newPackageId: data.package_id 
+              });
+              
+              const { error: updateError } = await supabase
+                .from('school_packages')
+                .update({
+                  package_id: data.package_id,
+                  status: 'active',
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('id', currentPackage.id);
+
+              if (updateError) {
+                logger.error('خطأ في تحديث اشتراك الباقة', new Error(updateError.message), { 
+                  schoolId: editingSchool.id,
+                  packageId: data.package_id 
+                });
+                toast({
+                  variant: "destructive",
+                  title: "خطأ في تحديث الباقة",
+                  description: `فشل في تحديث الباقة: ${updateError.message}`,
+                });
+                return;
+              }
+              logger.info('تم تحديث اشتراك الباقة بنجاح', { 
                 schoolId: editingSchool.id,
                 packageId: data.package_id 
               });
-              throw new Error(`فشل في تحديث الباقة: ${updateError.message}`);
-            }
-            logger.info('تم تحديث اشتراك الباقة بنجاح', { 
-              schoolId: editingSchool.id,
-              packageId: data.package_id 
-            });
-          } else {
-            // Create new package subscription
-            const { error: insertError } = await supabase
-              .from('school_packages')
-              .insert({
-                school_id: editingSchool.id,
-                package_id: data.package_id,
-                status: 'active',
-                start_date: new Date().toISOString(),
-              });
+            } else {
+              // Create new package subscription
+              logger.info('إنشاء اشتراك باقة جديد');
+              
+              const { error: insertError } = await supabase
+                .from('school_packages')
+                .insert({
+                  school_id: editingSchool.id,
+                  package_id: data.package_id,
+                  status: 'active',
+                  start_date: new Date().toISOString(),
+                });
 
-            if (insertError) {
-              logger.error('خطأ في إنشاء اشتراك الباقة الجديد', new Error(insertError.message), { 
+              if (insertError) {
+                logger.error('خطأ في إنشاء اشتراك الباقة الجديد', new Error(insertError.message), { 
+                  schoolId: editingSchool.id,
+                  packageId: data.package_id 
+                });
+                toast({
+                  variant: "destructive",
+                  title: "خطأ في إنشاء اشتراك الباقة",
+                  description: `فشل في إنشاء الاشتراك: ${insertError.message}`,
+                });
+                return;
+              }
+              logger.info('تم إنشاء اشتراك الباقة الجديد بنجاح', { 
                 schoolId: editingSchool.id,
                 packageId: data.package_id 
               });
-              throw new Error(`فشل في إنشاء اشتراك الباقة: ${insertError.message}`);
             }
-            logger.info('تم إنشاء اشتراك الباقة الجديد بنجاح', { 
+          } catch (packageError: any) {
+            logger.error('خطأ عام في تحديث الباقة', packageError, { 
               schoolId: editingSchool.id,
               packageId: data.package_id 
             });
+            toast({
+              variant: "destructive",
+              title: "خطأ في تحديث الباقة",
+              description: `حدث خطأ غير متوقع: ${packageError.message || packageError}`,
+            });
+            return;
           }
         }
 
         toast({
-          title: 'تم بنجاح',
-          description: 'تم تحديث المدرسة والباقة بنجاح',
+          title: 'تم التحديث بنجاح',
+          description: `تم تحديث بيانات المدرسة ${data.name} بنجاح`,
         });
       } else {
         // Create new school
@@ -462,12 +529,18 @@ const SchoolManagement = () => {
       setCitySearchQuery('');
       fetchSchools();
     } catch (error: any) {
-      handleError(error, {
-        context: 'school_management',
-        action: editingSchool ? 'update_school' : 'create_school',
-        schoolId: editingSchool?.id,
-        schoolName: data.name
+      const errorMessage = error?.message || error || 'خطأ غير محدد';
+      logger.error('خطأ في معالجة المدرسة', error, { 
+        schoolData: data,
+        editingSchool: !!editingSchool 
       });
+      toast({
+        variant: "destructive",
+        title: "خطأ في حفظ البيانات",
+        description: `حدث خطأ أثناء حفظ بيانات المدرسة: ${errorMessage}`,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -886,10 +959,23 @@ const SchoolManagement = () => {
                      )}
                    />
 
-                  <Button type="submit" className="w-full btn-elegant">
-                    <School className="h-4 w-4 ml-1" />
-                    {editingSchool ? 'تحديث المدرسة' : 'إنشاء المدرسة والحساب'}
-                  </Button>
+                   <Button 
+                     type="submit" 
+                     className="w-full btn-elegant" 
+                     disabled={isSubmitting}
+                   >
+                     {isSubmitting ? (
+                       <div className="flex items-center gap-2">
+                         <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                         {editingSchool ? "جاري التحديث..." : "جاري الإنشاء..."}
+                       </div>
+                     ) : (
+                       <>
+                         <School className="h-4 w-4 ml-1" />
+                         {editingSchool ? 'تحديث المدرسة' : 'إنشاء المدرسة والحساب'}
+                       </>
+                     )}
+                   </Button>
                 </form>
               </Form>
             </DialogContent>
