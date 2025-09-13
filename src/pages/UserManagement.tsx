@@ -608,7 +608,7 @@ const UserManagement: React.FC = () => {
 
       <div className="container mx-auto px-6 py-6 space-y-6 arabic-text">{/* Statistics Cards */}
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
           {statsCards.map((stat, index) => (
             <Card key={stat.title} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
@@ -624,12 +624,12 @@ const UserManagement: React.FC = () => {
               </CardContent>
             </Card>
           ))}
+          
+          {/* Orphaned Users Cleanup - Superadmin Only */}
+          {userProfile?.role === 'superadmin' && (
+            <OrphanedUsersCleanup />
+          )}
         </div>
-
-        {/* Orphaned Users Cleanup - Superadmin Only */}
-        {userProfile?.role === 'superadmin' && (
-          <OrphanedUsersCleanup />
-        )}
 
         {/* Filters and Search */}
         <Card>

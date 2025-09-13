@@ -81,25 +81,31 @@ export const OrphanedUsersCleanup: React.FC = () => {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          تنظيف المستخدمين المعلقين
-        </CardTitle>
-        <CardDescription>
-          فحص وحذف المستخدمين الذين لا يملكون بيانات profiles أو records في النظام
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        <div className="flex gap-2">
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-red-50">
+              <Users className="h-4 w-4 text-red-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold">تنظيف المستخدمين المعلقين</h3>
+              <p className="text-xs text-muted-foreground">
+                {scanResult?.orphanedUsersCount || 0} مستخدم معلق
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
           <Button 
             onClick={scanOrphanedUsers}
             disabled={loading}
             variant="outline"
+            size="sm"
+            className="w-full text-xs"
           >
-            {loading ? 'جاري الفحص...' : 'فحص المستخدمين المعلقين'}
+            {loading ? 'جاري الفحص...' : 'فحص'}
           </Button>
           
           {scanResult && scanResult.orphanedUsersCount > 0 && (
@@ -107,39 +113,40 @@ export const OrphanedUsersCleanup: React.FC = () => {
               onClick={() => setShowConfirmation(true)}
               disabled={loading}
               variant="destructive"
+              size="sm"
+              className="w-full text-xs"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              حذف المستخدمين المعلقين
+              <Trash2 className="h-3 w-3 mr-1" />
+              حذف ({scanResult.orphanedUsersCount})
             </Button>
           )}
         </div>
 
         {showConfirmation && scanResult && (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="border-red-200 bg-red-50 mt-3">
+            <AlertTriangle className="h-3 w-3" />
+            <AlertDescription className="text-xs">
               <div className="space-y-2">
-                <p className="font-semibold">
-                  هل أنت متأكد من حذف {scanResult.orphanedUsersCount} مستخدم معلق؟
+                <p className="font-medium">
+                  حذف {scanResult.orphanedUsersCount} مستخدم؟
                 </p>
-                <p className="text-sm text-gray-600">
-                  هذا الإجراء لا يمكن التراجع عنه وسيؤدي إلى حذف هؤلاء المستخدمين نهائياً من النظام.
-                </p>
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-1">
                   <Button 
                     onClick={deleteOrphanedUsers}
                     disabled={loading}
                     variant="destructive"
                     size="sm"
+                    className="text-xs flex-1"
                   >
-                    {loading ? 'جاري الحذف...' : 'نعم، احذف نهائياً'}
+                    {loading ? 'حذف...' : 'نعم'}
                   </Button>
                   <Button 
                     onClick={() => setShowConfirmation(false)}
                     variant="outline"
                     size="sm"
+                    className="text-xs flex-1"
                   >
-                    إلغاء
+                    لا
                   </Button>
                 </div>
               </div>
@@ -147,64 +154,13 @@ export const OrphanedUsersCleanup: React.FC = () => {
           </Alert>
         )}
 
-        {scanResult && (
-          <div className="space-y-4">
-            <Alert className={scanResult.orphanedUsersCount > 0 ? "border-yellow-200 bg-yellow-50" : "border-green-200 bg-green-50"}>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                <div className="space-y-2">
-                  <p className="font-semibold">
-                    {scanResult.orphanedUsersCount > 0 
-                      ? `تم العثور على ${scanResult.orphanedUsersCount} مستخدم معلق`
-                      : 'لا توجد مستخدمين معلقين في النظام'}
-                  </p>
-                  {scanResult.message && (
-                    <p className="text-sm">{scanResult.message}</p>
-                  )}
-                  {scanResult.deletedCount !== undefined && (
-                    <p className="text-sm text-green-600">
-                      تم حذف {scanResult.deletedCount} مستخدم بنجاح
-                    </p>
-                  )}
-                </div>
-              </AlertDescription>
-            </Alert>
-
-            {scanResult.orphanedUsers && scanResult.orphanedUsers.length > 0 && (
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-3">المستخدمين المعلقين:</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {scanResult.orphanedUsers.map((user) => (
-                    <div key={user.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                      <div>
-                        <p className="font-medium">{user.email}</p>
-                        <p className="text-xs text-gray-500">
-                          تاريخ الإنشاء: {new Date(user.created_at).toLocaleDateString('ar-EG')}
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-400">{user.id.slice(0, 8)}...</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {scanResult.errors && scanResult.errors.length > 0 && (
-              <Alert className="border-red-200 bg-red-50">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-2">
-                    <p className="font-semibold">أخطاء أثناء الحذف:</p>
-                    <ul className="text-sm space-y-1">
-                      {scanResult.errors.map((error, index) => (
-                        <li key={index} className="text-red-600">• {error}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
+        {scanResult && scanResult.deletedCount !== undefined && (
+          <Alert className="border-green-200 bg-green-50 mt-2">
+            <CheckCircle className="h-3 w-3" />
+            <AlertDescription className="text-xs text-green-600">
+              تم حذف {scanResult.deletedCount} مستخدم
+            </AlertDescription>
+          </Alert>
         )}
       </CardContent>
     </Card>
