@@ -130,7 +130,8 @@ export const ClassStudentsManager: React.FC<ClassStudentsManagerProps> = ({
           studentName: student.full_name,
           schoolName: classData.school?.name || 'مدرستنا',
           username: student.username,
-          password: password
+          password: password,
+          userType: 'student'
         }
       });
 

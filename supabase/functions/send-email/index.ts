@@ -22,12 +22,23 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { studentEmail, studentName, schoolName, username, password } = await req.json();
+    const { studentEmail, studentName, schoolName, username, password, userType = 'student' } = await req.json();
     
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
       throw new Error("RESEND_API_KEY not configured");
     }
+
+    // Function to get user type in Arabic
+    const getUserTypeArabic = (type: string) => {
+      const types = {
+        'student': 'الطالب',
+        'teacher': 'المعلم', 
+        'school_admin': 'مدير المدرسة',
+        'parent': 'الوالد'
+      };
+      return types[type as keyof typeof types] || 'الطالب';
+    };
 
     // Send email using direct fetch to Resend API
     const emailResponse = await fetch('https://api.resend.com/emails', {
@@ -37,9 +48,9 @@ serve(async (req: Request) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: `${schoolName} <onboarding@resend.dev>`,
+        from: `التقنية ببساطة <onboarding@resend.dev>`,
         to: [studentEmail],
-        subject: `مرحباً بك في ${schoolName}`,
+        subject: `أهلاً وسهلاً - مرحباً بك في التقنية ببساطة`,
         html: `
           <!DOCTYPE html>
           <html lang="ar" dir="rtl">
@@ -53,21 +64,54 @@ serve(async (req: Request) => {
               * {
                 font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
               }
+              .login-button {
+                display: inline-block;
+                padding: 15px 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 16px;
+                margin: 20px 0;
+                text-align: center;
+                transition: all 0.3s ease;
+              }
+              .login-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+              }
             </style>
           </head>
           <body style="margin: 0; padding: 0; background-color: #f5f5f5;">
             <div style="font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; padding: 20px; max-width: 600px; margin: 0 auto;">
+              
+              <!-- Logo Section -->
+              <div style="text-align: center; margin-bottom: 20px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <img src="https://swlwhjnwycvjdhgclwlx.supabase.co/storage/v1/object/public/system-audio/logo.png" alt="شعار التقنية ببساطة" style="max-width: 200px; height: auto;" />
+              </div>
+
+              <!-- Header Section -->
               <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="margin: 0; font-size: 32px; font-weight: 700; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">أهلاً وسهلاً!</h1>
-                <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">مرحباً بك في منصة ${schoolName} التعليمية</p>
+                <h1 style="margin: 0; font-size: 32px; font-weight: 700; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">أهلاً وسهلاً</h1>
               </div>
               
+              <!-- Content Section -->
               <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                <h2 style="color: #333; margin-bottom: 20px; font-size: 24px; font-weight: 600; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">عزيزي/عزيزتي ${studentName}،</h2>
+                <h2 style="color: #333; margin-bottom: 20px; font-size: 24px; font-weight: 600; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">
+                  عزيز${userType === 'student' ? 'ي' : userType === 'teacher' ? 'ي' : 'تي'} ${getUserTypeArabic(userType)} ${studentName}،
+                </h2>
                 
                 <p style="color: #555; line-height: 1.8; margin-bottom: 20px; font-size: 16px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">
-                  نرحب بك في منصة <strong style="font-weight: 700; color: #667eea;">${schoolName}</strong> التعليمية! نحن سعداء لانضمامك إلى مجتمعنا التعليمي.
+                  مرحباً بك في <strong style="font-weight: 700; color: #667eea;">التقنية ببساطة</strong>
                 </p>
+                
+                <!-- Login Button -->
+                <div style="text-align: center; margin: 25px 0;">
+                  <a href="http://www.edu-net.me" class="login-button" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; text-align: center;">
+                    تسجيل الدخول للموقع
+                  </a>
+                </div>
                 
                 ${username && password ? `
                 <div style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; border-right: 4px solid #667eea;">
@@ -78,13 +122,13 @@ serve(async (req: Request) => {
                 ` : ''}
                 
                 <p style="color: #555; line-height: 1.8; margin-top: 25px; font-size: 16px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">
-                  نتمنى لك تجربة تعليمية ممتعة ومثمرة! 🌟
+                  نتمنى لك تجربة تعليمية ممتعة ومثمرة
                 </p>
                 
                 <div style="text-align: center; margin-top: 35px; padding-top: 20px; border-top: 1px solid #eee;">
                   <p style="color: #666; font-size: 15px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; margin: 0;">
                     مع أطيب التحيات،<br>
-                    <strong style="font-weight: 700; color: #667eea;">فريق ${schoolName}</strong>
+                    <strong style="font-weight: 700; color: #667eea;">التقنية ببساطة</strong>
                   </p>
                 </div>
               </div>
