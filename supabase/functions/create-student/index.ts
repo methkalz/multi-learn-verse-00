@@ -45,22 +45,45 @@ Deno.serve(async (req) => {
     let user_id = null;
     let student_id = null;
     
-    // مع الحذف النهائي، الطالب يجب ألا يكون موجوداً
-    // Check if student already exists in this school
+    // التحقق من وجود الطالب أولاً بالبريد الإلكتروني (عالمياً، ليس فقط في المدرسة)
     if (email) {
-      const { data: existingStudent } = await supabaseAdmin
+      const { data: existingStudent, error: checkError } = await supabaseAdmin
         .from('students')
         .select('id, user_id, full_name, school_id')
         .eq('email', email)
-        .eq('school_id', school_id)
-        .single();
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking existing student:', checkError);
+        throw new Error(`Database error: ${checkError.message}`);
+      }
 
       if (existingStudent) {
-        console.log('Student already exists in this school:', existingStudent);
+        console.log('Student already exists globally:', existingStudent);
         return new Response(
           JSON.stringify({ 
-            error: 'طالب بهذا البريد الإلكتروني موجود بالفعل في هذه المدرسة',
-            success: false
+            error: `يوجد طالب بهذا البريد الإلكتروني مسبقاً: ${existingStudent.full_name}`,
+            success: false,
+            existingStudent: existingStudent
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 409,
+          }
+        );
+      }
+
+      // التحقق من وجود مستخدم في auth.users
+      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+      const existingAuthUser = existingUsers.users?.find(u => u.email === email);
+      
+      if (existingAuthUser) {
+        console.log('Auth user already exists:', existingAuthUser.id);
+        return new Response(
+          JSON.stringify({ 
+            error: 'يوجد مستخدم بهذا البريد الإلكتروني في النظام مسبقاً',
+            success: false,
+            authUserId: existingAuthUser.id
           }),
           {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
