@@ -106,18 +106,18 @@ serve(async (req: Request) => {
                   مرحباً بك في <strong style="font-weight: 700; color: #667eea;">التقنية ببساطة</strong>
                 </p>
                 
-                <!-- Login Button -->
-                <div style="text-align: center; margin: 25px 0;">
-                  <a href="http://www.edu-net.me" class="login-button" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; text-align: center;">
-                    تسجيل الدخول للموقع
-                  </a>
-                </div>
-                
                 ${username && password ? `
                 <div style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; border-right: 4px solid #667eea;">
                   <h3 style="color: #333; margin-top: 0; margin-bottom: 18px; font-size: 20px; font-weight: 600; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;">بيانات تسجيل الدخول:</h3>
                   <p style="margin: 8px 0; color: #555; font-size: 16px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;"><strong style="font-weight: 600;">البريد الإلكتروني:</strong> ${username}</p>
                   <p style="margin: 8px 0; color: #555; font-size: 16px; font-weight: 400; font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;"><strong style="font-weight: 600;">كلمة المرور:</strong> ${password}</p>
+                </div>
+                
+                <!-- Login Button -->
+                <div style="text-align: center; margin: 25px 0;">
+                  <a href="http://www.edu-net.me" class="login-button" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; text-align: center;">
+                    تسجيل الدخول للموقع
+                  </a>
                 </div>
                 ` : ''}
                 
