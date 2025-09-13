@@ -235,42 +235,80 @@ const SchoolManagement = () => {
             newPackageId: data.package_id 
           });
           
-          // Delete existing package subscription
-          const { error: deleteError } = await supabase
-            .from('school_packages')
-            .delete()
-            .eq('school_id', editingSchool.id);
+          // Check if package exists and is active
+          const { data: packageData, error: packageCheckError } = await supabase
+            .from('packages')
+            .select('id, name, is_active')
+            .eq('id', data.package_id)
+            .eq('is_active', true)
+            .single();
 
-          if (deleteError) {
-            logger.warn('خطأ في حذف اشتراك الباقة القديم', { 
-              error: deleteError.message, 
-              schoolId: editingSchool.id 
+          if (packageCheckError || !packageData) {
+            logger.error('الباقة المحددة غير موجودة أو غير نشطة', new Error(packageCheckError?.message || 'Package not found'), { 
+              packageId: data.package_id 
             });
-          } else {
-            logger.info('تم حذف اشتراك الباقة القديم بنجاح', { schoolId: editingSchool.id });
+            throw new Error('الباقة المحددة غير متاحة');
           }
 
-          // Add new package subscription
-          const { error: packageError } = await supabase
+          // Check current package subscription
+          const { data: currentPackage, error: currentPackageError } = await supabase
             .from('school_packages')
-            .insert({
-              school_id: editingSchool.id,
-              package_id: data.package_id,
-              status: 'active',
-              start_date: new Date().toISOString(),
-            });
+            .select('id, package_id')
+            .eq('school_id', editingSchool.id)
+            .maybeSingle();
 
-          if (packageError) {
-            logger.error('خطأ في إدراج اشتراك الباقة الجديد', new Error(packageError.message), { 
+          if (currentPackageError) {
+            logger.error('خطأ في فحص الباقة الحالية', new Error(currentPackageError.message), { 
+              schoolId: editingSchool.id 
+            });
+            throw new Error('فشل في فحص الباقة الحالية');
+          }
+
+          if (currentPackage) {
+            // Update existing package subscription
+            const { error: updateError } = await supabase
+              .from('school_packages')
+              .update({
+                package_id: data.package_id,
+                status: 'active',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', currentPackage.id);
+
+            if (updateError) {
+              logger.error('خطأ في تحديث اشتراك الباقة', new Error(updateError.message), { 
+                schoolId: editingSchool.id,
+                packageId: data.package_id 
+              });
+              throw new Error(`فشل في تحديث الباقة: ${updateError.message}`);
+            }
+            logger.info('تم تحديث اشتراك الباقة بنجاح', { 
               schoolId: editingSchool.id,
               packageId: data.package_id 
             });
-            throw packageError;
+          } else {
+            // Create new package subscription
+            const { error: insertError } = await supabase
+              .from('school_packages')
+              .insert({
+                school_id: editingSchool.id,
+                package_id: data.package_id,
+                status: 'active',
+                start_date: new Date().toISOString(),
+              });
+
+            if (insertError) {
+              logger.error('خطأ في إنشاء اشتراك الباقة الجديد', new Error(insertError.message), { 
+                schoolId: editingSchool.id,
+                packageId: data.package_id 
+              });
+              throw new Error(`فشل في إنشاء اشتراك الباقة: ${insertError.message}`);
+            }
+            logger.info('تم إنشاء اشتراك الباقة الجديد بنجاح', { 
+              schoolId: editingSchool.id,
+              packageId: data.package_id 
+            });
           }
-          logger.info('تم إنشاء اشتراك الباقة الجديد بنجاح', { 
-            schoolId: editingSchool.id,
-            packageId: data.package_id 
-          });
         }
 
         toast({
