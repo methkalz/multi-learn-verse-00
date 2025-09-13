@@ -78,6 +78,7 @@ import AppFooter from '@/components/shared/AppFooter';
 import { PageLoading, DataLoading } from '@/components/ui/LoadingComponents';
 import { logger } from '@/lib/logger';
 import { PinLoginDialog } from '@/components/admin/PinLoginDialog';
+import { OrphanedUsersCleanup } from '@/components/admin/OrphanedUsersCleanup';
 
 interface User {
   user_id: string;
@@ -624,6 +625,11 @@ const UserManagement: React.FC = () => {
             </Card>
           ))}
         </div>
+
+        {/* Orphaned Users Cleanup - Superadmin Only */}
+        {userProfile?.role === 'superadmin' && (
+          <OrphanedUsersCleanup />
+        )}
 
         {/* Filters and Search */}
         <Card>
