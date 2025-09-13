@@ -69,7 +69,6 @@ Deno.serve(async (req) => {
         );
       }
     }
-    }
     
     // If we reach here, create a new student (no existing student found)
     
