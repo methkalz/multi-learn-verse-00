@@ -312,28 +312,31 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
   };
 
   const handleDeleteTeacher = async (teacherId: string) => {
+    setLoading(true);
     try {
-      // Delete teacher class assignments first
-      const { error: assignError } = await supabase
-        .from('teacher_classes')
-        .delete()
-        .eq('teacher_id', teacherId);
+      // Use the secure delete-user-completely edge function
+      const { data, error } = await supabase.functions.invoke('delete-user-completely', {
+        body: {
+          userId: teacherId,
+          userType: 'teacher'
+        }
+      });
 
-      if (assignError) throw assignError;
+      if (error) {
+        logger.error('Error deleting teacher', error);
+        throw new Error(error.message || "فشل في حذف المعلم");
+      }
 
-      // Delete teacher profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('user_id', teacherId);
-
-      if (profileError) throw profileError;
+      if (!data?.success) {
+        throw new Error(data?.message || "فشل في حذف المعلم");
+      }
 
       toast({
         title: "تم حذف المعلم بنجاح",
-        description: "تم حذف المعلم وجميع التخصيصات المرتبطة به"
+        description: "تم حذف المعلم وجميع البيانات المرتبطة به من النظام"
       });
 
+      // Reload data
       loadData();
     } catch (error: any) {
       logger.error('Error deleting teacher', error as Error);
@@ -342,6 +345,8 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
         title: "خطأ في حذف المعلم",
         description: error.message
       });
+    } finally {
+      setLoading(false);
     }
   };
 
