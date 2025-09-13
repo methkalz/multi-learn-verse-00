@@ -361,6 +361,10 @@ export const ClassStudentsManager: React.FC<ClassStudentsManagerProps> = ({
   };
 
   const handleRemoveStudent = async (studentId: string, studentName: string) => {
+    if (!window.confirm(`⚠️ تحذير: هل أنت متأكد من إزالة الطالب "${studentName}" من هذا الفصل؟\n\nملاحظة: هذا سيزيل الطالب من الفصل فقط وليس من النظام كاملاً.`)) {
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('class_students')
@@ -371,8 +375,8 @@ export const ClassStudentsManager: React.FC<ClassStudentsManagerProps> = ({
       if (error) throw error;
 
       toast({
-        title: "تم إزالة الطالب",
-        description: `تم إزالة ${studentName} من الصف`
+        title: "تم إزالة الطالب من الفصل",
+        description: `تم إزالة ${studentName} من الفصل بنجاح (لا يزال مسجلاً في النظام)`
       });
 
       loadStudents();

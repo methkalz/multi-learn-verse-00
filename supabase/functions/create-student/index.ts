@@ -45,159 +45,30 @@ Deno.serve(async (req) => {
     let user_id = null;
     let student_id = null;
     
-    // Check if student already exists ANYWHERE (because email has global unique constraint)
+    // مع الحذف النهائي، الطالب يجب ألا يكون موجوداً
+    // Check if student already exists in this school
     if (email) {
       const { data: existingStudent } = await supabaseAdmin
         .from('students')
         .select('id, user_id, full_name, school_id')
         .eq('email', email)
+        .eq('school_id', school_id)
         .single();
 
       if (existingStudent) {
-        // Check if student is in the same school
-        if (existingStudent.school_id === school_id) {
-          // Student is in same school - check if profile exists
-          if (existingStudent.user_id) {
-            const { data: profile } = await supabaseAdmin
-              .from('profiles')
-              .select('user_id')
-              .eq('user_id', existingStudent.user_id)
-              .single();
-            
-            if (profile) {
-              console.log('Student already exists and is active in this school:', existingStudent);
-              return new Response(
-                JSON.stringify({ 
-                  error: 'الطالب موجود بالفعل في هذه المدرسة',
-                  success: false
-                }),
-                {
-                  headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                  status: 400,
-                }
-              );
-            }
-          }
-          // Student record exists in same school but profile was deleted - reactivate
-          console.log('Reactivating deleted student in same school:', existingStudent.id);
-          
-          // Update existing student record
-          const { data: updatedStudent, error: updateError } = await supabaseAdmin
-            .from('students')
-            .update({
-              full_name: full_name,
-              phone: phone || null,
-              user_id: null // Will be set later if user account is created
-            })
-            .eq('id', existingStudent.id)
-            .select()
-            .single();
-
-          if (updateError) {
-            console.error('Error updating existing student:', updateError);
-            throw new Error(`فشل في تحديث بيانات الطالب: ${updateError.message}`);
-          }
-
-          student_id = existingStudent.id;
-        } else {
-          // Student exists in different school - transfer to new school
-          console.log('Transferring student from another school:', existingStudent);
-          
-          // Update student's school
-          const { data: updatedStudent, error: updateError } = await supabaseAdmin
-            .from('students')
-            .update({
-              school_id: school_id,
-              full_name: full_name,
-              phone: phone || null,
-              user_id: null // Will be set later if user account is created
-            })
-            .eq('id', existingStudent.id)
-            .select()
-            .single();
-
-          if (updateError) {
-            console.error('Error transferring student:', updateError);
-            throw new Error(`فشل في نقل الطالب إلى المدرسة الجديدة: ${updateError.message}`);
-          }
-
-          student_id = existingStudent.id;
-        }
-        
-        // Continue with user account creation if needed
-        if (email && password) {
-          // Check if user account already exists
-          const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-          const existingUser = existingUsers.users?.find(u => u.email === email);
-          
-          if (existingUser) {
-            console.log('Using existing user account:', existingUser.id);
-            user_id = existingUser.id;
-            
-            // Update student record with user_id
-            await supabaseAdmin
-              .from('students')
-              .update({ user_id: user_id })
-              .eq('id', student_id);
-            
-            // Update the user's profile to include this school
-            const { error: profileError } = await supabaseAdmin
-              .from('profiles')
-              .upsert({
-                user_id: user_id,
-                role: 'student',
-                school_id: school_id,
-                full_name: full_name,
-                email: email,
-                phone: phone
-              });
-
-            if (profileError) {
-              console.error('Error updating profile:', profileError);
-            }
-          } else {
-        // Create new user account with complete metadata
-        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
-          email: email,
-          password: password,
-          email_confirm: true,
-          user_metadata: {
-            full_name: full_name,
-            role: 'student',
-            school_id: school_id
-          }
-        });
-
-            if (!userError && userData.user) {
-              user_id = userData.user.id;
-              console.log('User created successfully with student profile:', user_id);
-              
-              // Wait a moment for trigger to complete
-              await new Promise(resolve => setTimeout(resolve, 100));
-              
-              // Update student record with user_id
-              await supabaseAdmin
-                .from('students')
-                .update({ user_id: user_id })
-                .eq('id', student_id);
-            }
-          }
-        }
-
-        console.log('Student reactivated successfully:', student_id);
+        console.log('Student already exists in this school:', existingStudent);
         return new Response(
           JSON.stringify({ 
-            success: true, 
-            student_id: student_id,
-            user_id: user_id,
-            message: 'تم إعادة تنشيط الطالب بنجاح'
+            error: 'طالب بهذا البريد الإلكتروني موجود بالفعل في هذه المدرسة',
+            success: false
           }),
           {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200,
+            status: 409,
           }
         );
       }
+    }
     }
     
     // If we reach here, create a new student (no existing student found)

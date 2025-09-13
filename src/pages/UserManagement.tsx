@@ -371,6 +371,20 @@ const UserManagement: React.FC = () => {
     if (!userToDelete) return;
     
     try {
+      // Find user details first
+      const userDetails = users.find(u => u.user_id === userToDelete);
+      
+      // إذا كان المستخدم طالب، احذفه من جدول students أولاً (cascade delete سيحذف من class_students)
+      if (userDetails?.role === 'student') {
+        const { error: studentError } = await supabase
+          .from('students')
+          .delete()
+          .eq('user_id', userToDelete);
+
+        if (studentError) throw studentError;
+      }
+      
+      // Delete user profile (this will cascade to other related data)
       const { error } = await supabase
         .from('profiles')
         .delete()
@@ -379,8 +393,8 @@ const UserManagement: React.FC = () => {
       if (error) throw error;
       
       toast({
-        title: "تم حذف المستخدم",
-        description: "تم حذف المستخدم بنجاح",
+        title: "تم حذف المستخدم نهائياً",
+        description: "تم حذف المستخدم وجميع بياناته بشكل نهائي",
       });
       
       setShowDeleteDialog(false);
