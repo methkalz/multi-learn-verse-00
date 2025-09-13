@@ -26,6 +26,7 @@ import { DashboardStats, CalendarEvent } from '@/types/common';
 import { logError, logInfo } from '@/lib/logger';
 import SchoolAdminDashboard from '@/components/SchoolAdminDashboard';
 import TeacherDashboard from '@/components/TeacherDashboard';
+import { OrphanedUsersCleanup } from '@/components/admin/OrphanedUsersCleanup';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -812,6 +813,13 @@ const Dashboard = () => {
             ))}
           </div>
         </section>
+        
+        {/* Orphaned Users Cleanup - Superadmin Only */}
+        {userProfile?.role === 'superadmin' && (
+          <section className="space-y-4 animate-fade-in-up" style={{animationDelay: '400ms'}}>
+            <OrphanedUsersCleanup />
+          </section>
+        )}
       </div>
         ) : userProfile?.role === 'school_admin' ? (
           <SchoolAdminDashboard />

@@ -120,6 +120,38 @@ serve(async (req) => {
       }
     }
 
+    // Check if user already exists and handle orphaned users
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+    const existingAuthUser = existingUsers.users?.find(u => u.email === email);
+    
+    let userId: string;
+    
+    if (existingAuthUser) {
+      // Check if user has a profile or is orphaned
+      const { data: existingProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', existingAuthUser.id)
+        .single();
+
+      if (!existingProfile) {
+        // Orphaned user - delete and recreate
+        console.log('Found orphaned user, deleting and recreating...');
+        
+        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existingAuthUser.id);
+        if (deleteError) {
+          console.error('Error deleting orphaned user:', deleteError);
+        }
+      } else {
+        // User exists with profile - return error
+        console.error('Teacher with this email already exists');
+        return new Response(
+          JSON.stringify({ error: 'يوجد معلم بهذا البريد الإلكتروني مسبقاً' }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // Create user in Supabase Auth with complete metadata
     const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -141,6 +173,8 @@ serve(async (req) => {
       );
     }
 
+    userId = newUser.user.id;
+
     console.log('User created successfully with teacher profile:', newUser.user.id);
 
     // Wait a moment for trigger to complete
@@ -149,7 +183,7 @@ serve(async (req) => {
     // Assign teacher to classes if provided
     if (classIds.length > 0) {
       const teacherClassAssignments = classIds.map(classId => ({
-        teacher_id: newUser.user.id,
+        teacher_id: userId,
         class_id: classId
       }));
 

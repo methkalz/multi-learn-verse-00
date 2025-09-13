@@ -73,23 +73,43 @@ Deno.serve(async (req) => {
         );
       }
 
-      // التحقق من وجود مستخدم في auth.users
+      // التحقق من وجود مستخدم في auth.users وتنظيف المعلقين
       const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
       const existingAuthUser = existingUsers.users?.find(u => u.email === email);
       
       if (existingAuthUser) {
-        console.log('Auth user already exists:', existingAuthUser.id);
-        return new Response(
-          JSON.stringify({ 
-            error: 'يوجد مستخدم بهذا البريد الإلكتروني في النظام مسبقاً',
-            success: false,
-            authUserId: existingAuthUser.id
-          }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 409,
+        // Check if user has a profile or is orphaned
+        const { data: existingProfile } = await supabaseAdmin
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', existingAuthUser.id)
+          .single();
+
+        if (!existingProfile) {
+          // Orphaned user - delete them
+          console.log('Found orphaned auth user, deleting...');
+          
+          const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existingAuthUser.id);
+          if (deleteError) {
+            console.error('Error deleting orphaned user:', deleteError);
+          } else {
+            console.log('Orphaned user deleted successfully');
           }
-        );
+        } else {
+          // User exists with profile - return error
+          console.log('Auth user already exists with profile:', existingAuthUser.id);
+          return new Response(
+            JSON.stringify({ 
+              error: 'يوجد مستخدم بهذا البريد الإلكتروني في النظام مسبقاً',
+              success: false,
+              authUserId: existingAuthUser.id
+            }),
+            {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 409,
+            }
+          );
+        }
       }
     }
     
@@ -97,53 +117,26 @@ Deno.serve(async (req) => {
     
     // If email is provided and password is provided, create a user account
     if (email && password) {
-      // Check if user account already exists
-      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-      const existingUser = existingUsers.users?.find(u => u.email === email);
-      
-      if (existingUser) {
-        console.log('Using existing user account:', existingUser.id);
-        user_id = existingUser.id;
-        
-        // Update the user's profile to include this school
-        const { error: profileError } = await supabaseAdmin
-          .from('profiles')
-          .upsert({
-            user_id: user_id,
-            role: 'student',
-            school_id: school_id,
-            full_name: full_name,
-            email: email,
-            phone: phone
-          });
-
-        if (profileError) {
-          console.error('Error updating profile:', profileError);
+      // At this point, any orphaned users should have been cleaned up above
+      // Create new user account
+      const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
+        email: email,
+        password: password,
+        email_confirm: true,
+        user_metadata: {
+          role: 'student',
+          full_name: full_name,
+          school_id: school_id
         }
-      } else {
-        // Create new user account with complete metadata
-        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
-          email: email,
-          password: password,
-          email_confirm: true,
-          user_metadata: {
-            full_name: full_name,
-            role: 'student',
-            school_id: school_id
-          }
-        });
+      });
 
-        if (userError) {
-          console.error('Error creating user:', userError);
-          // Continue without user account if email creation fails
-        } else if (userData.user) {
-          user_id = userData.user.id;
-          console.log('User created successfully with student profile:', user_id);
-          
-          // Wait a moment for trigger to complete
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
+      if (createUserError) {
+        console.error('Error creating user:', createUserError);
+        throw new Error(`فشل في إنشاء حساب المستخدم: ${createUserError.message}`);
       }
+
+      user_id = newUser.user.id;
+      console.log('Created new user account:', user_id);
     }
 
     // Only create new student if we don't already have one
