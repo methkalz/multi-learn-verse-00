@@ -268,22 +268,39 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
             title: "تم إضافة المعلم بنجاح",
             description: `تم إضافة ${newTeacher.full_name} كمعلم جديد وإرسال بريد ترحيبي إلى ${newTeacher.email}`
           });
+          
+          // Keep the success status visible for a moment before resetting
+          setTimeout(() => {
+            setEmailStatus('idle');
+            setEmailErrorMessage('');
+            setShowAddForm(false);
+          }, 3000);
         } else {
           setEmailStatus('error');
           setEmailErrorMessage(data?.emailError || 'فشل في إرسال البريد الإلكتروني');
           toast({
             title: "تم إضافة المعلم بنجاح",
-            description: `تم إضافة ${newTeacher.full_name} كمعلم جديد ولكن فشل في إرسال البريد الإلكتروني`
+            description: `تم إضافة ${newTeacher.full_name} كمعلم جديد ولكن فشل في إرسال البريد الإلكتروني`,
+            variant: "destructive"
           });
+          
+          // Keep the form open on email error so user can see the status
+          setTimeout(() => {
+            setEmailStatus('idle');
+            setEmailErrorMessage('');
+          }, 5000);
         }
       } else {
         toast({
           title: "تم إضافة المعلم بنجاح", 
           description: `تم إضافة ${newTeacher.full_name} كمعلم جديد`
         });
+        
+        // Reset form immediately if no email was sent
+        setShowAddForm(false);
       }
 
-      // Reset form
+      // Reset form data
       setNewTeacher({
         full_name: '',
         email: '',
@@ -292,9 +309,11 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
         assigned_classes: []
       });
       setSendWelcomeEmail(true);
-      setEmailStatus('idle');
-      setEmailErrorMessage('');
-      setShowAddForm(false);
+      
+      // Only close form immediately if no email was sent or email was successful
+      if (!sendWelcomeEmail || data?.emailSent) {
+        // Form closure is handled above with setTimeout for email success
+      }
       
       // Reload data
       loadData();
@@ -627,55 +646,75 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
                 />
                 <div className="flex items-center space-x-reverse space-x-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <Label>إرسال بريد ترحيبي مع بيانات الدخول</Label>
-                </div>
-              </div>
-              
-              {/* Email Status Display */}
-              {sendWelcomeEmail && emailStatus !== 'idle' && (
-                <div className={`p-3 rounded-lg border ${
-                  emailStatus === 'sending' ? 'bg-blue-50 border-blue-200' :
-                  emailStatus === 'success' ? 'bg-green-50 border-green-200' :
-                  'bg-red-50 border-red-200'
-                }`}>
-                  <div className="flex items-center space-x-reverse space-x-2">
-                    {emailStatus === 'sending' && (
-                      <>
-                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <span className="text-sm text-blue-700 font-medium">جاري إرسال البريد الإلكتروني...</span>
-                      </>
-                    )}
-                    {emailStatus === 'success' && (
-                      <>
-                        <Check className="h-4 w-4 text-green-600" />
-                        <span className="text-sm text-green-700 font-medium">تم إرسال البريد الإلكتروني بنجاح</span>
-                      </>
-                    )}
-                    {emailStatus === 'error' && (
-                      <>
-                        <AlertCircle className="h-4 w-4 text-red-600" />
-                        <div className="text-sm text-red-700">
-                          <p className="font-medium">فشل في إرسال البريد الإلكتروني</p>
-                          {emailErrorMessage && (
-                            <p className="text-xs mt-1">{emailErrorMessage}</p>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+                 <Label>إرسال بريد ترحيبي مع بيانات الدخول</Label>
+               </div>
+             </div>
+             
+             {/* Email Status Display */}
+             {sendWelcomeEmail && emailStatus !== 'idle' && (
+               <div className={`p-4 rounded-lg border-2 transition-all duration-300 ${
+                 emailStatus === 'sending' ? 'bg-blue-50 border-blue-300 shadow-blue-100' :
+                 emailStatus === 'success' ? 'bg-green-50 border-green-300 shadow-green-100' :
+                 'bg-red-50 border-red-300 shadow-red-100'
+               } shadow-lg`}>
+                 <div className="flex items-center space-x-reverse space-x-3">
+                   {emailStatus === 'sending' && (
+                     <>
+                       <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                       <div>
+                         <p className="text-sm text-blue-700 font-medium">جاري إرسال البريد الإلكتروني...</p>
+                         <p className="text-xs text-blue-600 mt-1">يرجى الانتظار</p>
+                       </div>
+                     </>
+                   )}
+                   {emailStatus === 'success' && (
+                     <>
+                       <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
+                         <Check className="h-3 w-3 text-green-600" />
+                       </div>
+                       <div>
+                         <p className="text-sm text-green-700 font-medium">✅ تم إرسال البريد الإلكتروني بنجاح</p>
+                         <p className="text-xs text-green-600 mt-1">تم إرسال بيانات الدخول إلى المعلم</p>
+                       </div>
+                     </>
+                   )}
+                   {emailStatus === 'error' && (
+                     <>
+                       <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
+                         <AlertCircle className="h-3 w-3 text-red-600" />
+                       </div>
+                       <div className="flex-1">
+                         <p className="text-sm text-red-700 font-medium">❌ فشل في إرسال البريد الإلكتروني</p>
+                         {emailErrorMessage && (
+                           <p className="text-xs text-red-600 mt-1">{emailErrorMessage}</p>
+                         )}
+                         <p className="text-xs text-red-500 mt-2">يمكن للمعلم استخدام بيانات الدخول يدوياً</p>
+                       </div>
+                     </>
+                   )}
+                 </div>
+               </div>
+             )}
+           </div>
 
-            <div className="flex gap-3">
-              <Button 
-                onClick={handleAddTeacher}
-                disabled={loading || !newTeacher.full_name.trim() || !newTeacher.email.trim()}
-                className="flex-1"
-              >
-                <Check className="h-4 w-4 ml-1" />
-                إضافة المعلم
-              </Button>
+           <div className="flex gap-3">
+             <Button 
+               onClick={handleAddTeacher}
+               disabled={loading || !newTeacher.full_name.trim() || !newTeacher.email.trim()}
+               className="flex-1"
+             >
+               {loading ? (
+                 <>
+                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin ml-1"></div>
+                   جاري الإضافة...
+                 </>
+               ) : (
+                 <>
+                   <Check className="h-4 w-4 ml-1" />
+                   إضافة المعلم
+                 </>
+               )}
+             </Button>
               <Button 
                 variant="outline" 
                 onClick={() => setShowAddForm(false)}
