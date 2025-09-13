@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
 import { 
   Users, 
   Search, 
@@ -15,7 +18,11 @@ import {
   Mail,
   Phone,
   Calendar,
-  BookOpen
+  BookOpen,
+  Edit,
+  Trash2,
+  Save,
+  X
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -61,6 +68,124 @@ export default function StudentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [selectedGrade, setSelectedGrade] = useState<string>('all');
+  
+  // Edit student states
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    username: ''
+  });
+
+  // Handle edit student
+  const handleEditStudent = (student: Student) => {
+    setEditingStudent(student);
+    setEditForm({
+      full_name: student.full_name,
+      email: student.email || '',
+      phone: student.phone || '',
+      username: student.username || ''
+    });
+    setEditDialogOpen(true);
+  };
+
+  // Save edited student
+  const saveEditedStudent = async () => {
+    if (!editingStudent) return;
+    
+    try {
+      const { error } = await supabase
+        .from('students')
+        .update({
+          full_name: editForm.full_name,
+          email: editForm.email || null,
+          phone: editForm.phone || null,
+          username: editForm.username || null
+        })
+        .eq('id', editingStudent.id);
+
+      if (error) {
+        logger.error('Error updating student:', error);
+        toast({
+          title: "خطأ",
+          description: "فشل في تحديث بيانات الطالب",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "تم التحديث",
+        description: "تم تحديث بيانات الطالب بنجاح",
+      });
+
+      setEditDialogOpen(false);
+      setEditingStudent(null);
+      loadStudents(); // Reload the data
+      
+    } catch (error) {
+      logger.error('Error in saveEditedStudent:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء تحديث البيانات",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Handle delete student
+  const handleDeleteStudent = async (studentId: string, studentName: string) => {
+    try {
+      // First, remove student from all classes
+      const { error: classError } = await supabase
+        .from('class_students')
+        .delete()
+        .eq('student_id', studentId);
+
+      if (classError) {
+        logger.error('Error removing student from classes:', classError);
+        toast({
+          title: "خطأ",
+          description: "فشل في إزالة الطالب من الصفوف",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Then delete the student
+      const { error } = await supabase
+        .from('students')
+        .delete()
+        .eq('id', studentId);
+
+      if (error) {
+        logger.error('Error deleting student:', error);
+        toast({
+          title: "خطأ",
+          description: "فشل في حذف الطالب",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "تم الحذف",
+        description: `تم حذف الطالب ${studentName} بنجاح`,
+      });
+
+      loadStudents(); // Reload the data
+      
+    } catch (error) {
+      logger.error('Error in handleDeleteStudent:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حذف الطالب",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Load students data
   const loadStudents = async () => {
@@ -382,6 +507,7 @@ export default function StudentManagement() {
                       <TableHead className="text-right font-semibold">الهاتف</TableHead>
                       <TableHead className="text-right font-semibold">تاريخ التسجيل</TableHead>
                       <TableHead className="text-right font-semibold">الصفوف</TableHead>
+                      <TableHead className="text-center font-semibold">الإجراءات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -463,6 +589,48 @@ export default function StudentManagement() {
                             </div>
                           )}
                         </TableCell>
+                        
+                        <TableCell className="py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditStudent(student)}
+                              className="hover:bg-primary/5 hover:border-primary/40"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="hover:bg-destructive/5 hover:border-destructive/40"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    هل أنت متأكد من حذف الطالب "{student.full_name}"؟ هذا الإجراء لا يمكن التراجع عنه.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteStudent(student.id, student.full_name)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    حذف
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -471,6 +639,74 @@ export default function StudentManagement() {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit Student Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-right">تعديل بيانات الطالب</DialogTitle>
+              <DialogDescription className="text-right">
+                قم بتعديل بيانات الطالب في النموذج أدناه
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="full_name" className="text-right">الاسم الكامل</Label>
+                <Input
+                  id="full_name"
+                  value={editForm.full_name}
+                  onChange={(e) => setEditForm({...editForm, full_name: e.target.value})}
+                  className="text-right"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="username" className="text-right">اسم المستخدم</Label>
+                <Input
+                  id="username"
+                  value={editForm.username}
+                  onChange={(e) => setEditForm({...editForm, username: e.target.value})}
+                  className="text-right"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email" className="text-right">البريد الإلكتروني</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                  className="text-right"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="phone" className="text-right">رقم الهاتف</Label>
+                <Input
+                  id="phone"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                  className="text-right"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setEditDialogOpen(false)}
+              >
+                <X className="h-4 w-4 mr-2" />
+                إلغاء
+              </Button>
+              <Button
+                onClick={saveEditedStudent}
+                className="gradient-primary"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                حفظ التغييرات
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
