@@ -84,10 +84,17 @@ const SchoolClasses = () => {
 
   const loadData = async () => {
     try {
-      // Load grade levels
+      // Load available grade levels based on school package
+      let availableGrades: string[] = [];
+      
+      // Mock package check - in real app, fetch from packages table
+      availableGrades = ['10', '11', '12']; // Default to all grades for now
+
+      // Load grade levels and filter by package
       const { data: gradeLevelsData, error: gradeLevelsError } = await supabase
         .from('grade_levels')
         .select('*')
+        .in('label', availableGrades.length > 0 ? availableGrades : ['10', '11', '12'])
         .order('label');
 
       if (gradeLevelsError) throw gradeLevelsError;

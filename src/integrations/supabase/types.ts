@@ -378,6 +378,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "classes_grade_level_id_fkey"
+            columns: ["grade_level_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_assigned_grades"
+            referencedColumns: ["grade_level_id"]
+          },
+          {
             foreignKeyName: "classes_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -3939,6 +3946,39 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_content_settings: {
+        Row: {
+          allow_cross_grade_access: boolean
+          created_at: string
+          created_by: string
+          id: string
+          restrict_to_assigned_grades: boolean
+          school_id: string
+          show_all_package_content: boolean
+          updated_at: string
+        }
+        Insert: {
+          allow_cross_grade_access?: boolean
+          created_at?: string
+          created_by: string
+          id?: string
+          restrict_to_assigned_grades?: boolean
+          school_id: string
+          show_all_package_content?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allow_cross_grade_access?: boolean
+          created_at?: string
+          created_by?: string
+          id?: string
+          restrict_to_assigned_grades?: boolean
+          school_id?: string
+          show_all_package_content?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_audio_settings: {
         Row: {
           created_at: string
@@ -4019,7 +4059,23 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      teacher_assigned_grades: {
+        Row: {
+          grade_level_id: string | null
+          grade_level_label: string | null
+          school_id: string | null
+          teacher_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_rate_limit: {
@@ -4044,6 +4100,10 @@ export type Database = {
         Args: { question_id: string }
         Returns: Json
       }
+      get_school_content_settings: {
+        Args: { school_uuid: string }
+        Returns: Json
+      }
       get_students_for_school_admin: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4065,6 +4125,10 @@ export type Database = {
           school_id: string
           username: string
         }[]
+      }
+      get_teacher_assigned_grade_levels: {
+        Args: { teacher_user_id: string }
+        Returns: string[]
       }
       get_user_role: {
         Args: Record<PropertyKey, never>

@@ -39,6 +39,8 @@ import { ar } from 'date-fns/locale';
 import GradeContentViewer from '@/components/content/GradeContentViewer';
 import { TeacherDashboardStats } from '@/components/dashboard/TeacherDashboardStats';
 import { toast } from '@/hooks/use-toast';
+import { useTeacherContentAccess } from '@/hooks/useTeacherContentAccess';
+import { ContentFilterBadge } from '@/components/teacher/ContentFilterBadge';
 
 interface TeacherClass {
   id: string;

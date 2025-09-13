@@ -40,6 +40,7 @@ import AppFooter from '@/components/shared/AppFooter';
 import { useSharedLottieSettings } from '@/hooks/useSharedLottieSettings';
 import { LottieLoader } from '@/components/ui/LottieLoader';
 import { logger } from '@/lib/logger';
+import { TeacherContentSettingsForm } from '@/components/admin/TeacherContentSettingsForm';
 
 interface HeaderSettings {
   id?: string;
@@ -527,6 +528,10 @@ const SystemSettings = () => {
             <TabsTrigger value="footer" className="gap-2 text-right" dir="rtl">
               <Layout className="h-4 w-4" />
               إعدادات الفوتر
+            </TabsTrigger>
+            <TabsTrigger value="content" className="gap-2 text-right" dir="rtl">
+              <FileText className="h-4 w-4" />
+              المضامين التعليمية
             </TabsTrigger>
           </TabsList>
 
@@ -1571,6 +1576,11 @@ const SystemSettings = () => {
                 </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* تبويب إعدادات المضامين التعليمية */}
+          <TabsContent value="content" className="space-y-6 animate-fade-in" dir="rtl">
+            <TeacherContentSettingsForm />
           </TabsContent>
         </Tabs>
       </div>

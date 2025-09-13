@@ -121,13 +121,31 @@ export const ClassForm: React.FC<ClassFormProps> = ({ editingClass, onSuccess, o
 
   const loadInitialData = async () => {
     try {
-      // Load grade levels
+      // Load available grade levels based on school package
+      let availableGrades: string[] = [];
+      
+      if (userProfile?.school_id) {
+        // Mock package check - in real app, fetch from packages table
+        availableGrades = ['10', '11', '12']; // Default to all grades for now
+      }
+
+      // Load grade levels and filter by package
       const { data: gradeLevelsData, error: gradeLevelsError } = await supabase
         .from('grade_levels')
         .select('*')
+        .in('label', availableGrades.length > 0 ? availableGrades : ['10', '11', '12'])
         .order('label');
 
       if (gradeLevelsError) throw gradeLevelsError;
+      
+      if (gradeLevelsData?.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "لا توجد صفوف متاحة",
+          description: "لا توجد صفوف متاحة في الباقة النشطة لهذه المدرسة"
+        });
+      }
+      
       setGradeLevels(gradeLevelsData || []);
 
       // Load active academic years
