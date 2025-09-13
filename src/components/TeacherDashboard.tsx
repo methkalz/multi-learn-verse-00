@@ -27,7 +27,9 @@ import {
   Award,
   Target,
   Activity,
-  Bell
+  Bell,
+  Sparkles,
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,6 +39,7 @@ import { ar } from 'date-fns/locale';
 import AppHeader from '@/components/shared/AppHeader';
 import AppFooter from '@/components/shared/AppFooter';
 import GradeContentViewer from '@/components/content/GradeContentViewer';
+import { TeacherDashboardStats } from '@/components/dashboard/TeacherDashboardStats';
 import { toast } from '@/hooks/use-toast';
 
 interface TeacherClass {
@@ -86,6 +89,7 @@ const TeacherDashboard: React.FC = () => {
   const { user, userProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<TeacherStats>({
     totalClasses: 0,
     totalStudents: 0,
@@ -112,9 +116,13 @@ const TeacherDashboard: React.FC = () => {
     }
   }, [user, userProfile]);
 
-  const fetchTeacherData = async () => {
+  const fetchTeacherData = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       
       // الحصول على معرف المدرسة للمعلم
       const schoolId = userProfile?.school_id;
@@ -138,6 +146,13 @@ const TeacherDashboard: React.FC = () => {
       
       // جلب المضامين المتاحة حسب باقة المدرسة
       await fetchAvailableContents(schoolId);
+
+      if (isRefresh) {
+        toast({
+          title: "تم التحديث بنجاح",
+          description: "تم تحديث البيانات بنجاح",
+        });
+      }
       
     } catch (error) {
       logger.error('Error fetching teacher data', error as Error);
@@ -148,6 +163,7 @@ const TeacherDashboard: React.FC = () => {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -418,41 +434,6 @@ const TeacherDashboard: React.FC = () => {
     }
   };
 
-  const statsCards = [
-    {
-      title: 'صفوفي الدراسية',
-      value: stats.totalClasses.toString(),
-      icon: GraduationCap,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      gradient: 'from-blue-500 to-blue-600'
-    },
-    {
-      title: 'إجمالي الطلاب',
-      value: stats.totalStudents.toString(),
-      icon: Users,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      gradient: 'from-green-500 to-green-600'
-    },
-    {
-      title: 'المضامين المتاحة',
-      value: stats.availableContents.toString(),
-      icon: BookOpen,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      gradient: 'from-purple-500 to-purple-600'
-    },
-    {
-      title: 'الأحداث القادمة',
-      value: stats.upcomingEvents.toString(),
-      icon: Calendar,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      gradient: 'from-orange-500 to-orange-600'
-    }
-  ];
-
   const quickActions = [
     { name: 'إدارة الطلاب', icon: Users, path: '/student-management', color: 'blue' },
     { name: 'مضامين الصفوف', icon: BookOpen, path: '/content-management', color: 'green' },
@@ -462,65 +443,91 @@ const TeacherDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">جاري تحميل لوحة تحكم المعلم...</p>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/20 to-transparent animate-pulse"></div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-lg font-medium bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              جاري تحميل لوحة تحكم المعلم...
+            </p>
+            <p className="text-sm text-muted-foreground">يرجى الانتظار قليلاً</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col" dir="rtl">
       <AppHeader 
         title="لوحة تحكم المعلم" 
         showBackButton={false} 
         showLogout={true} 
       />
 
-      <main className="container mx-auto px-6 py-6 flex-1 space-y-8">
-        {/* الترحيب */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">أهلاً وسهلاً {userProfile?.full_name}</h1>
-            <p className="text-muted-foreground mt-1">
-              مرحباً بك في لوحة تحكم المعلم - إدارة صفوفك وطلابك بسهولة
-            </p>
-          </div>
-          <Button className="bg-gradient-to-r from-primary to-primary/80">
-            <Bell className="h-4 w-4 mr-2" />
-            الإشعارات
-          </Button>
-        </div>
-
-        {/* الإحصائيات */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statsCards.map((stat, index) => (
-            <Card key={index} className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+      <main className="container mx-auto px-6 py-8 flex-1 space-y-8">
+        {/* الترحيب المحسن */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 rounded-2xl -z-10"></div>
+          <div className="glass-card p-8 rounded-2xl backdrop-blur-sm border-0 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary/70 flex items-center justify-center">
+                    <Sparkles className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+                      أهلاً وسهلاً {userProfile?.full_name}
+                    </h1>
+                    <p className="text-muted-foreground">
+                      مرحباً بك في لوحة تحكم المعلم - إدارة صفوفك وطلابك بسهولة
+                    </p>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => fetchTeacherData(true)}
+                  disabled={refreshing}
+                  className="glass-card hover:shadow-lg transition-all duration-300"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                  {refreshing ? 'جاري التحديث...' : 'تحديث'}
+                </Button>
+                <Button className="bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg transition-all duration-300">
+                  <Bell className="h-4 w-4 mr-2" />
+                  الإشعارات
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* الإجراءات السريعة */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              الإجراءات السريعة
+        {/* الإحصائيات المحسنة */}
+        <TeacherDashboardStats 
+          stats={stats}
+          loading={loading}
+          refreshing={refreshing}
+          onRefresh={() => fetchTeacherData(true)}
+        />
+
+        {/* الإجراءات السريعة المحسنة */}
+        <Card className="glass-card border-0 shadow-xl animate-fade-in-up">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary to-primary/70 flex items-center justify-center">
+                <Target className="h-4 w-4 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                الإجراءات السريعة
+              </span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               الوصول السريع للأدوات والوظائف الأساسية
             </CardDescription>
           </CardHeader>
@@ -530,11 +537,11 @@ const TeacherDashboard: React.FC = () => {
                 <Button
                   key={index}
                   variant="outline"
-                  className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all duration-200"
+                  className="h-24 flex flex-col items-center justify-center gap-3 glass-card hover:shadow-lg hover:scale-105 transition-all duration-300 group"
                   onClick={() => navigate(action.path)}
                 >
-                  <action.icon className="h-6 w-6" />
-                  <span className="text-sm">{action.name}</span>
+                  <action.icon className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" />
+                  <span className="text-sm font-medium">{action.name}</span>
                 </Button>
               ))}
             </div>
@@ -542,131 +549,194 @@ const TeacherDashboard: React.FC = () => {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* صفوفي الدراسية */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5" />
-                صفوفي الدراسية
+          {/* صفوفي الدراسية المحسنة */}
+          <Card className="glass-card border-0 shadow-xl animate-fade-in-up">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                  <GraduationCap className="h-4 w-4 text-white" />
+                </div>
+                <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+                  صفوفي الدراسية
+                </span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-base">
                 الصفوف المخصصة لك والطلاب المسجلين فيها
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {myClasses.length > 0 ? (
-                myClasses.map((cls) => (
-                  <div key={cls.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div>
-                      <h4 className="font-medium">{cls.grade_level} - {cls.class_name}</h4>
-                      <p className="text-sm text-muted-foreground">{cls.academic_year}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">
-                        <Users className="h-3 w-3 mr-1" />
-                        {cls.student_count} طالب
-                      </Badge>
-                      <Button size="sm" variant="outline">
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                myClasses.map((cls, index) => (
+                  <div 
+                    key={cls.id} 
+                    className="glass-card p-4 rounded-xl hover:shadow-lg transition-all duration-300 group animate-fade-in-up"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {cls.grade_level} - {cls.class_name}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">{cls.academic_year}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                          <Users className="h-3 w-3 mr-1" />
+                          {cls.student_count} طالب
+                        </Badge>
+                        <Button size="sm" variant="outline" className="hover:shadow-md transition-all duration-200">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>لم يتم تخصيص صفوف لك بعد</p>
+                <div className="text-center py-12 space-y-4">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-primary/10 to-primary/5 flex items-center justify-center">
+                    <GraduationCap className="h-8 w-8 text-primary/50" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">لم يتم تخصيص صفوف لك بعد</p>
+                    <p className="text-sm text-muted-foreground mt-1">سيتم إشعارك عند تخصيص صفوف دراسية لك</p>
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* الأحداث القادمة */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5" />
-                الأحداث القادمة
+          {/* الأحداث القادمة المحسنة */}
+          <Card className="glass-card border-0 shadow-xl animate-fade-in-up">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center">
+                  <CalendarDays className="h-4 w-4 text-white" />
+                </div>
+                <span className="bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+                  الأحداث القادمة
+                </span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-base">
                 فعاليات ومناسبات المدرسة القادمة
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event) => (
-                  <div key={event.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                    <div className="w-3 h-3 rounded-full mt-2" style={{ backgroundColor: event.color }}></div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">{event.title}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(event.date), 'dd MMMM yyyy', { locale: ar })}
-                        {event.time && ` - ${event.time}`}
-                      </p>
-                      {event.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                      )}
+                upcomingEvents.map((event, index) => (
+                  <div 
+                    key={event.id} 
+                    className="glass-card p-4 rounded-xl hover:shadow-lg transition-all duration-300 animate-fade-in-up"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div 
+                        className="w-4 h-4 rounded-full mt-2 shadow-lg" 
+                        style={{ backgroundColor: event.color }}
+                      ></div>
+                      <div className="flex-1 space-y-1">
+                        <h4 className="font-semibold text-foreground">{event.title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(event.date), 'dd MMMM yyyy', { locale: ar })}
+                          {event.time && ` - ${event.time}`}
+                        </p>
+                        {event.description && (
+                          <p className="text-sm text-muted-foreground/80">{event.description}</p>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="bg-secondary/50 border-secondary">
+                        {event.type}
+                      </Badge>
                     </div>
-                    <Badge variant="outline">{event.type}</Badge>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>لا توجد أحداث قادمة</p>
+                <div className="text-center py-12 space-y-4">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-orange-500/10 to-orange-500/5 flex items-center justify-center">
+                    <Calendar className="h-8 w-8 text-orange-500/50" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">لا توجد أحداث قادمة</p>
+                    <p className="text-sm text-muted-foreground mt-1">سيتم إضافة الأحداث الجديدة هنا</p>
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* الطلاب الجدد */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5" />
-              آخر الطلاب المسجلين
+        {/* الطلاب الجدد المحسن */}
+        <Card className="glass-card border-0 shadow-xl animate-fade-in-up">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center">
+                <UserCheck className="h-4 w-4 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
+                آخر الطلاب المسجلين
+              </span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               الطلاب الذين تم تسجيلهم مؤخراً في صفوفك
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentStudents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {recentStudents.map((student) => (
-                  <div key={student.id} className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Users className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">{student.full_name}</h4>
-                      <p className="text-sm text-muted-foreground">@{student.username}</p>
+                {recentStudents.map((student, index) => (
+                  <div 
+                    key={student.id} 
+                    className="glass-card p-4 rounded-xl hover:shadow-lg transition-all duration-300 group animate-fade-in-up"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {student.full_name}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">@{student.username}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>لا توجد طلاب مسجلين في صفوفك</p>
+              <div className="text-center py-12 space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-green-500/10 to-green-500/5 flex items-center justify-center">
+                  <Users className="h-8 w-8 text-green-500/50" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">لا توجد طلاب مسجلين في صفوفك</p>
+                  <p className="text-sm text-muted-foreground mt-1">سيظهر الطلاب الجدد هنا عند تسجيلهم</p>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* المضامين المتاحة */}
+        {/* المضامين المتاحة المحسنة */}
         {schoolPackageContents.length > 0 && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <BookMarked className="h-7 w-7" />
-                المضامين التعليمية المتاحة
-              </h2>
-              <Badge variant="secondary" className="gap-1">
-                <span>{stats.availableContents}</span>
-                <span>عنصر متاح</span>
-              </Badge>
+          <div className="space-y-8 animate-fade-in-up">
+            <div className="glass-card p-6 rounded-2xl border-0 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
+                    <BookMarked className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent">
+                      المضامين التعليمية المتاحة
+                    </h2>
+                    <p className="text-muted-foreground">استكشف المواد التعليمية المتاحة لمدرستك</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200 px-4 py-2">
+                  <span className="font-semibold">{stats.availableContents}</span>
+                  <span className="mr-1">عنصر متاح</span>
+                </Badge>
+              </div>
             </div>
             
             {schoolPackageContents.includes('grade10') && availableContents.grade10.length > 0 && (
