@@ -88,7 +88,7 @@ serve(async (req: Request) => {
               
               <!-- Logo Section -->
               <div style="text-align: center; margin-bottom: 20px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <img src="https://swlwhjnwycvjdhgclwlx.supabase.co/storage/v1/object/public/system-audio/logo.png" alt="شعار التقنية ببساطة" style="max-width: 200px; height: auto;" />
+                <img src="https://edu-net.me/logo-mail.png" alt="شعار التقنية ببساطة" style="max-width: 200px; height: auto;" />
               </div>
 
               <!-- Header Section -->
