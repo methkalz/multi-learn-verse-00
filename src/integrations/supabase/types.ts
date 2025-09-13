@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_access_pins: {
+        Row: {
+          created_at: string
+          expires_at: string
+          generated_by: string
+          id: string
+          is_used: boolean
+          pin_code: string
+          target_user_id: string
+          updated_at: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          generated_by: string
+          id?: string
+          is_used?: boolean
+          pin_code: string
+          target_user_id: string
+          updated_at?: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          generated_by?: string
+          id?: string
+          is_used?: boolean
+          pin_code?: string
+          target_user_id?: string
+          updated_at?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -3995,6 +4031,10 @@ export type Database = {
           window_minutes?: number
         }
         Returns: boolean
+      }
+      cleanup_expired_pins: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       cleanup_expired_quiz_sessions: {
         Args: Record<PropertyKey, never>

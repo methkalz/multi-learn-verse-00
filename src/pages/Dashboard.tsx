@@ -58,6 +58,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import AppFooter from '@/components/shared/AppFooter';
 import { PageLoading } from '@/components/ui/LoadingComponents';
+import { AdminAccessBanner } from '@/components/admin/AdminAccessBanner';
 
 /**
  * Dashboard Component Implementation
@@ -430,7 +431,11 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pattern-dots flex flex-col" dir="rtl">{/* Modern Header مع الإعدادات المخصصة والتأثيرات */}
+    <div className="min-h-screen bg-background pattern-dots flex flex-col" dir="rtl">
+      {/* Admin Access Banner */}
+      <AdminAccessBanner />
+      
+      {/* Modern Header مع الإعدادات المخصصة والتأثيرات */}
       <header 
         className={`glass-card sticky top-0 z-50 soft-shadow ${
           dashboardHeaderSettings.enable_glass_effect ? 'backdrop-blur supports-[backdrop-filter]:bg-background/60' : ''

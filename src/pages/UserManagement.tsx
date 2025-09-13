@@ -68,7 +68,8 @@ import {
   XCircle,
   Trash,
   UserMinus,
-  Award
+  Award,
+  LogIn
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -76,6 +77,7 @@ import AppHeader from '@/components/shared/AppHeader';
 import AppFooter from '@/components/shared/AppFooter';
 import { PageLoading, DataLoading } from '@/components/ui/LoadingComponents';
 import { logger } from '@/lib/logger';
+import { PinLoginDialog } from '@/components/admin/PinLoginDialog';
 
 interface User {
   user_id: string;
@@ -135,6 +137,8 @@ const UserManagement: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [showPinLoginDialog, setShowPinLoginDialog] = useState(false);
+  const [selectedUserForPin, setSelectedUserForPin] = useState<User | null>(null);
   const [editUserData, setEditUserData] = useState<{
     user_id: string;
     full_name: string;
@@ -764,30 +768,44 @@ const UserManagement: React.FC = () => {
                              نشط
                            </Badge>
                          </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setShowUserDetails(true);
-                              }}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleUserAction('delete', user.user_id)}
-                              className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
-                              disabled={user.role === 'superadmin'}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                         <TableCell>
+                           <div className="flex items-center justify-center gap-1">
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => {
+                                 setSelectedUser(user);
+                                 setShowUserDetails(true);
+                               }}
+                               className="h-8 w-8 p-0"
+                               title="عرض التفاصيل"
+                             >
+                               <Eye className="h-4 w-4" />
+                             </Button>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => {
+                                 setSelectedUserForPin(user);
+                                 setShowPinLoginDialog(true);
+                               }}
+                               className="text-blue-600 hover:text-blue-700 h-8 w-8 p-0"
+                               title="الدخول للحساب"
+                             >
+                               <LogIn className="h-4 w-4" />
+                             </Button>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => handleUserAction('delete', user.user_id)}
+                               className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                               disabled={user.role === 'superadmin'}
+                               title="حذف المستخدم"
+                             >
+                               <Trash2 className="h-4 w-4" />
+                             </Button>
+                           </div>
+                         </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -1232,6 +1250,13 @@ const UserManagement: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* PIN Login Dialog */}
+      <PinLoginDialog
+        open={showPinLoginDialog}
+        onOpenChange={setShowPinLoginDialog}
+        targetUser={selectedUserForPin}
+      />
       
       <AppFooter />
     </div>
