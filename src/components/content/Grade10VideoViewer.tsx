@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Video, Play, Search, Calendar, Eye } from 'lucide-react';
+import { Video, Play, Search, Calendar, Eye, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface Grade10Video {
@@ -29,6 +30,8 @@ interface Grade10VideoViewerProps {
 
 const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedVideo, setSelectedVideo] = useState<Grade10Video | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   const filteredVideos = videos.filter(video =>
     video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,8 +59,9 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
     return match ? match[1] : null;
   };
 
-  const openVideo = (videoUrl: string) => {
-    window.open(videoUrl, '_blank');
+  const openVideo = (video: Grade10Video) => {
+    setSelectedVideo(video);
+    setIsVideoModalOpen(true);
   };
 
   const formatDate = (dateString: string): string => {
@@ -72,10 +76,50 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
     const labels = {
       youtube: 'يوتيوب',
       vimeo: 'فيميو',
-      direct: 'رابط مباشر',
-      embedded: 'مدمج'
+      direct: 'رابط مباشر'
     };
     return labels[sourceType as keyof typeof labels] || sourceType;
+  };
+
+  const renderVideoPlayer = (video: Grade10Video) => {
+    if (video.source_type === 'youtube') {
+      const videoId = extractYouTubeId(video.video_url);
+      if (videoId) {
+        return (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}`}
+            className="w-full h-96 rounded-lg"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        );
+      }
+    }
+    
+    if (video.source_type === 'direct') {
+      return (
+        <video
+          src={video.video_url}
+          controls
+          className="w-full h-96 rounded-lg"
+        >
+          متصفحك لا يدعم تشغيل الفيديو
+        </video>
+      );
+    }
+
+    // For Google Drive and other links
+    return (
+      <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center">
+        <div className="text-center">
+          <Video className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground mb-4">لا يمكن عرض هذا الفيديو مباشرة</p>
+          <Button onClick={() => window.open(video.video_url, '_blank')}>
+            فتح في صفحة جديدة
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -151,7 +195,7 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
                   <Button
                     size="lg"
                     className="bg-white/20 hover:bg-white/30 text-white border-white/50"
-                    onClick={() => openVideo(video.video_url)}
+                    onClick={() => openVideo(video)}
                   >
                     <Play className="h-6 w-6 mr-2" />
                     مشاهدة
@@ -197,7 +241,7 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
 
                 <Button 
                   className="w-full" 
-                  onClick={() => openVideo(video.video_url)}
+                  onClick={() => openVideo(video)}
                 >
                   <Play className="h-4 w-4 mr-2" />
                   مشاهدة الفيديو
@@ -207,6 +251,25 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
           ))}
         </div>
       )}
+
+      {/* Video Modal */}
+      <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="text-right">
+              {selectedVideo?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedVideo && renderVideoPlayer(selectedVideo)}
+            {selectedVideo?.description && (
+              <p className="text-muted-foreground text-right">
+                {selectedVideo.description}
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
