@@ -222,7 +222,7 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
               <div>
                 <DialogTitle className="text-xl">المشروع النهائي: {project.title}</DialogTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  آخر حفظ: {lastSaved ? lastSaved.toLocaleTimeString('ar-SA') : 'لم يتم الحفظ'}
+                  آخر حفظ: {lastSaved ? lastSaved.toLocaleTimeString('en-US') : 'لم يتم الحفظ'}
                   {isAutoSaving && <span className="text-blue-600 ml-2">جاري الحفظ...</span>}
                 </p>
               </div>
@@ -331,14 +331,14 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
               <span>
-                آخر تحديث: {new Date(project.updated_at).toLocaleString('ar-SA')}
+                آخر تحديث: {new Date(project.updated_at).toLocaleString('en-US')}
               </span>
             </div>
             {project.due_date && (
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  موعد التسليم: {new Date(project.due_date).toLocaleDateString('ar-SA')}
+                  موعد التسليم: {new Date(project.due_date).toLocaleDateString('en-US')}
                 </span>
               </div>
             )}

@@ -109,7 +109,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
           id: `v_${Date.now()}`,
           content,
           timestamp: new Date().toISOString(),
-          changes: `تحديث تلقائي - ${new Date().toLocaleTimeString('ar-EG')}`
+          changes: `تحديث تلقائي - ${new Date().toLocaleTimeString('en-US')}`
         };
         setVersions(prev => [newVersion, ...prev.slice(0, 9)]); // Keep last 10 versions
         
@@ -210,7 +210,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
         id: `v_${Date.now()}`,
         content,
         timestamp: new Date().toISOString(),
-        changes: `حفظ يدوي - ${new Date().toLocaleTimeString('ar-EG')}`
+        changes: `حفظ يدوي - ${new Date().toLocaleTimeString('en-US')}`
       };
       setVersions(prev => [newVersion, ...prev.slice(0, 9)]);
       
@@ -266,7 +266,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
     setContent(version.content);
     toast({
       title: "تم استرداد النسخة",
-      description: `تم استرداد النسخة من ${new Date(version.timestamp).toLocaleString('ar-EG')}`
+      description: `تم استرداد النسخة من ${new Date(version.timestamp).toLocaleString('en-US')}`
     });
   };
 
@@ -467,7 +467,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
                                 )}
                                 {task.completed_at && (
                                   <p className="text-xs text-green-600 mt-2">
-                                    تم الإنجاز: {new Date(task.completed_at).toLocaleString('ar-EG')}
+                                    تم الإنجاز: {new Date(task.completed_at).toLocaleString('en-US')}
                                   </p>
                                 )}
                               </div>
@@ -519,7 +519,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
                                 </Badge>
                               </div>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(comment.timestamp).toLocaleString('ar-EG')}
+                                {new Date(comment.timestamp).toLocaleString('en-US')}
                               </span>
                             </div>
                             <p className="text-sm">{comment.text}</p>
@@ -572,7 +572,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
                               </div>
                               <p className="text-sm text-muted-foreground mb-2">{version.changes}</p>
                               <p className="text-xs text-muted-foreground">
-                                {new Date(version.timestamp).toLocaleString('ar-EG')}
+                                {new Date(version.timestamp).toLocaleString('en-US')}
                               </p>
                             </div>
                             <div className="flex gap-2">
@@ -698,20 +698,20 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
                         <div className="flex justify-between">
                           <span>تاريخ الإنشاء:</span>
                           <span className="font-medium">
-                            {new Date(project.created_at).toLocaleDateString('ar-EG')}
+            {new Date(project.created_at).toLocaleDateString('en-US')}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span>آخر تحديث:</span>
                           <span className="font-medium">
-                            {lastSaved ? lastSaved.toLocaleString('ar-EG') : 'لم يحفظ بعد'}
+                            {lastSaved ? lastSaved.toLocaleString('en-US') : 'لم يحفظ بعد'}
                           </span>
                         </div>
                         {project.due_date && (
                           <div className="flex justify-between">
                             <span>موعد التسليم:</span>
                             <span className="font-medium">
-                              {new Date(project.due_date).toLocaleDateString('ar-EG')}
+              {new Date(project.due_date).toLocaleDateString('en-US')}
                             </span>
                           </div>
                         )}
@@ -778,12 +778,12 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
               {project.due_date && (
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  <span>موعد التسليم: {new Date(project.due_date).toLocaleDateString('ar-EG')}</span>
+                  <span>موعد التسليم: {new Date(project.due_date).toLocaleDateString('en-US')}</span>
                 </div>
               )}
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                <span>تم الإنشاء: {new Date(project.created_at).toLocaleDateString('ar-EG')}</span>
+                <span>تم الإنشاء: {new Date(project.created_at).toLocaleDateString('en-US')}</span>
               </div>
             </div>
             
@@ -791,7 +791,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
               {lastSaved && (
                 <div className="flex items-center gap-1">
                   <CheckCircle className="h-3 w-3 text-green-600" />
-                  <span>آخر حفظ: {lastSaved.toLocaleTimeString('ar-EG')}</span>
+                  <span>آخر حفظ: {lastSaved.toLocaleTimeString('en-US')}</span>
                 </div>
               )}
               <div className="flex items-center gap-1">
