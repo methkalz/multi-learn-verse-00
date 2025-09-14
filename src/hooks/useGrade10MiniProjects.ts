@@ -61,6 +61,12 @@ export const useGrade10MiniProjects = () => {
 
   // إنشاء المهام الافتراضية الثابتة
   const createDefaultTasks = async (projectId: string) => {
+    console.log('Creating default tasks for project:', projectId);
+    
+    if (!userProfile?.user_id) {
+      throw new Error('User profile is required to create tasks');
+    }
+
     const defaultTasks = [
       { title: 'إنشاء صفحة البداية', order_index: 1 },
       { title: 'اختيار موضوع والشرح عنه', order_index: 2 },
@@ -74,49 +80,91 @@ export const useGrade10MiniProjects = () => {
       title: task.title,
       description: '',
       order_index: task.order_index,
-      created_by: userProfile!.user_id,
+      created_by: userProfile.user_id,
       is_completed: false
     }));
 
-    const { error } = await supabase
-      .from('grade10_project_tasks')
-      .insert(tasksToInsert);
+    console.log('Inserting tasks:', tasksToInsert);
 
-    if (error) throw error;
+    const { data, error } = await supabase
+      .from('grade10_project_tasks')
+      .insert(tasksToInsert)
+      .select();
+
+    if (error) {
+      console.error('Error creating default tasks:', error);
+      throw error;
+    }
+
+    console.log('Default tasks created successfully:', data);
+    return data;
   };
 
   // إنشاء مشروع جديد
   const createProject = async (projectData: ProjectFormData) => {
+    console.log('Creating project with data:', projectData);
+    console.log('User profile:', userProfile);
+    
     try {
       if (!userProfile?.user_id || !userProfile?.school_id) {
+        console.error('Missing user profile data:', { userProfile });
         toast.error('يجب تسجيل الدخول أولاً');
         return;
       }
 
-      const { data, error } = await supabase
+      // إنشاء المشروع
+      const projectPayload = {
+        ...projectData,
+        student_id: userProfile.user_id,
+        school_id: userProfile.school_id,
+        status: 'draft' as const,
+        content: '',
+        progress_percentage: 0
+      };
+
+      console.log('Creating project with payload:', projectPayload);
+
+      const { data: newProject, error: projectError } = await supabase
         .from('grade10_mini_projects')
-        .insert({
-          ...projectData,
-          student_id: userProfile.user_id,
-          school_id: userProfile.school_id,
-          status: 'draft' as const,
-          content: '',
-          progress_percentage: 0
-        })
+        .insert(projectPayload)
         .select()
         .single();
 
-      if (error) throw error;
+      if (projectError) {
+        console.error('Error creating project:', projectError);
+        throw projectError;
+      }
+
+      console.log('Project created successfully:', newProject);
 
       // إنشاء المهام الافتراضية للمشروع الجديد
-      await createDefaultTasks(data.id);
+      try {
+        await createDefaultTasks(newProject.id);
+        console.log('Default tasks created successfully for project:', newProject.id);
+      } catch (tasksError) {
+        console.error('Error creating default tasks, will try to delete project:', tasksError);
+        
+        // إذا فشل إنشاء المهام، حذف المشروع لتجنب البيانات غير المكتملة
+        try {
+          await supabase
+            .from('grade10_mini_projects')
+            .delete()
+            .eq('id', newProject.id);
+          console.log('Project deleted due to tasks creation failure');
+        } catch (deleteError) {
+          console.error('Error deleting project after tasks failure:', deleteError);
+        }
+        
+        throw new Error('فشل في إنشاء المهام الافتراضية للمشروع');
+      }
       
-      setProjects(prev => [(data as Grade10MiniProject), ...prev]);
+      setProjects(prev => [(newProject as Grade10MiniProject), ...prev]);
       toast.success('تم إنشاء المشروع بنجاح');
-      return data;
+      return newProject;
     } catch (error) {
       console.error('Error creating project:', error);
       toast.error('حدث خطأ في إنشاء المشروع');
+      throw error;
     }
   };
 
