@@ -16,10 +16,10 @@ export const useSmartPageBreak = ({
   initialContent = '',
   linesPerPage = 35
 }: UseSmartPageBreakOptions = {}) => {
-  // A4 dimensions and line calculations
-  const A4_PAGE_HEIGHT = 950; // Usable height in pixels
-  const LINE_HEIGHT = 27; // 16px font * 1.8 line-height ≈ 27px
-  const MAX_LINES_PER_PAGE = linesPerPage;
+  // A4 dimensions and line calculations with Word-like margins
+  const A4_PAGE_HEIGHT = 760; // Reduced usable height due to 95px margins on top/bottom (950 - 190)
+  const LINE_HEIGHT = 26; // 16px font * 1.6 line-height ≈ 26px
+  const MAX_LINES_PER_PAGE = Math.floor(linesPerPage * 0.85); // Reduced to ~30 lines for safety
   
   const [pages, setPages] = useState<Page[]>([
     { id: 'page-1', content: initialContent }
@@ -139,7 +139,7 @@ export const useSmartPageBreak = ({
       clearTimeout(debounceTimer.current);
     }
 
-    // Debounce check by 300ms
+    // Debounce check by 200ms for faster response
     debounceTimer.current = setTimeout(() => {
       const pageIndex = pages.findIndex(p => p.id === pageId);
       const isLastPage = pageIndex === pages.length - 1;
@@ -155,7 +155,7 @@ export const useSmartPageBreak = ({
           moveOverflowContent(element, newPageId);
         }
       }
-    }, 300);
+    }, 200);
   }, [pages, needsPageBreak, addPage, moveOverflowContent]);
 
   // Load initial content with page breaks

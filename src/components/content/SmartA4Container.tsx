@@ -101,28 +101,25 @@ export const SmartA4Container: React.FC<SmartA4ContainerProps> = ({
 
           {/* Editable content area */}
           <div
-            contentEditable={!readOnly && index === pages.length - 1}
+            contentEditable={!readOnly}
             suppressContentEditableWarning={true}
             onInput={(e) => handleInput(e, page.id)}
             onPaste={handlePaste}
             onKeyDown={(e) => handleKeyDown(e, page.id)}
-            className={`
-              w-full outline-none p-10 transition-colors duration-200
-              ${readOnly || index < pages.length - 1 ? 'cursor-default bg-gray-50' : 'cursor-text'}
-              ${index === pages.length - 1 ? 'focus:bg-white focus:ring-2 focus:ring-primary/20' : ''}
-            `}
+            className="w-full outline-none cursor-text transition-colors duration-200 focus:bg-white focus:ring-2 focus:ring-primary/20"
             style={{
               height: `${A4_PAGE_HEIGHT}px`,
               maxHeight: `${A4_PAGE_HEIGHT}px`,
+              padding: '95px', // 2.5cm margins like Word
               wordWrap: 'break-word',
               hyphens: 'auto',
               direction: 'rtl',
               textAlign: 'right',
               fontSize: '16px',
-              lineHeight: '1.8', // Consistent line height for calculations
+              lineHeight: '1.6', // Reduced for better line calculation
               fontFamily: '"Times New Roman", serif',
               overflow: 'hidden',
-              paddingTop: '50px',
+              boxSizing: 'border-box'
             }}
             dangerouslySetInnerHTML={{ __html: page.content }}
           />
@@ -139,6 +136,7 @@ export const SmartA4Container: React.FC<SmartA4ContainerProps> = ({
         .a4-page {
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          background: white !important;
         }
         
         .a4-page:hover {
