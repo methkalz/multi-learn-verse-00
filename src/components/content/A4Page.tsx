@@ -16,6 +16,7 @@ interface A4PageProps {
   readOnly?: boolean;
   onInput: (content: string) => void;
   onFocus: () => void;
+  onPageRef?: (element: HTMLDivElement | null) => void;
 }
 
 const A4Page: React.FC<A4PageProps> = ({
@@ -25,7 +26,8 @@ const A4Page: React.FC<A4PageProps> = ({
   isActive,
   readOnly = false,
   onInput,
-  onFocus
+  onFocus,
+  onPageRef
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +36,18 @@ const A4Page: React.FC<A4PageProps> = ({
       contentRef.current.innerHTML = page.content;
     }
   }, [page.content]);
+
+  // Register page ref with parent
+  useEffect(() => {
+    if (onPageRef && contentRef.current) {
+      onPageRef(contentRef.current);
+    }
+    return () => {
+      if (onPageRef) {
+        onPageRef(null);
+      }
+    };
+  }, [onPageRef]);
 
   const handleInput = () => {
     if (contentRef.current && !readOnly) {

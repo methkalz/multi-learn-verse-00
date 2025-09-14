@@ -55,36 +55,83 @@ export const useA4PageSystem = ({
     });
   }, []);
 
-  const calculateLines = (element: HTMLElement): number => {
-    const computedStyle = window.getComputedStyle(element);
-    const lineHeight = parseInt(computedStyle.lineHeight) || LINE_HEIGHT;
-    const contentHeight = element.scrollHeight;
-    return Math.ceil(contentHeight / lineHeight);
-  };
-
   const needsPageBreak = (element: HTMLElement): boolean => {
-    const lines = calculateLines(element);
-    return lines > MAX_LINES_PER_PAGE;
+    // Temporarily remove overflow hidden to get accurate scroll height
+    const originalOverflow = element.style.overflow;
+    element.style.overflow = 'visible';
+    
+    const contentHeight = element.scrollHeight;
+    const availableHeight = USABLE_HEIGHT; // 931px
+    
+    // Restore original overflow
+    element.style.overflow = originalOverflow;
+    
+    const isOverflowing = contentHeight > availableHeight;
+    
+    console.log('Page overflow check:', {
+      contentHeight,
+      availableHeight,
+      isOverflowing,
+      element: element.textContent?.substring(0, 50) + '...'
+    });
+    
+    return isOverflowing;
   };
 
   const moveOverflowContent = (sourceElement: HTMLElement, targetPageId: string): string => {
-    const sourceText = sourceElement.innerText || '';
-    const words = sourceText.split(/\s+/);
+    const sourceText = sourceElement.innerHTML || '';
     
-    // Estimate how many words fit in one page
-    const wordsPerLine = 8; // Conservative estimate for Arabic/English
-    const maxWordsPerPage = MAX_LINES_PER_PAGE * wordsPerLine;
-    
-    if (words.length <= maxWordsPerPage) {
+    // If content fits, no need to move anything
+    if (!needsPageBreak(sourceElement)) {
       return '';
     }
-
-    // Split content
-    const keepWords = words.slice(0, maxWordsPerPage);
-    const moveWords = words.slice(maxWordsPerPage);
+    
+    // Use a more sophisticated approach to split content
+    // Start by trying to split at natural breaks (paragraphs, sentences)
+    const textContent = sourceElement.textContent || '';
+    const words = textContent.split(/\s+/);
+    
+    // Binary search to find the optimal split point
+    let low = 0;
+    let high = words.length;
+    let bestSplit = Math.floor(words.length * 0.7); // Start at 70% as estimate
+    
+    while (low < high - 1) {
+      const mid = Math.floor((low + high) / 2);
+      const testContent = words.slice(0, mid).join(' ');
+      
+      // Create a temporary test element
+      const testElement = sourceElement.cloneNode(true) as HTMLElement;
+      testElement.innerHTML = testContent;
+      testElement.style.position = 'absolute';
+      testElement.style.visibility = 'hidden';
+      testElement.style.top = '-9999px';
+      document.body.appendChild(testElement);
+      
+      const fits = !needsPageBreak(testElement);
+      document.body.removeChild(testElement);
+      
+      if (fits) {
+        bestSplit = mid;
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+    
+    // Split the content
+    const keepWords = words.slice(0, bestSplit);
+    const moveWords = words.slice(bestSplit);
     
     // Update source content
     sourceElement.innerHTML = keepWords.join(' ');
+    
+    console.log('Content split:', {
+      originalWords: words.length,
+      keepWords: keepWords.length,
+      moveWords: moveWords.length,
+      splitPoint: bestSplit
+    });
     
     // Return overflow content
     return moveWords.join(' ');
@@ -113,9 +160,10 @@ export const useA4PageSystem = ({
     // Update content first
     updatePageContent(pageId, content);
 
-    // Check for overflow after a short delay
+    // Check for overflow after a delay to allow DOM to update
     setTimeout(() => {
       if (needsPageBreak(pageElement)) {
+        console.log('Page overflow detected, creating new page...');
         isUpdating.current = true;
         
         // Create new page
@@ -124,11 +172,17 @@ export const useA4PageSystem = ({
         // Move overflow content
         const overflowContent = moveOverflowContent(pageElement, newPageId);
         
-        if (overflowContent) {
+        if (overflowContent.trim()) {
           // Update both pages
-          const sourceContent = pageElement.innerText || '';
+          const sourceContent = pageElement.innerHTML || '';
           updatePageContent(pageId, sourceContent);
           updatePageContent(newPageId, overflowContent);
+          
+          console.log('Content moved to new page:', {
+            sourcePageId: pageId,
+            newPageId: newPageId,
+            overflowLength: overflowContent.length
+          });
         }
         
         isUpdating.current = false;
@@ -139,7 +193,7 @@ export const useA4PageSystem = ({
           deleteLastPageIfEmpty();
         }
       }
-    }, 100);
+    }, 300); // Increased delay for better accuracy
   }, [pages, updatePageContent, addPage, deleteLastPageIfEmpty]);
 
   const registerPageRef = useCallback((pageId: string, element: HTMLElement | null) => {

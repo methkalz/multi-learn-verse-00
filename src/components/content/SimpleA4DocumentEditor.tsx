@@ -44,7 +44,8 @@ const SimpleA4DocumentEditor: React.FC<SimpleA4DocumentEditorProps> = ({
     deleteLastPageIfEmpty,
     getTotalContent,
     focusPage,
-    handlePageInput
+    handlePageInput,
+    registerPageRef
   } = useA4PageSystem({
     initialContent,
     onContentChange: (content, pageCount) => {
@@ -173,6 +174,7 @@ const SimpleA4DocumentEditor: React.FC<SimpleA4DocumentEditorProps> = ({
               readOnly={readOnly}
               onInput={(content) => handlePageInput(page.id, content)}
               onFocus={() => focusPage(index)}
+              onPageRef={(element) => registerPageRef(page.id, element)}
             />
           ))}
         </div>
