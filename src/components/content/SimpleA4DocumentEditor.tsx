@@ -39,12 +39,11 @@ const SimpleA4DocumentEditor: React.FC<SimpleA4DocumentEditorProps> = ({
   const {
     pages,
     currentPageIndex,
-    addPage,
     updatePageContent,
-    deleteLastPageIfEmpty,
     getTotalContent,
     focusPage,
     handlePageInput,
+    handleLargePaste,
     registerPageRef
   } = useA4PageSystem({
     initialContent,
@@ -175,6 +174,7 @@ const SimpleA4DocumentEditor: React.FC<SimpleA4DocumentEditorProps> = ({
               onInput={(content) => handlePageInput(page.id, content)}
               onFocus={() => focusPage(index)}
               onPageRef={(element) => registerPageRef(page.id, element)}
+              onPaste={(content) => handleLargePaste(page.id, content)}
             />
           ))}
         </div>

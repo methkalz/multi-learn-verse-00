@@ -17,6 +17,7 @@ interface A4PageProps {
   onInput: (content: string) => void;
   onFocus: () => void;
   onPageRef?: (element: HTMLDivElement | null) => void;
+  onPaste?: (content: string) => void;
 }
 
 const A4Page: React.FC<A4PageProps> = ({
@@ -27,15 +28,37 @@ const A4Page: React.FC<A4PageProps> = ({
   readOnly = false,
   onInput,
   onFocus,
-  onPageRef
+  onPageRef,
+  onPaste
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (contentRef.current && contentRef.current.innerHTML !== page.content) {
-      contentRef.current.innerHTML = page.content;
+    if (contentRef.current && contentRef.current.textContent !== page.content) {
+      const selection = window.getSelection();
+      const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      const cursorOffset = range ? range.startOffset : 0;
+      
+      contentRef.current.textContent = page.content;
+      
+      // Restore cursor position if page is active
+      if (isActive && range) {
+        try {
+          const newRange = document.createRange();
+          const textNode = contentRef.current.firstChild;
+          if (textNode) {
+            const offset = Math.min(cursorOffset, textNode.textContent?.length || 0);
+            newRange.setStart(textNode, offset);
+            newRange.collapse(true);
+            selection?.removeAllRanges();
+            selection?.addRange(newRange);
+          }
+        } catch (error) {
+          // Cursor position restoration failed, continue normally
+        }
+      }
     }
-  }, [page.content]);
+  }, [page.content, isActive]);
 
   // Register page ref with parent
   useEffect(() => {
@@ -51,15 +74,37 @@ const A4Page: React.FC<A4PageProps> = ({
 
   const handleInput = () => {
     if (contentRef.current && !readOnly) {
-      const content = contentRef.current.innerHTML;
+      const content = contentRef.current.textContent || '';
       onInput(content);
     }
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+    const pastedText = e.clipboardData.getData('text/plain');
+    
+    // For large paste operations, use the specialized handler
+    if (pastedText.length > 500 && onPaste) {
+      onPaste(pastedText);
+      return;
+    }
+    
+    // For small pastes, insert at cursor position
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(pastedText));
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    
+    // Trigger input event
+    if (contentRef.current) {
+      const content = contentRef.current.textContent || '';
+      onInput(content);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
