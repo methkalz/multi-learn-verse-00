@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { useAvailableGrades } from './useAvailableGrades';
+import { useStudentAssignedGrade } from './useStudentAssignedGrade';
 import { logger } from '@/lib/logger';
 
 export interface StudentContentItem {
@@ -32,128 +32,186 @@ export interface GradeContent {
   videos: StudentContentItem[];
   documents: StudentContentItem[];
   projects: StudentContentItem[];
-  lessons: any[];
+  lessons: StudentContentItem[];
 }
 
 export const useStudentContent = () => {
   const { user, userProfile } = useAuth();
-  const { availableGrades, isGradeAvailable } = useAvailableGrades();
-  const [gradeContent, setGradeContent] = useState<GradeContent[]>([]);
-  const [currentGrade, setCurrentGrade] = useState<string>('');
+  const { assignedGrade, loading: gradeLoading } = useStudentAssignedGrade();
+  const [gradeContent, setGradeContent] = useState<GradeContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchContentForGrade = async (grade: string): Promise<GradeContent> => {
     try {
-      // Fetch videos
-      const { data: videos, error: videosError } = await supabase
-        .from(grade === '10' ? 'grade10_videos' : 
-              grade === '11' ? 'grade11_videos' : 'grade12_videos')
-        .select('*')
-        .eq('is_active', true)
-        .eq('is_visible', true)
-        .order('order_index', { ascending: true });
+      // Initialize arrays
+      let videos: StudentContentItem[] = [];
+      let documents: StudentContentItem[] = [];
+      let projects: StudentContentItem[] = [];
+      let lessons: StudentContentItem[] = [];
 
-      if (videosError) throw videosError;
-
-      // Fetch documents
-      const { data: documents, error: documentsError } = await supabase
-        .from(grade === '10' ? 'grade10_documents' : 'grade11_documents')
-        .select('*')
-        .eq('is_active', true)
-        .eq('is_visible', true)
-        .order('order_index', { ascending: true });
-
-      if (documentsError && documentsError.code !== 'PGRST116') {
-        throw documentsError;
-      }
-
-      // Fetch projects (for grade 10 and 12)
-      let projects: any[] = [];
-      if (grade === '10') {
-        const { data: projectData, error: projectsError } = await supabase
-          .from('grade10_mini_projects')
+      // Fetch videos based on grade
+      try {
+        const videoTable = grade === '10' ? 'grade10_videos' : 
+                          grade === '11' ? 'grade11_videos' : 'grade12_videos';
+        
+        const response = await supabase
+          .from(videoTable)
           .select('*')
-          .eq('student_id', user?.id)
-          .order('created_at', { ascending: false });
-
-        if (projectsError && projectsError.code !== 'PGRST116') {
-          throw projectsError;
-        }
-        projects = projectData || [];
-      }
-
-      // Fetch lessons (for grade 11)
-      let lessons: any[] = [];
-      if (grade === '11') {
-        const { data: lessonData, error: lessonsError } = await supabase
-          .from('grade11_lessons')
-          .select(`
-            *,
-            sections:grade11_sections(
-              *,
-              topics:grade11_topics(*)
-            )
-          `)
           .eq('is_active', true)
+          .eq('is_visible', true)
           .order('order_index', { ascending: true });
-
-        if (lessonsError && lessonsError.code !== 'PGRST116') {
-          throw lessonsError;
-        }
-        lessons = lessonData || [];
-      }
-
-      // Get progress data for this grade content
-      const allContentIds = [
-        ...(videos || []).map(v => v.id),
-        ...(documents || []).map(d => d.id),
-        ...projects.map(p => p.id),
-        ...lessons.map(l => l.id)
-      ];
-
-      let progressData: any[] = [];
-      if (allContentIds.length > 0 && user) {
-        const { data: progress, error: progressError } = await supabase
-          .from('student_progress')
-          .select('*')
-          .eq('student_id', user.id)
-          .in('content_id', allContentIds);
-
-        if (progressError) {
-          logger.warn('Could not fetch progress data', progressError);
-        } else {
-          progressData = progress || [];
-        }
-      }
-
-      // Map progress to content items
-      const mapContentWithProgress = (items: any[], contentType: string) => {
-        return items.map(item => {
-          const progress = progressData.find(p => 
-            p.content_id === item.id && p.content_type === contentType
-          );
-          
-          return {
-            ...item,
-            content_type: contentType,
+        
+        if (response.data) {
+          videos = response.data.map((item: any) => ({
+            id: item.id,
+            title: item.title || '',
+            description: item.description,
+            content_type: 'video' as const,
             grade_level: grade,
-            progress: progress ? {
-              progress_percentage: progress.progress_percentage,
-              completed_at: progress.completed_at,
-              points_earned: progress.points_earned,
-              time_spent_minutes: progress.time_spent_minutes
-            } : undefined
-          };
-        });
-      };
+            category: item.category,
+            video_url: item.video_url,
+            thumbnail_url: item.thumbnail_url,
+            duration: item.duration,
+            is_visible: item.is_visible || true,
+            is_active: item.is_active || true,
+            order_index: item.order_index || 0,
+            created_at: item.created_at,
+          }));
+        }
+      } catch (err) {
+        logger.warn('Could not fetch videos', { error: err });
+      }
+
+      // Fetch documents for grades 10 and 11
+      try {
+        if (grade === '10' || grade === '11') {
+          const docTable = grade === '10' ? 'grade10_documents' : 'grade11_documents';
+          const response = await supabase
+            .from(docTable)
+            .select('*')
+            .eq('is_active', true)
+            .eq('is_visible', true)
+            .order('order_index', { ascending: true });
+          
+          if (response.data) {
+            documents = response.data.map((item: any) => ({
+              id: item.id,
+              title: item.title || '',
+              description: item.description,
+              content_type: 'document' as const,
+              grade_level: grade,
+              category: item.category,
+              file_path: item.file_path,
+              is_visible: item.is_visible || true,
+              is_active: item.is_active || true,
+              order_index: item.order_index || 0,
+              created_at: item.created_at,
+            }));
+          }
+        }
+      } catch (err) {
+        logger.warn('Could not fetch documents', { error: err });
+      }
+
+      // Fetch projects for grade 10
+      try {
+        if (grade === '10' && user) {
+          const response = await supabase
+            .from('grade10_mini_projects')
+            .select('*')
+            .eq('student_id', user.id)
+            .order('created_at', { ascending: false });
+
+          if (response.data) {
+            projects = response.data.map((item: any) => ({
+              id: item.id,
+              title: item.title || '',
+              description: item.description,
+              content_type: 'project' as const,
+              grade_level: grade,
+              is_visible: true,
+              is_active: true,
+              order_index: 0,
+              created_at: item.created_at,
+            }));
+          }
+        }
+      } catch (err) {
+        logger.warn('Could not fetch projects', { error: err });
+      }
+
+      // Fetch lessons for grade 11
+      try {
+        if (grade === '11') {
+          const response = await supabase
+            .from('grade11_lessons')
+            .select('*')
+            .eq('is_active', true)
+            .order('order_index', { ascending: true });
+
+          if (response.data) {
+            lessons = response.data.map((item: any) => ({
+              id: item.id,
+              title: item.title || '',
+              description: item.description || '',
+              content_type: 'lesson' as const,
+              grade_level: grade,
+              is_visible: true,
+              is_active: item.is_active || true,
+              order_index: item.order_index || 0,
+              created_at: item.created_at,
+            }));
+          }
+        }
+      } catch (err) {
+        logger.warn('Could not fetch lessons', { error: err });
+      }
+
+      // Get progress data
+      const allItems = [...videos, ...documents, ...projects, ...lessons];
+      const allContentIds = allItems.map(item => item.id);
+
+      if (allContentIds.length > 0 && user) {
+        try {
+          const response = await supabase
+            .from('student_progress')
+            .select('*')
+            .eq('student_id', user.id)
+            .in('content_id', allContentIds);
+
+          if (response.data) {
+            const progressMap = new Map();
+            response.data.forEach((p: any) => {
+              progressMap.set(`${p.content_id}-${p.content_type}`, {
+                progress_percentage: p.progress_percentage,
+                completed_at: p.completed_at,
+                points_earned: p.points_earned,
+                time_spent_minutes: p.time_spent_minutes
+              });
+            });
+
+            // Add progress to items
+            [videos, documents, projects, lessons].forEach(itemArray => {
+              itemArray.forEach(item => {
+                const progressKey = `${item.id}-${item.content_type}`;
+                if (progressMap.has(progressKey)) {
+                  item.progress = progressMap.get(progressKey);
+                }
+              });
+            });
+          }
+        } catch (err) {
+          logger.warn('Could not fetch progress data', { error: err });
+        }
+      }
 
       return {
         grade,
-        videos: mapContentWithProgress(videos || [], 'video'),
-        documents: mapContentWithProgress(documents || [], 'document'),
-        projects: mapContentWithProgress(projects, 'project'),
-        lessons: mapContentWithProgress(lessons, 'lesson')
+        videos,
+        documents,
+        projects,
+        lessons
       };
 
     } catch (err) {
@@ -162,8 +220,8 @@ export const useStudentContent = () => {
     }
   };
 
-  const fetchAllAvailableContent = async () => {
-    if (!user || userProfile?.role !== 'student' || availableGrades.length === 0) {
+  const fetchAssignedGradeContent = async () => {
+    if (!user || userProfile?.role !== 'student' || !assignedGrade || gradeLoading) {
       return;
     }
 
@@ -171,24 +229,13 @@ export const useStudentContent = () => {
       setLoading(true);
       setError(null);
 
-      const contentPromises = availableGrades.map(grade => fetchContentForGrade(grade));
-      const results = await Promise.all(contentPromises);
-      
-      setGradeContent(results);
-
-      // Set current grade to student's assigned grade or first available
-      if (!currentGrade && availableGrades.length > 0) {
-        // Try to determine student's grade from profile or use first available
-        const studentGrade = availableGrades[0];
-        setCurrentGrade(studentGrade);
-      }
+      const content = await fetchContentForGrade(assignedGrade);
+      setGradeContent(content);
 
       logger.info('Student content loaded successfully', { 
-        grades: availableGrades,
-        contentCount: results.reduce((acc, grade) => 
-          acc + grade.videos.length + grade.documents.length + 
-          grade.projects.length + grade.lessons.length, 0
-        )
+        grade: assignedGrade,
+        contentCount: content.videos.length + content.documents.length + 
+                     content.projects.length + content.lessons.length
       });
 
     } catch (err) {
@@ -200,21 +247,15 @@ export const useStudentContent = () => {
     }
   };
 
-  const getContentByGrade = (grade: string): GradeContent | undefined => {
-    return gradeContent.find(gc => gc.grade === grade);
-  };
-
-  const getCurrentGradeContent = (): GradeContent | undefined => {
-    return getContentByGrade(currentGrade);
-  };
-
   const getAllContentItems = (): StudentContentItem[] => {
-    return gradeContent.flatMap(gc => [
-      ...gc.videos,
-      ...gc.documents,
-      ...gc.projects,
-      ...gc.lessons
-    ]);
+    if (!gradeContent) return [];
+    
+    return [
+      ...gradeContent.videos,
+      ...gradeContent.documents,
+      ...gradeContent.projects,
+      ...gradeContent.lessons
+    ];
   };
 
   const getCompletedContentCount = (): number => {
@@ -234,25 +275,20 @@ export const useStudentContent = () => {
   };
 
   useEffect(() => {
-    if (availableGrades.length > 0) {
-      fetchAllAvailableContent();
+    if (!gradeLoading && assignedGrade) {
+      fetchAssignedGradeContent();
     }
-  }, [user, userProfile, availableGrades]);
+  }, [user, userProfile, assignedGrade, gradeLoading]);
 
   return {
     gradeContent,
-    currentGrade,
-    setCurrentGrade,
-    loading,
+    assignedGrade,
+    loading: loading || gradeLoading,
     error,
-    availableGrades,
-    isGradeAvailable,
-    getContentByGrade,
-    getCurrentGradeContent,
     getAllContentItems,
     getCompletedContentCount,
     getTotalContentCount,
     getProgressPercentage,
-    refetch: fetchAllAvailableContent
+    refetch: fetchAssignedGradeContent
   };
 };

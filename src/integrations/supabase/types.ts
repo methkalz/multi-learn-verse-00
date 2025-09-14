@@ -4293,6 +4293,10 @@ export type Database = {
         Args: { school_uuid: string }
         Returns: Json
       }
+      get_student_assigned_grade: {
+        Args: { student_user_id: string }
+        Returns: string
+      }
       get_student_dashboard_stats: {
         Args: { student_uuid: string }
         Returns: Json

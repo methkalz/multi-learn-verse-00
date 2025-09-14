@@ -63,7 +63,7 @@ export const useStudentProgress = () => {
       if (statsError) throw statsError;
 
       if (statsData) {
-        setStats(statsData as StudentStats);
+        setStats(statsData as unknown as StudentStats);
       }
 
       // Get progress data

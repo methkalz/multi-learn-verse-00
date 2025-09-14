@@ -25,17 +25,15 @@ import { toast } from 'sonner';
 
 export const StudentGradeContent: React.FC = () => {
   const { 
-    currentGrade, 
-    setCurrentGrade, 
-    availableGrades, 
-    getCurrentGradeContent, 
+    gradeContent, 
+    assignedGrade, 
     loading,
     error
   } = useStudentContent();
   const { updateProgress } = useStudentProgress();
   const [activeContentTab, setActiveContentTab] = useState('videos');
 
-  const currentContent = getCurrentGradeContent();
+  const currentContent = gradeContent;
 
   const handleContentClick = async (contentId: string, contentType: any, title: string) => {
     try {
@@ -214,7 +212,7 @@ export const StudentGradeContent: React.FC = () => {
           </div>
           <h3 className="text-lg font-semibold">لا يوجد محتوى متاح</h3>
           <p className="text-muted-foreground">
-            يرجى اختيار صف دراسي لعرض المحتوى المتاح
+            لا يوجد محتوى متاح للصف {assignedGrade} حالياً
           </p>
         </div>
       </Card>
@@ -262,19 +260,12 @@ export const StudentGradeContent: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Grade Selector */}
-      <div className="flex flex-wrap gap-2 justify-center">
-        {availableGrades.map((grade) => (
-          <Button
-            key={grade}
-            variant={currentGrade === grade ? "default" : "outline"}
-            onClick={() => setCurrentGrade(grade)}
-            className="flex items-center gap-2"
-          >
-            <BookOpen className="w-4 h-4" />
-            الصف {grade}
-          </Button>
-        ))}
+      {/* Grade Header */}
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg">
+          <BookOpen className="w-5 h-5" />
+          <span className="font-medium">محتوى الصف {assignedGrade}</span>
+        </div>
       </div>
 
       {/* Content Tabs */}
@@ -306,7 +297,7 @@ export const StudentGradeContent: React.FC = () => {
                   </div>
                   <h3 className="text-lg font-semibold">لا يوجد {tab.label} متاح</h3>
                   <p className="text-muted-foreground">
-                    لم يتم إضافة أي {tab.label} للصف {currentGrade} بعد
+                    لم يتم إضافة أي {tab.label} للصف {assignedGrade} بعد
                   </p>
                 </div>
               </Card>

@@ -37,7 +37,7 @@ import AppFooter from '@/components/shared/AppFooter';
 const StudentDashboard: React.FC = () => {
   const { userProfile } = useAuth();
   const { stats, achievements, loading } = useStudentProgress();
-  const { currentGrade, setCurrentGrade, availableGrades, getProgressPercentage } = useStudentContent();
+  const { assignedGrade, getProgressPercentage } = useStudentContent();
   const [activeTab, setActiveTab] = useState('overview');
 
   const motivationalMessages = [
@@ -228,26 +228,19 @@ const StudentDashboard: React.FC = () => {
                   </CardContent>
                 </Card>
 
-                {/* Grade Selector */}
+                {/* Assigned Grade Info */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <FolderOpen className="w-5 h-5" />
-                      اختر الصف
+                      صفك الدراسي
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {availableGrades.map((grade) => (
-                      <Button
-                        key={grade}
-                        variant={currentGrade === grade ? "default" : "outline"}
-                        className="w-full justify-start"
-                        onClick={() => setCurrentGrade(grade)}
-                      >
-                        <BookOpen className="w-4 h-4 mr-2" />
-                        الصف {grade}
-                      </Button>
-                    ))}
+                    <div className="text-center p-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg">
+                      <h3 className="text-xl font-bold">الصف {assignedGrade}</h3>
+                      <p className="text-sm opacity-90">صفك المخصص</p>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
