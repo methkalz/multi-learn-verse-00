@@ -57,182 +57,141 @@ const MultiPageDocumentEditor = forwardRef<MultiPageDocumentEditorRef, MultiPage
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [totalWordCount, setTotalWordCount] = useState(0);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
-  const pageEditorsRef = useRef<(any)[]>([]);
 
-  // Create editors for each page
-  const createEditor = useCallback((pageIndex: number, content: string) => {
-    return useEditor({
-      extensions: [
-        StarterKit,
-        TextStyle,
-        Color,
-      ],
-      content: content,
-      editable: !readOnly,
-      onUpdate: ({ editor }) => {
-        const html = editor.getHTML();
-        updatePageContent(pageIndex, html);
+  // Main editor for all content
+  const mainEditor = useEditor({
+    extensions: [
+      StarterKit,
+      TextStyle,
+      Color,
+    ],
+    content: initialContent,
+    editable: !readOnly,
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      handleContentChange(html);
+    },
+    editorProps: {
+      attributes: {
+        class: cn(
+          'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
+          'prose-headings:text-right prose-p:text-right',
+          'prose-ul:text-right prose-ol:text-right',
+          'min-h-full w-full p-4',
+          '[&_*]:direction-rtl [&_*]:text-right'
+        ),
+        dir: 'rtl',
+        style: `
+          direction: rtl; 
+          text-align: right; 
+          font-family: Arial, Tahoma, sans-serif;
+          line-height: 24px;
+          font-size: 16px;
+        `
       },
-      onFocus: () => {
-        setCurrentPageIndex(pageIndex);
-      },
-      editorProps: {
-        attributes: {
-          class: cn(
-            'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
-            'prose-headings:text-right prose-p:text-right',
-            'prose-ul:text-right prose-ol:text-right',
-            'min-h-full w-full p-4',
-            '[&_*]:direction-rtl [&_*]:text-right'
-          ),
-          dir: 'rtl',
-          style: `
-            direction: rtl; 
-            text-align: right; 
-            font-family: Arial, Tahoma, sans-serif;
-            min-height: ${CONTENT_HEIGHT}px;
-            max-height: ${CONTENT_HEIGHT}px;
-            overflow-y: auto;
-            line-height: 24px;
-            font-size: 16px;
-          `
-        },
-        handleKeyDown: (view, event) => {
-          // Handle page navigation with keyboard
-          if (event.key === 'PageDown' || (event.ctrlKey && event.key === 'ArrowDown')) {
-            event.preventDefault();
-            goToNextPage();
-            return true;
-          }
-          if (event.key === 'PageUp' || (event.ctrlKey && event.key === 'ArrowUp')) {
-            event.preventDefault();
-            goToPrevPage();
-            return true;
-          }
-          
-          // Auto-create new page when reaching bottom
-          if (event.key === 'Enter') {
-            const editorElement = view.dom;
-            if (editorElement.scrollHeight > CONTENT_HEIGHT) {
-              setTimeout(() => checkForPageOverflow(pageIndex), 100);
-            }
-          }
-          
-          return false;
+      handleKeyDown: (view, event) => {
+        // Handle page navigation with keyboard
+        if (event.key === 'PageDown' || (event.ctrlKey && event.key === 'ArrowDown')) {
+          event.preventDefault();
+          goToNextPage();
+          return true;
         }
-      },
-    });
-  }, [readOnly]);
-
-  // Check if page content overflows and needs to be split
-  const checkForPageOverflow = useCallback((pageIndex: number) => {
-    const editor = pageEditorsRef.current[pageIndex];
-    if (!editor) return;
-
-    const editorElement = editor.view.dom;
-    if (editorElement.scrollHeight > CONTENT_HEIGHT + 50) { // 50px buffer
-      splitPageContent(pageIndex);
-    }
-  }, []);
-
-  // Split page content when it overflows
-  const splitPageContent = useCallback((pageIndex: number) => {
-    const editor = pageEditorsRef.current[pageIndex];
-    if (!editor) return;
-
-    const content = editor.getHTML();
-    const doc = new DOMParser().parseFromString(content, 'text/html');
-    const elements = Array.from(doc.body.children);
-    
-    let keepOnCurrentPage = '';
-    let moveToNextPage = '';
-    let totalHeight = 0;
-    let splitIndex = 0;
-
-    // Calculate which elements fit on current page
-    for (let i = 0; i < elements.length; i++) {
-      const elementHeight = estimateElementHeight(elements[i].outerHTML);
-      if (totalHeight + elementHeight > CONTENT_HEIGHT - 100) { // 100px buffer
-        splitIndex = i;
-        break;
+        if (event.key === 'PageUp' || (event.ctrlKey && event.key === 'ArrowUp')) {
+          event.preventDefault();
+          goToPrevPage();
+          return true;
+        }
+        return false;
       }
-      totalHeight += elementHeight;
-      keepOnCurrentPage += elements[i].outerHTML;
-      splitIndex = i + 1;
+    },
+  });
+
+  // Split content into pages based on estimated height
+  const splitContentIntoPages = useCallback((content: string): PageData[] => {
+    if (!content?.trim()) {
+      return [{
+        id: '1',
+        content: '',
+        wordCount: 0
+      }];
     }
 
-    // Move remaining elements to next page
-    for (let i = splitIndex; i < elements.length; i++) {
-      moveToNextPage += elements[i].outerHTML;
-    }
+    // Parse HTML content
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<div>${content}</div>`, 'text/html');
+    const elements = Array.from(doc.querySelector('div')?.children || []);
+    
+    const newPages: PageData[] = [];
+    let currentPageContent = '';
+    let currentPageHeight = 0;
+    let pageId = 1;
 
-    if (moveToNextPage.trim()) {
-      // Update current page
-      editor.commands.setContent(keepOnCurrentPage);
+    // Estimate line height and page capacity
+    const lineHeight = 24; // pixels
+    const linesPerPage = Math.floor(CONTENT_HEIGHT / lineHeight) - 5; // Buffer for margins
+    const wordsPerLine = 8; // Average Arabic words per line
+    const wordsPerPage = linesPerPage * wordsPerLine;
+
+    let currentWordCount = 0;
+
+    for (const element of elements) {
+      const elementText = element.textContent || '';
+      const elementWords = elementText.trim().split(/\s+/).filter(word => word.length > 0).length;
       
-      // Create or update next page
-      setPages(prev => {
-        const newPages = [...prev];
-        if (newPages[pageIndex + 1]) {
-          // Prepend to existing next page
-          newPages[pageIndex + 1].content = moveToNextPage + newPages[pageIndex + 1].content;
-        } else {
-          // Create new page
-          newPages.splice(pageIndex + 1, 0, {
-            id: `${Date.now()}`,
-            content: moveToNextPage,
-            wordCount: 0
-          });
-        }
-        return newPages;
-      });
+      // Check if adding this element would exceed page capacity
+      if (currentWordCount + elementWords > wordsPerPage && currentPageContent) {
+        // Finalize current page
+        const plainText = currentPageContent.replace(/<[^>]*>/g, '').trim();
+        const wordCount = plainText.split(/\s+/).filter(word => word.length > 0).length;
+        
+        newPages.push({
+          id: pageId.toString(),
+          content: currentPageContent.trim(),
+          wordCount
+        });
+
+        // Start new page
+        pageId++;
+        currentPageContent = element.outerHTML;
+        currentWordCount = elementWords;
+      } else {
+        currentPageContent += element.outerHTML;
+        currentWordCount += elementWords;
+      }
     }
-  }, []);
 
-  // Estimate element height for content splitting
-  const estimateElementHeight = useCallback((html: string): number => {
-    const tempDiv = document.createElement('div');
-    tempDiv.style.cssText = `
-      position: absolute;
-      visibility: hidden;
-      width: ${CONTENT_WIDTH}px;
-      direction: rtl;
-      text-align: right;
-      font-family: Arial, Tahoma, sans-serif;
-      font-size: 16px;
-      line-height: 24px;
-      padding: 0;
-      margin: 0;
-    `;
-    
-    tempDiv.innerHTML = html;
-    document.body.appendChild(tempDiv);
-    
-    const height = tempDiv.scrollHeight;
-    document.body.removeChild(tempDiv);
-    
-    return height;
-  }, []);
-
-  // Update page content and recalculate stats
-  const updatePageContent = useCallback((pageIndex: number, content: string) => {
-    setPages(prev => {
-      const newPages = [...prev];
-      const plainText = content.replace(/<[^>]*>/g, '').trim();
+    // Add the last page if there's content
+    if (currentPageContent.trim()) {
+      const plainText = currentPageContent.replace(/<[^>]*>/g, '').trim();
       const wordCount = plainText.split(/\s+/).filter(word => word.length > 0).length;
       
-      newPages[pageIndex] = {
-        ...newPages[pageIndex],
-        content,
+      newPages.push({
+        id: pageId.toString(),
+        content: currentPageContent.trim(),
         wordCount
-      };
-      
-      return newPages;
-    });
+      });
+    }
 
-    // Trigger content change
-    const allContent = pages.map(page => page.content).join('\n\n<!-- PAGE_BREAK -->\n\n');
-    onContentChange?.(allContent);
+    return newPages.length > 0 ? newPages : [{
+      id: '1',
+      content: '',
+      wordCount: 0
+    }];
+  }, []);
+
+  // Handle content changes
+  const handleContentChange = useCallback((content: string) => {
+    // Calculate word count
+    const plainText = content.replace(/<[^>]*>/g, '').trim();
+    const words = plainText.split(/\s+/).filter(word => word.length > 0);
+    setTotalWordCount(words.length);
+    
+    // Split into pages
+    const newPages = splitContentIntoPages(content);
+    setPages(newPages);
+    
+    // Trigger external content change
+    onContentChange?.(content);
     
     // Auto-save logic
     if (autoSave && onSave) {
@@ -240,18 +199,15 @@ const MultiPageDocumentEditor = forwardRef<MultiPageDocumentEditorRef, MultiPage
         clearTimeout(autoSaveTimeoutRef.current);
       }
       autoSaveTimeoutRef.current = setTimeout(() => {
-        handleAutoSave(allContent);
+        handleAutoSave(content);
       }, autoSaveInterval);
     }
-  }, [pages, onContentChange, autoSave, onSave, autoSaveInterval]);
+  }, [onContentChange, autoSave, onSave, autoSaveInterval, splitContentIntoPages]);
 
   // Navigation functions
   const goToNextPage = useCallback(() => {
     if (currentPageIndex < pages.length - 1) {
       setCurrentPageIndex(currentPageIndex + 1);
-      setTimeout(() => {
-        pageEditorsRef.current[currentPageIndex + 1]?.commands.focus();
-      }, 100);
     } else {
       // Create new page if at the end
       addNewPage();
@@ -261,18 +217,12 @@ const MultiPageDocumentEditor = forwardRef<MultiPageDocumentEditorRef, MultiPage
   const goToPrevPage = useCallback(() => {
     if (currentPageIndex > 0) {
       setCurrentPageIndex(currentPageIndex - 1);
-      setTimeout(() => {
-        pageEditorsRef.current[currentPageIndex - 1]?.commands.focus();
-      }, 100);
     }
   }, [currentPageIndex]);
 
   const goToPage = useCallback((pageIndex: number) => {
     if (pageIndex >= 0 && pageIndex < pages.length) {
       setCurrentPageIndex(pageIndex);
-      setTimeout(() => {
-        pageEditorsRef.current[pageIndex]?.commands.focus();
-      }, 100);
     }
   }, [pages.length]);
 
@@ -318,13 +268,13 @@ const MultiPageDocumentEditor = forwardRef<MultiPageDocumentEditorRef, MultiPage
 
   // Manual save function
   const handleManualSave = async () => {
-    if (!onSave || isSaving) return;
+    if (!onSave || isSaving || !mainEditor) return;
     
-    const allContent = pages.map(page => page.content).join('\n\n<!-- PAGE_BREAK -->\n\n');
+    const content = mainEditor.getHTML();
     
     try {
       setIsSaving(true);
-      await onSave(allContent);
+      await onSave(content);
       setLastSaved(new Date());
       toast.success('تم حفظ المستند بنجاح');
     } catch (error) {
@@ -353,43 +303,21 @@ const MultiPageDocumentEditor = forwardRef<MultiPageDocumentEditorRef, MultiPage
     return `تم الحفظ منذ ${Math.floor(diffInSeconds / 3600)} ساعة`;
   };
 
-  // Calculate total word count
+  // Initialize content
   useEffect(() => {
-    const total = pages.reduce((sum, page) => sum + page.wordCount, 0);
-    setTotalWordCount(total);
-  }, [pages]);
-
-  // Initialize editors when pages change
-  useEffect(() => {
-    pageEditorsRef.current = pages.map((page, index) => {
-      if (pageEditorsRef.current[index]) {
-        return pageEditorsRef.current[index];
-      }
-      return createEditor(index, page.content);
-    });
-
-    // Clean up unused editors
-    if (pageEditorsRef.current.length > pages.length) {
-      pageEditorsRef.current.splice(pages.length).forEach(editor => {
-        editor?.destroy();
-      });
+    if (initialContent && mainEditor) {
+      mainEditor.commands.setContent(initialContent);
     }
-  }, [pages, createEditor]);
+  }, [initialContent, mainEditor]);
 
   // Expose methods through ref
   useImperativeHandle(ref, () => ({
-    getContent: () => pages.map(page => page.content).join('\n\n<!-- PAGE_BREAK -->\n\n'),
+    getContent: () => mainEditor?.getHTML() || '',
     setContent: (content: string) => {
-      const splitContent = content.split('\n\n<!-- PAGE_BREAK -->\n\n');
-      const newPages = splitContent.map((pageContent, index) => ({
-        id: `${index + 1}`,
-        content: pageContent,
-        wordCount: pageContent.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word.length > 0).length
-      }));
-      setPages(newPages);
+      mainEditor?.commands.setContent(content);
     },
     focus: () => {
-      pageEditorsRef.current[currentPageIndex]?.commands.focus();
+      mainEditor?.commands.focus();
     },
     save: handleManualSave
   }));
@@ -400,9 +328,6 @@ const MultiPageDocumentEditor = forwardRef<MultiPageDocumentEditorRef, MultiPage
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
-      pageEditorsRef.current.forEach(editor => {
-        editor?.destroy();
-      });
     };
   }, []);
 
@@ -533,7 +458,6 @@ const MultiPageDocumentEditor = forwardRef<MultiPageDocumentEditorRef, MultiPage
                 variant="outline"
                 size="sm"
                 onClick={goToNextPage}
-                disabled={currentPageIndex >= pages.length - 1}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -541,67 +465,69 @@ const MultiPageDocumentEditor = forwardRef<MultiPageDocumentEditorRef, MultiPage
           </Card>
         </div>
 
-        {/* Document Pages */}
+        {/* Main Editor */}
         <div className="lg:col-span-3">
-          <div className="space-y-6">
-            {pages.map((page, index) => {
-              const editor = pageEditorsRef.current[index];
-              
-              return (
-                <Card
-                  key={page.id}
-                  className={cn(
-                    "transition-all duration-200",
-                    index === currentPageIndex 
-                      ? "ring-2 ring-primary shadow-lg" 
-                      : "shadow-sm hover:shadow-md"
-                  )}
-                  style={{
-                    width: `${A4_WIDTH}px`,
-                    height: `${A4_HEIGHT}px`,
-                    maxWidth: '100%',
-                    aspectRatio: `${A4_WIDTH} / ${A4_HEIGHT}`,
-                  }}
-                >
-                  {/* Page Header */}
-                  <div className="flex items-center justify-between p-2 border-b bg-muted/20">
-                    <span className="text-sm font-medium">
-                      صفحة {(index + 1).toLocaleString('ar')}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {page.wordCount.toLocaleString('ar')} كلمة
-                    </span>
-                  </div>
+          <Card className="p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">محرر المشروع</h3>
+              <p className="text-sm text-muted-foreground">
+                اكتب محتوى مشروعك هنا. سيتم تقسيمه تلقائياً على صفحات A4.
+              </p>
+            </div>
+            
+            <div className="border rounded-lg overflow-hidden">
+              {mainEditor && (
+                <EditorContent 
+                  editor={mainEditor}
+                  className="min-h-[600px] p-6 prose prose-sm max-w-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[600px]"
+                />
+              )}
+            </div>
 
-                  {/* Page Content */}
-                  <div
-                    className="relative bg-white"
-                    style={{
-                      height: `${A4_HEIGHT - 40}px`, // Subtract header height
-                      margin: `${PAGE_MARGIN}px`,
-                      width: `${CONTENT_WIDTH}px`,
-                    }}
-                    onClick={() => {
-                      setCurrentPageIndex(index);
-                      editor?.commands.focus();
-                    }}
-                  >
-                    {editor && (
-                      <EditorContent 
-                        editor={editor}
-                        className="h-full [&_.ProseMirror]:outline-none [&_.ProseMirror]:h-full"
-                      />
+            {/* Pages Preview */}
+            <div className="mt-6 space-y-4">
+              <h4 className="text-md font-semibold">معاينة الصفحات</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto">
+                {pages.map((page, index) => (
+                  <Card
+                    key={page.id}
+                    className={cn(
+                      "p-4 cursor-pointer transition-all",
+                      index === currentPageIndex 
+                        ? "ring-2 ring-primary border-primary" 
+                        : "hover:border-primary/50"
                     )}
-
-                    {/* Page Number */}
-                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground">
-                      {(index + 1).toLocaleString('ar')}
+                    onClick={() => goToPage(index)}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">
+                        صفحة {(index + 1).toLocaleString('ar')}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {page.wordCount.toLocaleString('ar')} كلمة
+                      </span>
                     </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+                    
+                    <div 
+                      className="bg-white border rounded text-xs p-2 min-h-[120px] overflow-hidden"
+                      style={{
+                        direction: 'rtl',
+                        textAlign: 'right',
+                        fontFamily: 'Arial, Tahoma, sans-serif',
+                        lineHeight: '1.2'
+                      }}
+                    >
+                      <div
+                        dangerouslySetInnerHTML={{ 
+                          __html: page.content || '<p>صفحة فارغة</p>' 
+                        }}
+                      />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
 
