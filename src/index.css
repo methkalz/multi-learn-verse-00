@@ -209,7 +209,6 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-cairo;
-    direction: rtl;
   }
 
   /* Hide scrollbar utility class */
@@ -257,11 +256,7 @@ All colors MUST be HSL.
     text-align: right;
   }
 
-  /* فقرات ونصوص عربية */
-  p, div, span, h1, h2, h3, h4, h5, h6, td, th, li {
-    text-align: right;
-    direction: rtl;
-  }
+  /* فقرات ونصوص عربية - removed conflicting direction rules */
 
   /* استثناءات للعناصر التي تحتاج اتجاه LTR */
   input[type="email"], input[type="url"], input[type="tel"],
