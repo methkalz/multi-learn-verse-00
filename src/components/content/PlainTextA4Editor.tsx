@@ -300,7 +300,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
           {pages.map((page, index) => (
             <Card 
               key={page.id}
-              className="page-card relative bg-background shadow-lg border border-border"
+              className="page-card relative bg-background shadow-lg"
               style={{
                 width: `${A4_WIDTH}px`,
                 minHeight: `${A4_HEIGHT}px`,
@@ -308,14 +308,14 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                 position: 'relative',
               }}
             >
-              {/* Word-like margin indicator - single border around writing area */}
+              {/* Single subtle margin indicator - only on focus */}
               <div 
-                className="absolute pointer-events-none opacity-0 transition-opacity duration-200 page-margins border border-primary/40"
+                className="absolute pointer-events-none opacity-0 transition-opacity duration-300 page-margin-indicator border border-primary/15"
                 style={{ 
-                  left: `${PAGE_PADDING}px`, 
-                  top: `${PAGE_PADDING}px`, 
-                  right: `${PAGE_PADDING}px`,
-                  bottom: `${PAGE_PADDING}px`
+                  left: `${PAGE_PADDING - 1}px`, 
+                  top: `${PAGE_PADDING - 1}px`, 
+                  right: `${PAGE_PADDING - 1}px`,
+                  bottom: `${PAGE_PADDING - 1}px`
                 }}
               />
               {/* Page Content */}
@@ -394,16 +394,11 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
           }
           
           .arabic-text-optimized:focus {
-            outline: 2px solid hsl(var(--primary) / 0.3);
-            outline-offset: 2px;
+            outline: none;
           }
           
-          .page-card:focus-within .page-margins {
+          .page-card:focus-within .page-margin-indicator {
             opacity: 1 !important;
-          }
-          
-          .page-card:hover .page-margins {
-            opacity: 0.5 !important;
           }
           
           @media print {
