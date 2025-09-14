@@ -227,6 +227,63 @@ All colors MUST be HSL.
     text-align: right;
   }
 
+  /* Enhanced Arabic text editor styles */
+  .enhanced-arabic-editor {
+    unicode-bidi: plaintext;
+    text-align: start;
+  }
+
+  .enhanced-arabic-editor p {
+    unicode-bidi: plaintext;
+    text-align: start;
+    margin: 0.5em 0;
+  }
+
+  .enhanced-arabic-editor div {
+    unicode-bidi: plaintext;
+    text-align: start;
+  }
+
+  .enhanced-arabic-editor[dir="rtl"], 
+  .enhanced-arabic-editor *[dir="rtl"] {
+    text-align: right;
+  }
+
+  .enhanced-arabic-editor[dir="ltr"], 
+  .enhanced-arabic-editor *[dir="ltr"] {
+    text-align: left;
+  }
+
+  /* Better handling for mixed content */
+  .enhanced-arabic-editor span:lang(ar) {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .enhanced-arabic-editor span:lang(en) {
+    direction: ltr;
+    text-align: left;
+  }
+
+  /* Fix for Arabic text inside tables */
+  .enhanced-arabic-editor table td,
+  .enhanced-arabic-editor table th {
+    unicode-bidi: plaintext;
+    text-align: start;
+  }
+
+  /* Proper RTL support for lists */
+  .enhanced-arabic-editor ul,
+  .enhanced-arabic-editor ol {
+    padding-inline-start: 2em;
+    padding-inline-end: 0;
+  }
+
+  .enhanced-arabic-editor li {
+    unicode-bidi: plaintext;
+    text-align: start;
+  }
+
   /* فقرات ونصوص عربية */
   p, div, span, h1, h2, h3, h4, h5, h6, td, th, li {
     text-align: right;
