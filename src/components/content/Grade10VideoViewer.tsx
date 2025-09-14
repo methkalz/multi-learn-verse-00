@@ -14,7 +14,7 @@ interface Grade10Video {
   video_url: string;
   thumbnail_url?: string;
   duration?: string;
-  source_type: 'youtube' | 'vimeo' | 'direct';
+  source_type: 'youtube' | 'vimeo' | 'direct' | 'google_drive';
   category?: string;
   grade_level: string;
   owner_user_id: string;
@@ -76,7 +76,8 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
     const labels = {
       youtube: 'يوتيوب',
       vimeo: 'فيميو',
-      direct: 'رابط مباشر'
+      direct: 'رابط مباشر',
+      google_drive: 'جوجل درايف'
     };
     return labels[sourceType as keyof typeof labels] || sourceType;
   };
@@ -95,6 +96,19 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
         );
       }
     }
+
+    if (video.source_type === 'google_drive') {
+      // Convert Google Drive preview link to embed link
+      const embedUrl = video.video_url.replace('/preview', '/embed?start=0');
+      return (
+        <iframe
+          src={embedUrl}
+          className="w-full h-96 rounded-lg"
+          allow="autoplay"
+          allowFullScreen
+        />
+      );
+    }
     
     if (video.source_type === 'direct') {
       return (
@@ -108,7 +122,7 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
       );
     }
 
-    // For Google Drive and other links
+    // Fallback for unknown types
     return (
       <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center">
         <div className="text-center">
