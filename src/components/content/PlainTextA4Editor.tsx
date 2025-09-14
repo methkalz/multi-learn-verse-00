@@ -308,10 +308,10 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                 position: 'relative',
               }}
             >
-              {/* Word-like margin indicators */}
-              <div className="absolute inset-0 pointer-events-none">
+              {/* Word-like margin indicators - only show on focus */}
+              <div className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-200 page-margins">
                 <div 
-                  className="absolute border-l-2 border-primary/30"
+                  className="absolute border-l border-primary/40"
                   style={{ 
                     left: `${PAGE_PADDING}px`, 
                     top: `${PAGE_PADDING}px`, 
@@ -319,7 +319,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                   }}
                 />
                 <div 
-                  className="absolute border-r-2 border-primary/30"
+                  className="absolute border-r border-primary/40"
                   style={{ 
                     right: `${PAGE_PADDING}px`, 
                     top: `${PAGE_PADDING}px`, 
@@ -327,7 +327,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                   }}
                 />
                 <div 
-                  className="absolute border-t-2 border-primary/30"
+                  className="absolute border-t border-primary/40"
                   style={{ 
                     top: `${PAGE_PADDING}px`, 
                     left: `${PAGE_PADDING}px`, 
@@ -335,7 +335,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                   }}
                 />
                 <div 
-                  className="absolute border-b-2 border-primary/30"
+                  className="absolute border-b border-primary/40"
                   style={{ 
                     bottom: `${PAGE_PADDING}px`, 
                     left: `${PAGE_PADDING}px`, 
@@ -421,6 +421,14 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
           .arabic-text-optimized:focus {
             outline: 2px solid hsl(var(--primary) / 0.3);
             outline-offset: 2px;
+          }
+          
+          .page-card:focus-within .page-margins {
+            opacity: 1 !important;
+          }
+          
+          .page-card:hover .page-margins {
+            opacity: 0.5 !important;
           }
           
           @media print {
