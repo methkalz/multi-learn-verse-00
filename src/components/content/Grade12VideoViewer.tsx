@@ -50,7 +50,20 @@ const Grade12VideoViewer: React.FC<Grade12VideoViewerProps> = ({ videos, loading
       }
     }
 
+    if (video.source_type === 'google_drive') {
+      const fileId = extractGoogleDriveId(video.video_url);
+      if (fileId) {
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+      }
+    }
+
     return '/placeholder.svg';
+  };
+
+  const extractGoogleDriveId = (url: string): string | null => {
+    const regex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
   };
 
   const extractYouTubeId = (url: string): string | null => {
