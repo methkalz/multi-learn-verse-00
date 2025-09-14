@@ -227,34 +227,14 @@ All colors MUST be HSL.
     text-align: right;
   }
 
-  /* Enhanced Arabic text editor styles - Clean and simple */
-  .enhanced-arabic-editor {
-    direction: rtl;
-    text-align: right;
+  /* Document editor styles - Natural text direction */
+  .document-editor {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: start;
   }
 
-  .enhanced-arabic-editor p,
-  .enhanced-arabic-editor div,
-  .enhanced-arabic-editor span {
-    text-align: right;
-    margin: 0.5em 0;
-  }
-
-  /* Fix for Arabic text inside tables */
-  .enhanced-arabic-editor table td,
-  .enhanced-arabic-editor table th {
-    text-align: right;
-  }
-
-  /* Proper RTL support for lists */
-  .enhanced-arabic-editor ul,
-  .enhanced-arabic-editor ol {
-    padding-inline-start: 2em;
-    padding-inline-end: 0;
-  }
-
-  .enhanced-arabic-editor li {
-    text-align: right;
+  .document-editor * {
+    text-align: inherit;
   }
 
 

@@ -49,21 +49,21 @@ const ImageResizer = () => {
       }
       
       /* Custom scrollbar for editor */
-      .enhanced-arabic-editor::-webkit-scrollbar {
+      .document-editor::-webkit-scrollbar {
         width: 8px;
       }
       
-      .enhanced-arabic-editor::-webkit-scrollbar-track {
+      .document-editor::-webkit-scrollbar-track {
         background: #f1f5f9;
         border-radius: 4px;
       }
       
-      .enhanced-arabic-editor::-webkit-scrollbar-thumb {
+      .document-editor::-webkit-scrollbar-thumb {
         background: #cbd5e1;
         border-radius: 4px;
       }
       
-      .enhanced-arabic-editor::-webkit-scrollbar-thumb:hover {
+      .document-editor::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
       }
       
@@ -75,25 +75,25 @@ const ImageResizer = () => {
       }
       
       /* Enhanced contenteditable styling */
-      .enhanced-arabic-editor:focus {
+      .document-editor:focus {
         outline: none;
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
       }
 
-      .enhanced-arabic-editor p {
+      .document-editor p {
         margin: 1em 0;
       }
 
-      .enhanced-arabic-editor p:first-child {
+      .document-editor p:first-child {
         margin-top: 0;
       }
 
-      .enhanced-arabic-editor p:last-child {
+      .document-editor p:last-child {
         margin-bottom: 0;
       }
       
       /* Table enhancements */
-      .enhanced-arabic-editor table {
+      .document-editor table {
         border-collapse: collapse;
         width: 100%;
         margin: 20px 0;
@@ -102,14 +102,14 @@ const ImageResizer = () => {
         overflow: hidden;
       }
       
-      .enhanced-arabic-editor table td,
-      .enhanced-arabic-editor table th {
+      .document-editor table td,
+      .document-editor table th {
         padding: 12px;
         border: 1px solid #ddd;
-        text-align: right;
+        text-align: inherit;
       }
       
-      .enhanced-arabic-editor table th {
+      .document-editor table th {
         background-color: #f8f9fa;
         font-weight: bold;
         text-align: center;

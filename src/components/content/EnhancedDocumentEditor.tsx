@@ -763,7 +763,8 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
         <div
           ref={editorRef}
           contentEditable={!readOnly}
-          className={`outline-none enhanced-arabic-editor ${isA4Mode ? 'p-16' : 'p-6'} min-h-[500px] focus:outline-none focus:ring-2 focus:ring-primary/20`}
+          dir="auto"
+          className={`outline-none document-editor ${isA4Mode ? 'p-16' : 'p-6'} min-h-[500px] focus:outline-none focus:ring-2 focus:ring-primary/20`}
           style={{ 
             lineHeight: '1.8',
             fontFamily: 'Arial, sans-serif',
