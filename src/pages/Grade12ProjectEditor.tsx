@@ -12,9 +12,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
 import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
-import { useAutoPageBreak } from '@/hooks/useAutoPageBreak';
+import { useSmartPageBreak } from '@/hooks/useSmartPageBreak';
 import EnhancedDocumentEditor from '@/components/content/EnhancedDocumentEditor';
-import { A4PageContainer } from '@/components/content/A4PageContainer';
+import { SmartA4Container } from '@/components/content/SmartA4Container';
 import { 
   Save, 
   ArrowLeft, 
@@ -76,7 +76,7 @@ const Grade12ProjectEditor: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('editor');
 
-  // Auto page break system - simplified
+  // Smart page break system - line-based
   const {
     pages,
     currentPageIndex,
@@ -84,9 +84,10 @@ const Grade12ProjectEditor: React.FC = () => {
     addPage,
     updatePageContent,
     registerPageRef,
+    checkForOverflow,
     totalPages,
     A4_PAGE_HEIGHT
-  } = useAutoPageBreak({
+  } = useSmartPageBreak({
     initialContent: project?.project_content || '',
     onContentChange: (newContent) => {
       setContent(newContent);
@@ -405,14 +406,14 @@ const Grade12ProjectEditor: React.FC = () => {
                 />
               </div>
 
-              {/* A4 Pages Container - Scrollable */}
+              {/* Smart A4 Pages Container - Natural overflow detection */}
               <div className="flex-1 overflow-y-auto">
-                <A4PageContainer
+                <SmartA4Container
                   pages={pages}
                   currentPageIndex={currentPageIndex}
                   onContentChange={updatePageContent}
                   onPageRefChange={registerPageRef}
-                  onAddPage={addPage}
+                  onOverflowCheck={checkForOverflow}
                   A4_PAGE_HEIGHT={A4_PAGE_HEIGHT}
                   readOnly={!canEdit}
                 />
