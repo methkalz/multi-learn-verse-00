@@ -131,17 +131,31 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
     if (editorRef.current && content) {
       // حفظ موضع المؤشر قبل التحديث
       const selection = window.getSelection();
-      const range = selection?.getRangeAt(0);
-      const startOffset = range?.startOffset;
-      const endOffset = range?.endOffset;
-      const startContainer = range?.startContainer;
-      const endContainer = range?.endContainer;
+      let range = null;
+      let startOffset = 0;
+      let endOffset = 0;
+      let startContainer = null;
+      let endContainer = null;
+      
+      // التحقق من وجود selection و ranges قبل الوصول إليها
+      if (selection && selection.rangeCount > 0) {
+        try {
+          range = selection.getRangeAt(0);
+          startOffset = range.startOffset;
+          endOffset = range.endOffset;
+          startContainer = range.startContainer;
+          endContainer = range.endContainer;
+        } catch (error) {
+          // في حالة الخطأ، تجاهل حفظ الموضع
+          console.warn('Failed to save cursor position:', error);
+        }
+      }
       
       // تحديث المحتوى فقط إذا كان مختلفاً
       if (editorRef.current.innerHTML !== content) {
         editorRef.current.innerHTML = content;
         
-        // استعادة موضع المؤشر
+        // استعادة موضع المؤشر فقط إذا كان محفوظاً
         if (selection && range && startContainer && endContainer) {
           try {
             const newRange = document.createRange();
@@ -156,8 +170,8 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
             let currentOffset = 0;
             let targetStartNode = null;
             let targetEndNode = null;
-            let targetStartOffset = startOffset || 0;
-            let targetEndOffset = endOffset || 0;
+            let targetStartOffset = startOffset;
+            let targetEndOffset = endOffset;
             
             // البحث عن النودة المناسبة
             while (node = walker.nextNode()) {
@@ -182,11 +196,16 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
             }
           } catch (error) {
             // في حالة الخطأ، ضع المؤشر في النهاية
-            const newRange = document.createRange();
-            newRange.selectNodeContents(editorRef.current);
-            newRange.collapse(false);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
+            console.warn('Failed to restore cursor position:', error);
+            try {
+              const newRange = document.createRange();
+              newRange.selectNodeContents(editorRef.current);
+              newRange.collapse(false);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+            } catch (fallbackError) {
+              console.warn('Failed to set fallback cursor position:', fallbackError);
+            }
           }
         }
       }
