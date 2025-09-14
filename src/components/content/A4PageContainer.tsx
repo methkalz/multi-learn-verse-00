@@ -1,134 +1,218 @@
 import React, { useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+
+interface Page {
+  id: string;
+  content: string;
+}
 
 interface A4PageContainerProps {
-  pages: Array<{ id: string; content: string }>;
+  pages: Page[];
   currentPageIndex: number;
-  onPageContentChange: (pageId: string, content: string) => void;
-  onRegisterPageRef: (pageId: string, element: HTMLElement | null) => void;
+  onContentChange: (pageId: string, content: string) => void;
+  onPageRefChange: (pageId: string, element: HTMLElement | null) => void;
   className?: string;
   readOnly?: boolean;
+  A4_PAGE_HEIGHT: number;
 }
 
 export const A4PageContainer: React.FC<A4PageContainerProps> = ({
   pages,
   currentPageIndex,
-  onPageContentChange,
-  onRegisterPageRef,
-  className,
-  readOnly = false
+  onContentChange,
+  onPageRefChange,
+  className = '',
+  readOnly = false,
+  A4_PAGE_HEIGHT
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleContentChange = (pageId: string, event: React.FormEvent<HTMLDivElement>) => {
-    const content = event.currentTarget.innerHTML;
-    onPageContentChange(pageId, content);
-  };
-
-  const handlePaste = (event: React.ClipboardEvent) => {
-    event.preventDefault();
-    const text = event.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
-  };
-
+  // Auto-scroll to current page
   useEffect(() => {
-    // Auto-scroll to current page
     if (containerRef.current && currentPageIndex >= 0) {
-      const pageElement = containerRef.current.children[currentPageIndex] as HTMLElement;
-      if (pageElement) {
-        pageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const currentPageElement = containerRef.current.children[currentPageIndex] as HTMLElement;
+      if (currentPageElement) {
+        currentPageElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
       }
     }
   }, [currentPageIndex]);
 
+  const handleContentChange = (pageId: string, content: string) => {
+    onContentChange(pageId, content);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, pageId: string) => {
+    // Prevent typing if the page is at maximum height
+    const target = e.currentTarget as HTMLElement;
+    const currentHeight = target.scrollHeight;
+    
+    if (currentHeight >= A4_PAGE_HEIGHT - 40 && // Account for padding
+        e.key.length === 1 && // Only for printable characters
+        !e.ctrlKey && !e.metaKey) { // Allow shortcuts
+      
+      // Check if this is the last page
+      const pageIndex = pages.findIndex(p => p.id === pageId);
+      if (pageIndex === pages.length - 1) {
+        // Let the hook handle page creation
+        return;
+      } else {
+        // Prevent typing on non-last pages that are full
+        e.preventDefault();
+      }
+    }
+  };
+
   return (
     <div 
       ref={containerRef}
-      className={cn(
-        "a4-pages-container",
-        "flex flex-col items-center gap-8 p-8 bg-muted/20 min-h-screen",
-        className
-      )}
+      className={`a4-container space-y-8 max-h-[80vh] overflow-y-auto p-4 bg-gray-100 ${className}`}
     >
       {pages.map((page, index) => (
         <div
           key={page.id}
-          className={cn(
-            "a4-page",
-            "bg-background shadow-lg",
-            "w-[210mm] min-h-[297mm]",
-            "p-[25.4mm]", // 1 inch margins
-            "relative",
-            "transition-all duration-200",
-            index === currentPageIndex && "ring-2 ring-primary/20"
-          )}
+          data-page-id={page.id}
+          ref={(el) => onPageRefChange(page.id, el)}
+          className={`
+            a4-page bg-white shadow-lg mx-auto relative
+            border border-gray-300 rounded-sm
+            ${index === currentPageIndex ? 'ring-2 ring-primary' : ''}
+          `}
           style={{
-            // A4 dimensions: 210 × 297 mm
-            width: '210mm',
-            minHeight: '297mm',
-            maxHeight: '297mm',
-            overflow: 'visible'
+            width: '602px',      // A4 width after margins (159.2mm = 602px)
+            height: `${A4_PAGE_HEIGHT}px`, // A4 height after margins (246.2mm = 930px)
+            minHeight: `${A4_PAGE_HEIGHT}px`,
+            maxHeight: `${A4_PAGE_HEIGHT}px`,
+            overflow: 'hidden',  // Critical: hide overflow to prevent text disappearing below
           }}
         >
           {/* Page number indicator */}
-          <div className="absolute top-2 right-4 text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
+          <div className="absolute top-2 right-4 text-xs text-muted-foreground bg-background px-2 py-1 rounded shadow-sm border z-10">
             صفحة {index + 1} من {pages.length}
           </div>
-          
-          {/* Content area */}
+
+          {/* Editable content area */}
           <div
-            ref={(el) => onRegisterPageRef(page.id, el)}
-            className={cn(
-              "a4-content-area",
-              "w-full min-h-full",
-              "prose prose-lg max-w-none",
-              "focus:outline-none",
-              "text-foreground",
-              "[&>*]:mb-4 [&>*:last-child]:mb-0",
-              "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-6",
-              "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mb-4",
-              "[&_h3]:text-lg [&_h3]:font-medium [&_h3]:mb-3",
-              "[&_p]:leading-relaxed [&_p]:mb-4",
-              "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4",
-              "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4",
-              "[&_li]:mb-2",
-              "[&_table]:border-collapse [&_table]:w-full [&_table]:mb-4",
-              "[&_th]:border [&_th]:border-border [&_th]:p-2 [&_th]:bg-muted",
-              "[&_td]:border [&_td]:border-border [&_td]:p-2",
-              "[&_img]:max-w-full [&_img]:h-auto [&_img]:mb-4",
-              "[&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:mb-4"
-            )}
-            contentEditable={!readOnly}
+            contentEditable={!readOnly && index === pages.length - 1} // Only last page is editable
             suppressContentEditableWarning={true}
-            onInput={(e) => handleContentChange(page.id, e)}
+            onInput={(e) => handleContentChange(page.id, e.currentTarget.innerHTML)}
             onPaste={handlePaste}
-            dangerouslySetInnerHTML={{ __html: page.content }}
+            onKeyDown={(e) => handleKeyDown(e, page.id)}
+            className={`
+              w-full h-full outline-none p-10
+              ${readOnly || index < pages.length - 1 ? 'cursor-default bg-gray-50' : 'cursor-text'}
+              ${index === pages.length - 1 ? 'focus:bg-white' : ''}
+            `}
             style={{
-              minHeight: 'calc(297mm - 50.8mm)', // Full height minus margins
-              maxHeight: 'calc(297mm - 50.8mm)',
-              overflow: 'hidden',
+              minHeight: `${A4_PAGE_HEIGHT - 20}px`, // Account for page number
+              maxHeight: `${A4_PAGE_HEIGHT - 20}px`,
               wordWrap: 'break-word',
               hyphens: 'auto',
-              direction: 'rtl',
-              textAlign: 'right'
+              direction: 'rtl', // RTL support for Arabic
+              textAlign: 'right',
+              fontSize: '16px',
+              lineHeight: '1.8',
+              fontFamily: '"Times New Roman", serif',
+              overflow: 'hidden', // Prevent text from going beyond page bounds
+              paddingTop: '50px', // Space for page number
             }}
+            dangerouslySetInnerHTML={{ __html: page.content }}
           />
-          
-          {/* Page break indicator */}
+
+          {/* Visual indicator for page break */}
           {index < pages.length - 1 && (
-            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground bg-background px-3 py-1 rounded-full border">
-              فاصل الصفحة
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 to-primary/40" />
+          )}
+
+          {/* Near-end warning (show when close to page limit) */}
+          {!readOnly && index === pages.length - 1 && (
+            <div className="absolute bottom-4 left-4 right-4 text-center">
+              <div className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-200 inline-block">
+                📝 سيتم إنشاء صفحة جديدة تلقائياً عند الحاجة
+              </div>
             </div>
           )}
         </div>
       ))}
-      
-      {/* Add page button */}
-      <div className="text-center py-8">
-        <div className="text-sm text-muted-foreground">
-          سيتم إنشاء صفحة جديدة تلقائياً عند امتلاء الصفحة السابقة
-        </div>
-      </div>
+
+      <style>{`
+        .a4-page {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+        
+        .a4-page:hover {
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Print styles */
+        @media print {
+          .a4-container {
+            max-height: none !important;
+            overflow: visible !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+          
+          .a4-page {
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            page-break-after: always;
+            width: 210mm !important;
+            height: 297mm !important;
+            max-height: none !important;
+            border-radius: 0 !important;
+          }
+          
+          .a4-page [contenteditable] {
+            padding: 25.4mm !important;
+            max-height: none !important;
+            overflow: visible !important;
+          }
+          
+          .a4-page:last-child {
+            page-break-after: auto;
+          }
+
+          .absolute {
+            display: none !important;
+          }
+        }
+
+        /* Ensure proper text flow and prevent overflow */
+        .a4-page [contenteditable] {
+          overflow-wrap: break-word;
+          word-break: break-word;
+          box-sizing: border-box;
+        }
+
+        /* Custom scrollbar for container */
+        .a4-container::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .a4-container::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 4px;
+        }
+
+        .a4-container::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 4px;
+        }
+
+        .a4-container::-webkit-scrollbar-thumb:hover {
+          background: #a8a8a8;
+        }
+      `}</style>
     </div>
   );
 };
