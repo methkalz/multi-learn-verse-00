@@ -56,7 +56,7 @@ export const useAutoPageBreak = ({
     }
   }, [pages, onContentChange]);
 
-  // Simple height check - only called manually
+  // Simple height check - only called manually and with strict conditions
   const checkPageHeight = useCallback((pageId: string) => {
     if (checkingRef.current) return;
     
@@ -71,15 +71,18 @@ export const useAutoPageBreak = ({
     
     if (!isLastPage) return;
     
-    // Get actual content height (not scroll height)
+    // Get actual content height
     const contentHeight = contentArea.offsetHeight;
-    const maxAllowedHeight = A4_PAGE_HEIGHT - 100; // Account for padding
+    const availableHeight = A4_PAGE_HEIGHT - 120; // Conservative margin for padding
     
-    console.log(`Page ${pageIndex + 1}: content height = ${contentHeight}px, max = ${maxAllowedHeight}px`);
+    console.log(`Page ${pageIndex + 1}: content height = ${contentHeight}px, available = ${availableHeight}px`);
     
-    if (contentHeight > maxAllowedHeight) {
-      console.log('Creating new page due to height overflow');
+    // Only create new page if we're REALLY close to the bottom (90% full)
+    if (contentHeight > availableHeight * 0.9) {
+      console.log('Page is 90% full, creating new page');
       addPage();
+    } else {
+      console.log('Page has space remaining, no new page needed');
     }
   }, [pages, addPage, A4_PAGE_HEIGHT]);
 

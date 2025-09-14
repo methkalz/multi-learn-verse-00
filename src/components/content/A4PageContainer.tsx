@@ -43,19 +43,7 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
 
   const handleContentChange = (pageId: string, content: string) => {
     onContentChange(pageId, content);
-    
-    // Check height after content change - but only occasionally
-    const pageIndex = pages.findIndex(p => p.id === pageId);
-    const isLastPage = pageIndex === pages.length - 1;
-    
-    if (isLastPage && onManualHeightCheck) {
-      // Only check every few characters to avoid spam
-      if (content.length % 50 === 0) {
-        setTimeout(() => {
-          onManualHeightCheck(pageId);
-        }, 500);
-      }
-    }
+    // No automatic height checking here
   };
 
   const handlePaste = (e: React.ClipboardEvent, pageId: string) => {
@@ -63,20 +51,32 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
     const text = e.clipboardData.getData('text/plain');
     document.execCommand('insertText', false, text);
     
-    // Check height after paste
-    if (onManualHeightCheck) {
+    // Check height after paste only if significant content added
+    if (text.length > 100 && onManualHeightCheck) {
       setTimeout(() => {
         onManualHeightCheck(pageId);
-      }, 100);
+      }, 300);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, pageId: string) => {
-    // Check height on Enter key
-    if (e.key === 'Enter' && onManualHeightCheck) {
-      setTimeout(() => {
+    // Don't check height on Enter - let user continue typing normally
+    // Only prevent typing if we're really at the bottom of the page
+    const target = e.currentTarget as HTMLElement;
+    const actualHeight = target.offsetHeight;
+    const maxHeight = A4_PAGE_HEIGHT - 80; // More conservative
+    
+    // Only prevent if we're REALLY close to the bottom and typing normal characters
+    if (actualHeight > maxHeight && 
+        e.key.length === 1 && 
+        !e.ctrlKey && 
+        !e.metaKey) {
+      
+      const pageIndex = pages.findIndex(p => p.id === pageId);
+      if (pageIndex === pages.length - 1 && onManualHeightCheck) {
+        // Create new page and move to it
         onManualHeightCheck(pageId);
-      }, 100);
+      }
     }
   };
 
