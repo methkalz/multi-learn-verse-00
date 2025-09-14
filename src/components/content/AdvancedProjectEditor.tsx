@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,7 +30,8 @@ import {
   Award,
   BarChart3,
   CheckSquare,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -73,7 +75,8 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
     addComment, 
     tasks, 
     fetchTasks,
-    toggleTaskCompletion 
+    toggleTaskCompletion,
+    deleteProject 
   } = useGrade10MiniProjects();
   
   const [content, setContent] = useState(project?.content || '');
@@ -84,6 +87,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
   const [versions, setVersions] = useState<ProjectVersion[]>([]);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [activeTab, setActiveTab] = useState('editor');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const autoSaveIntervalRef = useRef<NodeJS.Timeout>();
@@ -268,6 +272,26 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
     });
   };
 
+  const handleDeleteProject = async () => {
+    try {
+      const success = await deleteProject(project.id);
+      if (success) {
+        setShowDeleteDialog(false);
+        onClose();
+        toast({
+          title: "تم حذف المشروع",
+          description: "تم حذف المشروع بنجاح",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "خطأ في الحذف",
+        description: "حدث خطأ أثناء حذف المشروع",
+        variant: "destructive"
+      });
+    }
+  };
+
   const calculateProgress = () => {
     const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).filter(w => w.length > 0).length;
     const hasImages = content.includes('<img');
@@ -355,6 +379,38 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
                     <Save className="h-4 w-4" />
                     {isAutoSaving ? 'جاري الحفظ...' : 'حفظ'}
                   </Button>
+
+                  <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="gap-2"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        حذف
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>تأكيد حذف المشروع</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          هل أنت متأكد من حذف مشروع "{project.title}"؟
+                          <br />
+                          هذا الإجراء لا يمكن التراجع عنه وسيتم حذف جميع المحتوى والمهام والتعليقات والملفات المرتبطة بالمشروع.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleDeleteProject}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          حذف المشروع
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </>
               )}
               
