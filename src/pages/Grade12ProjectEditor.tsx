@@ -115,16 +115,19 @@ const Grade12ProjectEditor: React.FC = () => {
         });
         
         setLastSaved(new Date());
-        toast({
-          title: "تم الحفظ التلقائي",
-          description: "تم حفظ التغييرات تلقائياً",
-        });
+        // Only show autosave toast occasionally to avoid spam
+        if (Math.random() < 0.3) { // Show 30% of the time
+          toast({
+            title: "تم الحفظ التلقائي",
+            description: "تم حفظ التغييرات تلقائياً",
+          });
+        }
       } catch (error) {
         console.error('Error auto-saving:', error);
       } finally {
         setIsAutoSaving(false);
       }
-    }, 3000);
+    }, 300000); // 5 minutes = 300000ms
 
     return () => clearTimeout(autoSaveTimer);
   }, [content, project?.id, project?.project_content, updateProject]);

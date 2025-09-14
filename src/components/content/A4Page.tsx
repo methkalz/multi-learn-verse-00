@@ -122,13 +122,16 @@ const A4Page: React.FC<A4PageProps> = ({
         onKeyDown={handleKeyDown}
         onFocus={onFocus}
         className={`
-          w-full outline-none transition-colors duration-200
+          absolute outline-none transition-colors duration-200
           ${!readOnly ? 'focus:bg-primary/5' : ''}
         `}
         style={{
-          width: '794px',
-          height: '1123px',
-          padding: '96px', // Word-standard margins: 2.54cm = 96px at 96 DPI
+          top: '96px',
+          left: '96px',
+          width: '602px', // 794 - 96*2 = 602px
+          height: '931px', // 1123 - 96*2 = 931px
+          padding: '0', // No padding - text starts at margin
+          margin: '0',
           wordWrap: 'break-word',
           hyphens: 'auto',
           direction: 'rtl',
