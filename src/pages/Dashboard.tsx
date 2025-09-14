@@ -26,6 +26,7 @@ import { DashboardStats, CalendarEvent } from '@/types/common';
 import { logError, logInfo } from '@/lib/logger';
 import SchoolAdminDashboard from '@/components/SchoolAdminDashboard';
 import TeacherDashboard from '@/components/TeacherDashboard';
+import StudentDashboard from '@/components/student/StudentDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -820,6 +821,8 @@ const Dashboard = () => {
       </div>
         ) : userProfile?.role === 'school_admin' ? (
           <SchoolAdminDashboard />
+        ) : userProfile?.role === 'student' ? (
+          <StudentDashboard />
         ) : (
           <div className="container mx-auto px-6 py-6 text-center">
             <h2 className="text-2xl font-bold mb-4">مرحباً بك</h2>

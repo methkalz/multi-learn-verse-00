@@ -3830,6 +3830,165 @@ export type Database = {
         }
         Relationships: []
       }
+      student_achievements: {
+        Row: {
+          achievement_description: string | null
+          achievement_name: string
+          achievement_type: string
+          earned_at: string
+          id: string
+          metadata: Json | null
+          points_value: number
+          school_id: string
+          student_id: string
+        }
+        Insert: {
+          achievement_description?: string | null
+          achievement_name: string
+          achievement_type: string
+          earned_at?: string
+          id?: string
+          metadata?: Json | null
+          points_value?: number
+          school_id: string
+          student_id: string
+        }
+        Update: {
+          achievement_description?: string | null
+          achievement_name?: string
+          achievement_type?: string
+          earned_at?: string
+          id?: string
+          metadata?: Json | null
+          points_value?: number
+          school_id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
+      student_activity_log: {
+        Row: {
+          activity_type: string
+          content_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          metadata: Json | null
+          points_earned: number | null
+          school_id: string
+          student_id: string
+        }
+        Insert: {
+          activity_type: string
+          content_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          metadata?: Json | null
+          points_earned?: number | null
+          school_id: string
+          student_id: string
+        }
+        Update: {
+          activity_type?: string
+          content_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          metadata?: Json | null
+          points_earned?: number | null
+          school_id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
+      student_daily_challenges: {
+        Row: {
+          challenge_date: string
+          challenge_description: string | null
+          challenge_title: string
+          challenge_type: string
+          completed: boolean
+          completed_at: string | null
+          current_progress: number
+          id: string
+          points_reward: number
+          school_id: string
+          student_id: string
+          target_value: number
+        }
+        Insert: {
+          challenge_date?: string
+          challenge_description?: string | null
+          challenge_title: string
+          challenge_type: string
+          completed?: boolean
+          completed_at?: string | null
+          current_progress?: number
+          id?: string
+          points_reward?: number
+          school_id: string
+          student_id: string
+          target_value: number
+        }
+        Update: {
+          challenge_date?: string
+          challenge_description?: string | null
+          challenge_title?: string
+          challenge_type?: string
+          completed?: boolean
+          completed_at?: string | null
+          current_progress?: number
+          id?: string
+          points_reward?: number
+          school_id?: string
+          student_id?: string
+          target_value?: number
+        }
+        Relationships: []
+      }
+      student_progress: {
+        Row: {
+          completed_at: string | null
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          points_earned: number
+          progress_percentage: number
+          school_id: string
+          student_id: string
+          time_spent_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          points_earned?: number
+          progress_percentage?: number
+          school_id: string
+          student_id: string
+          time_spent_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          points_earned?: number
+          progress_percentage?: number
+          school_id?: string
+          student_id?: string
+          time_spent_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       students: {
         Row: {
           created_at_utc: string
@@ -4133,6 +4292,14 @@ export type Database = {
       get_school_package_with_usage: {
         Args: { school_uuid: string }
         Returns: Json
+      }
+      get_student_dashboard_stats: {
+        Args: { student_uuid: string }
+        Returns: Json
+      }
+      get_student_total_points: {
+        Args: { student_uuid: string }
+        Returns: number
       }
       get_students_for_school_admin: {
         Args: Record<PropertyKey, never>
