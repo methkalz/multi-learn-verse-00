@@ -149,6 +149,26 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
     }
   };
 
+  // Handler for proper RTL input to prevent text reversal
+  const handleRTLInput = (e: React.FormEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    
+    // Ensure proper direction is maintained
+    target.style.direction = 'rtl';
+    target.style.textAlign = 'right';
+    
+    // Fix any reversed text in child elements
+    const textNodes = target.querySelectorAll('*');
+    textNodes.forEach((node: any) => {
+      if (node.style) {
+        node.style.direction = 'rtl';
+        node.style.textAlign = 'right';
+      }
+    });
+    
+    updateContent();
+  };
+
   // Enhanced image handling with drag & drop
   const handleImageUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -763,7 +783,6 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
         <div
           ref={editorRef}
           contentEditable={!readOnly}
-          dir="rtl"
           className={`outline-none enhanced-arabic-editor ${isA4Mode ? 'p-16' : 'p-6'} min-h-[500px] focus:outline-none focus:ring-2 focus:ring-primary/20`}
           style={{ 
             lineHeight: '1.8',
@@ -783,7 +802,7 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
               breakInside: 'avoid'
             })
           }}
-          onInput={updateContent}
+          onInput={handleRTLInput}
           onBlur={updateContent}
           onPaste={handlePaste}
           onDragOver={handleDragOver}

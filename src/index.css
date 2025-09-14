@@ -231,6 +231,13 @@ All colors MUST be HSL.
   .enhanced-arabic-editor {
     direction: rtl;
     text-align: right;
+    unicode-bidi: bidi-override;
+  }
+
+  .enhanced-arabic-editor * {
+    direction: inherit;
+    text-align: inherit;
+    unicode-bidi: inherit;
   }
 
   .enhanced-arabic-editor p,
@@ -238,6 +245,8 @@ All colors MUST be HSL.
   .enhanced-arabic-editor span {
     text-align: right;
     margin: 0.5em 0;
+    direction: rtl;
+    unicode-bidi: normal;
   }
 
   /* Fix for Arabic text inside tables */
@@ -255,6 +264,24 @@ All colors MUST be HSL.
 
   .enhanced-arabic-editor li {
     text-align: right;
+  }
+
+  /* Enhanced contentEditable RTL support */
+  .enhanced-arabic-editor[contenteditable="true"] {
+    text-rendering: optimizeLegibility;
+    writing-mode: horizontal-tb;
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* Prevent text reversal in contentEditable */
+  .enhanced-arabic-editor[contenteditable="true"] br {
+    content: "";
+  }
+
+  .enhanced-arabic-editor[contenteditable="true"]:focus {
+    direction: rtl !important;
+    text-align: right !important;
   }
 
   /* فقرات ونصوص عربية */
