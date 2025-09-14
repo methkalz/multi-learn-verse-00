@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, BookOpen, FileText, Video, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGrade11Content, Grade11SectionWithTopics, Grade11TopicWithLessons, Grade11LessonWithMedia, Grade11Section, Grade11Topic, Grade11Lesson } from '@/hooks/useGrade11Content';
 import { useGrade11Files } from '@/hooks/useGrade11Files';
+import { useAuth } from '@/hooks/useAuth';
 import Grade11SectionForm from './Grade11SectionForm';
 import Grade11TopicForm from './Grade11TopicForm';
 import Grade11LessonForm from './Grade11LessonForm';
@@ -21,6 +23,7 @@ import KnowledgeAdventureRealContent from '../games/KnowledgeAdventureRealConten
 import { logger } from '@/lib/logger';
 
 const Grade11Content = () => {
+  const { userProfile } = useAuth();
   const { 
     sections, 
     loading, 
@@ -40,6 +43,9 @@ const Grade11Content = () => {
     reorderTopics,
     reorderLessons
   } = useGrade11Content();
+
+  // تحديد الصلاحيات
+  const canManageContent = userProfile?.role === 'superadmin';
 
   const { 
     documents, 
@@ -430,26 +436,54 @@ const Grade11Content = () => {
         </TabsContent>
 
         <TabsContent value="files" className="space-y-6">
-          <Grade11FileLibrary
-            documents={documents}
-            loading={filesLoading}
-            onAddDocument={handleAddDocument}
-            onEditDocument={handleEditDocument}
-            onDeleteDocument={deleteDocument}
-            uploadFile={uploadFile}
-            addDocuments={addDocuments}
-            getFileUrl={getFileUrl}
-          />
+          <div className="space-y-4">
+            {canManageContent && (
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-semibold">مكتبة الملفات</h3>
+                  <p className="text-muted-foreground">{documents.length} ملف متاح</p>
+                </div>
+                <Button onClick={handleAddDocument} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  إضافة ملف جديد
+                </Button>
+              </div>
+            )}
+            <Grade11FileLibrary
+              documents={documents}
+              loading={filesLoading}
+              onAddDocument={canManageContent ? handleAddDocument : () => {}}
+              onEditDocument={canManageContent ? handleEditDocument : () => {}}
+              onDeleteDocument={canManageContent ? deleteDocument : () => {}}
+              uploadFile={uploadFile}
+              addDocuments={addDocuments}
+              getFileUrl={getFileUrl}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="videos" className="space-y-6">
-          <Grade11VideoLibrary
-            videos={videos}
-            loading={filesLoading}
-            onAddVideo={handleAddVideo}
-            onEditVideo={handleEditVideo}
-            onDeleteVideo={deleteVideo}
-          />
+          <div className="space-y-4">
+            {canManageContent && (
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-semibold">مكتبة الفيديوهات</h3>
+                  <p className="text-muted-foreground">{videos.length} فيديو متاح</p>
+                </div>
+                <Button onClick={handleAddVideo} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  إضافة فيديو جديد
+                </Button>
+              </div>
+            )}
+            <Grade11VideoLibrary
+              videos={videos}
+              loading={filesLoading}
+              onAddVideo={canManageContent ? handleAddVideo : () => {}}
+              onEditVideo={canManageContent ? handleEditVideo : () => {}}
+              onDeleteVideo={canManageContent ? deleteVideo : () => {}}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="exams" className="space-y-6">

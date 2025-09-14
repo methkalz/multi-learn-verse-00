@@ -41,7 +41,9 @@ const Grade12VideoLibrary: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const [viewingVideo, setViewingVideo] = useState(false);
 
-  const isTeacher = userProfile?.role === 'teacher' || userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
+  // فصل منطق العرض عن منطق التعديل
+  const canViewContent = true; // الجميع يستطيع المشاهدة
+  const canManageContent = userProfile?.role === 'superadmin'; // فقط السوبر آدمن يستطيع التعديل
 
   useEffect(() => {
     fetchVideos();
@@ -155,7 +157,7 @@ const Grade12VideoLibrary: React.FC = () => {
           </p>
         </div>
         
-        {isTeacher && (
+        {canManageContent && (
           <Button onClick={() => setShowVideoForm(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             إضافة فيديو جديد
@@ -203,7 +205,7 @@ const Grade12VideoLibrary: React.FC = () => {
                 : 'لم يتم إضافة أي فيديوهات بعد'
               }
             </p>
-            {isTeacher && !searchTerm && selectedCategory === 'all' && (
+            {canManageContent && !searchTerm && selectedCategory === 'all' && (
               <Button onClick={() => setShowVideoForm(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
                 إضافة أول فيديو
@@ -329,7 +331,7 @@ const Grade12VideoLibrary: React.FC = () => {
                     </Button>
                   )}
                   
-                  {isTeacher && (
+                  {canManageContent && (
                     <>
                       <Button
                         variant="outline"

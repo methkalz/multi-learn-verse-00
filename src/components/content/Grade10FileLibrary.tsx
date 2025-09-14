@@ -57,7 +57,9 @@ const Grade10FileLibrary: React.FC<Grade10FileLibraryProps> = ({
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const itemsPerPage = 12;
 
-  const canManageContent = userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
+  // فصل منطق العرض عن منطق التعديل
+  const canViewContent = true; // الجميع يستطيع المشاهدة
+  const canManageContent = userProfile?.role === 'superadmin'; // فقط السوبر آدمن يستطيع التعديل
 
   // Filter and paginate documents
   const filteredDocuments = documents.filter(doc => {

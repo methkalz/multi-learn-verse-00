@@ -108,10 +108,7 @@ const Grade11VideoLibrary: React.FC<Grade11VideoLibraryProps> = ({
             </Badge>
           )}
         </div>
-        <Button onClick={onAddVideo} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          إضافة فيديو
-        </Button>
+        {/* تم إزالة زر إضافة الفيديو - يُظهر فقط للسوبر آدمن في مكون آخر */}
       </div>
 
       {/* Search */}
@@ -136,9 +133,7 @@ const Grade11VideoLibrary: React.FC<Grade11VideoLibraryProps> = ({
               : 'لم يتم إضافة أي فيديوهات بعد'
             }
           </p>
-          {!searchTerm && (
-            <Button onClick={onAddVideo}>إضافة فيديو جديد</Button>
-          )}
+          {/* تم إزالة زر إضافة الفيديو - يُظهر فقط للسوبر آدمن في مكون آخر */}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -224,37 +219,7 @@ const Grade11VideoLibrary: React.FC<Grade11VideoLibraryProps> = ({
                     <ExternalLink className="h-3 w-3 mr-1" />
                     مشاهدة
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onEditVideo(video)}
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          هل أنت متأكد من حذف الفيديو "{video.title}"؟ لا يمكن التراجع عن هذا الإجراء.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => onDeleteVideo(video.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          حذف
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  {/* أزرار التعديل والحذف - يُظهر فقط للسوبر آدمن في مكون آخر */}
                 </div>
               </CardContent>
             </Card>

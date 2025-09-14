@@ -22,7 +22,9 @@ const Grade10VideoLibrary: React.FC = () => {
   const [editingVideo, setEditingVideo] = useState<{ id: string; title: string; video_url: string } | null>(null);
   const [previewVideo, setPreviewVideo] = useState<{ id: string; title: string; video_url: string; source_type: string; description?: string } | null>(null);
 
-  const canManageContent = userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
+  // فصل منطق العرض عن منطق التعديل
+  const canViewContent = true; // الجميع يستطيع المشاهدة
+  const canManageContent = userProfile?.role === 'superadmin'; // فقط السوبر آدمن يستطيع التعديل
 
   const categoryOptions = [
     { value: 'all', label: 'جميع الفئات' },
