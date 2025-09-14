@@ -45,6 +45,7 @@ import { Separator } from '@/components/ui/separator';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import ImageResizer from './ImageResizer';
 
 interface EnhancedDocumentEditorProps {
   content: string;
@@ -170,15 +171,57 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
 
     const reader = new FileReader();
     reader.onload = (e) => {
+      const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const imageHTML = `
-        <div class="image-container" style="margin: 20px 0; text-align: center;">
+        <div class="image-container" style="margin: 20px auto; text-align: center; display: inline-block; position: relative; max-width: 100%;">
           <img 
+            id="${imageId}"
             src="${e.target?.result}" 
-            style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer;" 
-            alt="صورة" 
-            onclick="this.style.transform = this.style.transform ? '' : 'scale(1.2)'; this.style.transition = 'transform 0.3s ease';"
+            style="
+              max-width: 100%; 
+              height: auto; 
+              border-radius: 8px; 
+              box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+              cursor: default;
+              resize: both;
+              overflow: auto;
+              display: block;
+            " 
+            alt="صورة"
+            onload="this.style.width = Math.min(this.naturalWidth, 600) + 'px';"
+            draggable="false"
           />
+          <div class="image-resize-handles" style="
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            user-select: none;
+          " onclick="toggleImageSize('${imageId}')">⟷</div>
         </div>
+        <script>
+          function toggleImageSize(imgId) {
+            const img = document.getElementById(imgId);
+            if (!img) return;
+            
+            const currentWidth = img.style.width || img.offsetWidth + 'px';
+            const naturalWidth = img.naturalWidth;
+            const containerWidth = img.closest('.image-container').offsetWidth;
+            
+            if (parseInt(currentWidth) < naturalWidth * 0.8) {
+              img.style.width = Math.min(naturalWidth, containerWidth) + 'px';
+            } else if (parseInt(currentWidth) > naturalWidth * 0.5) {
+              img.style.width = (naturalWidth * 0.3) + 'px';
+            } else {
+              img.style.width = (naturalWidth * 0.6) + 'px';
+            }
+          }
+        </script>
       `;
       document.execCommand('insertHTML', false, imageHTML);
       updateContent();
@@ -384,9 +427,11 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-white shadow-lg">
-      {/* Enhanced Toolbar */}
-      <div className="bg-muted/30 p-3 border-b">
+    <>
+      <ImageResizer />
+      <div className="border rounded-lg overflow-hidden bg-white shadow-lg h-full flex flex-col">
+        {/* Enhanced Toolbar */}
+        <div className="bg-muted/30 p-3 border-b shrink-0">
         <div className="flex flex-wrap gap-2 items-center text-sm">
           {!readOnly && (
             <>
@@ -705,26 +750,37 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
         className="hidden"
       />
 
-      {/* Editor Area */}
+      {/* Editor Area with Enhanced Scrolling */}
       <div 
-        className={`${isA4Mode ? 'max-w-4xl mx-auto bg-white shadow-lg' : ''}`}
-        style={isA4Mode ? { minHeight: '29.7cm' } : {}}
+        className={`${isA4Mode ? 'max-w-4xl mx-auto bg-white shadow-lg overflow-y-auto max-h-screen' : 'overflow-y-auto max-h-[70vh]'}`}
+        style={isA4Mode ? { 
+          minHeight: '29.7cm',
+          scrollBehavior: 'smooth'
+        } : {
+          scrollBehavior: 'smooth'
+        }}
       >
         <div
           ref={editorRef}
           contentEditable={!readOnly}
           dir="rtl"
-          className={`outline-none enhanced-arabic-editor ${isA4Mode ? 'p-16' : 'p-6'} min-h-[500px]`}
+          className={`outline-none enhanced-arabic-editor ${isA4Mode ? 'p-16' : 'p-6'} min-h-[500px] focus:outline-none focus:ring-2 focus:ring-primary/20`}
           style={{ 
             lineHeight: '1.8',
             fontFamily: 'Arial, sans-serif',
             fontSize: '16px',
+            scrollbarWidth: 'auto',
+            scrollbarColor: '#cbd5e1 #f1f5f9',
+            overflowWrap: 'break-word',
+            wordBreak: 'break-word',
             ...(isA4Mode && { 
               width: '21cm',
               minHeight: '29.7cm',
               margin: '0 auto',
               padding: '2cm',
-              backgroundColor: 'white'
+              backgroundColor: 'white',
+              pageBreakInside: 'avoid',
+              breakInside: 'avoid'
             })
           }}
           onInput={updateContent}
@@ -839,10 +895,11 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
               size: A4;
               margin: 2cm;
             }
-          }
-        `
-      }} />
-    </div>
+           }
+         `
+       }} />
+     </div>
+    </>
   );
 };
 
