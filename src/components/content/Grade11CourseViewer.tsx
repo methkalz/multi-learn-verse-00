@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { useGrade11Content, Grade11TopicWithLessons, Grade11LessonWithMedia } from '@/hooks/useGrade11Content';
@@ -39,13 +38,13 @@ const Grade11CourseViewer: React.FC = () => {
   const getMediaIcon = (mediaType: string) => {
     switch (mediaType) {
       case 'video':
-        return <PlayCircle className="h-4 w-4 text-red-500" />;
+        return <PlayCircle className="h-4 w-4 text-muted-foreground" />;
       case 'lottie':
-        return <Play className="h-4 w-4 text-purple-500" />;
+        return <Play className="h-4 w-4 text-muted-foreground" />;
       case 'image':
-        return <FileText className="h-4 w-4 text-blue-500" />;
+        return <FileText className="h-4 w-4 text-muted-foreground" />;
       default:
-        return <FileText className="h-4 w-4 text-gray-500" />;
+        return <FileText className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -69,14 +68,14 @@ const Grade11CourseViewer: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white rounded-2xl p-8 mb-8">
+      <div className="bg-gradient-to-r from-slate-50 to-gray-100 border border-border rounded-xl p-8 mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div>
-            <h1 className="text-3xl font-bold mb-4">محتوى الصف الحادي عشر</h1>
-            <p className="text-blue-100 mb-6 text-lg">
+            <h1 className="text-3xl font-bold mb-4 text-foreground">محتوى الصف الحادي عشر</h1>
+            <p className="text-muted-foreground mb-6 text-lg">
               استكشف المنهج التعليمي الشامل للصف الحادي عشر مع دروس تفاعلية ووسائط متنوعة
             </p>
-            <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Play className="h-5 w-5" />
                 <span>{totalLessons} درس</span>
@@ -92,23 +91,22 @@ const Grade11CourseViewer: React.FC = () => {
             </div>
           </div>
           <div className="hidden lg:block">
-            <div className="bg-white/10 backdrop-blur rounded-xl p-6">
-              <h3 className="font-semibold mb-4">إحصائيات المحتوى</h3>
-              <div className="space-y-3">
+            <div className="bg-muted/30 border rounded-xl p-6">
+              <h3 className="font-semibold mb-4 text-foreground">إحصائيات المحتوى</h3>
+              <div className="space-y-3 text-muted-foreground">
                 <div className="flex justify-between">
                   <span>الأقسام</span>
-                  <span className="font-bold">{sections.length}</span>
+                  <span className="font-bold text-foreground">{sections.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>المواضيع</span>
-                  <span className="font-bold">{allTopics.length}</span>
+                  <span className="font-bold text-foreground">{allTopics.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>الدروس</span>
-                  <span className="font-bold">{totalLessons}</span>
+                  <span className="font-bold text-foreground">{totalLessons}</span>
                 </div>
-                <Progress value={75} className="mt-4" />
-                <p className="text-xs text-blue-100">75% من المحتوى متاح</p>
+                <p className="text-xs text-muted-foreground mt-4">جميع المحتوى متاح للعرض</p>
               </div>
             </div>
           </div>
@@ -152,7 +150,7 @@ const Grade11CourseViewer: React.FC = () => {
                     <AccordionTrigger className="px-6 py-4 hover:no-underline">
                       <div className="flex items-center justify-between w-full text-right">
                         <div className="flex items-center gap-4">
-                          <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                          <div className="bg-muted text-muted-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                             {sectionIndex + 1}
                           </div>
                           <div>
@@ -171,7 +169,7 @@ const Grade11CourseViewer: React.FC = () => {
                     <AccordionContent className="px-6 pb-6">
                       <div className="space-y-4">
                         {section.topics.map((topic, topicIndex) => (
-                          <Card key={topic.id} className="border-r-4 border-r-primary">
+                          <Card key={topic.id} className="border-r-4 border-r-muted-foreground/30">
                             <CardHeader className="pb-3">
                               <CardTitle className="text-base flex items-center gap-3">
                                 <span className="bg-muted text-muted-foreground rounded w-6 h-6 flex items-center justify-center text-xs">
@@ -197,12 +195,12 @@ const Grade11CourseViewer: React.FC = () => {
                                       onClick={() => handleLessonClick(lesson)}
                                       className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors group"
                                     >
-                                      <div className="bg-green-100 text-green-600 rounded w-6 h-6 flex items-center justify-center text-xs">
+                                      <div className="bg-muted text-muted-foreground rounded w-6 h-6 flex items-center justify-center text-xs">
                                         ✓
                                       </div>
                                       
                                       <div className="flex-1">
-                                        <h4 className="font-medium text-sm group-hover:text-primary transition-colors">
+                                        <h4 className="font-medium text-sm group-hover:text-foreground transition-colors">
                                           {lessonIndex + 1}. {lesson.title}
                                         </h4>
                                         <div className="flex items-center gap-4 mt-1">
@@ -227,7 +225,7 @@ const Grade11CourseViewer: React.FC = () => {
                                         </div>
                                       </div>
                                       
-                                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                                     </div>
                                   ))}
                                 </div>
@@ -246,30 +244,35 @@ const Grade11CourseViewer: React.FC = () => {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Course Progress */}
+          {/* Content Statistics */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">تقدم المحتوى</CardTitle>
+              <CardTitle className="text-base">إحصائيات المحتوى</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">75%</div>
-                  <p className="text-sm text-muted-foreground">مكتمل</p>
+                  <div className="text-2xl font-bold text-foreground">{sections.length}</div>
+                  <p className="text-sm text-muted-foreground">أقسام متاحة</p>
                 </div>
-                <Progress value={75} />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{Math.floor(totalLessons * 0.75)} درس مكتمل</span>
-                  <span>{totalLessons} درس إجمالي</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">المواضيع</span>
+                    <span className="font-medium">{allTopics.length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">الدروس</span>
+                    <span className="font-medium">{totalLessons}</span>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Quick Stats */}
+          {/* Content Overview */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">إحصائيات سريعة</CardTitle>
+              <CardTitle className="text-base">نظرة عامة</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -286,8 +289,8 @@ const Grade11CourseViewer: React.FC = () => {
                   <Badge variant="secondary">{totalLessons}</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">المدة الإجمالية</span>
-                  <Badge variant="secondary">{Math.floor(totalDuration / 60)}ساعة</Badge>
+                  <span className="text-sm">المدة التقديرية</span>
+                  <Badge variant="secondary">{Math.floor(totalDuration / 60)} ساعة</Badge>
                 </div>
               </div>
             </CardContent>

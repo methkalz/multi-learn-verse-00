@@ -52,7 +52,7 @@ const Grade11LessonDetailsModal: React.FC<Grade11LessonDetailsModalProps> = ({ l
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] p-0 gap-0">
         {/* Header */}
-        <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
+        <DialogHeader className="p-6 pb-4 bg-muted/30 border-b">
           <div className="flex items-start justify-between">
             <div className="flex-1 pr-8">
               <DialogTitle className="text-2xl font-bold text-foreground mb-3">
@@ -68,7 +68,7 @@ const Grade11LessonDetailsModal: React.FC<Grade11LessonDetailsModalProps> = ({ l
                   <span>{format(new Date(lesson.created_at), 'dd/MM/yyyy')}</span>
                 </div>
                 {lesson.media && lesson.media.length > 0 && (
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  <Badge variant="secondary" className="bg-muted text-muted-foreground">
                     {lesson.media.length} ملف مرفق
                   </Badge>
                 )}
