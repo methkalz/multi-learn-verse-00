@@ -27,7 +27,9 @@ import {
   BookOpen,
   Target,
   Award,
-  BarChart3
+  BarChart3,
+  CheckSquare,
+  Plus
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,7 +67,14 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
   onSave
 }) => {
   const { userProfile } = useAuth();
-  const { updateProjectContent, updateProjectStatus, addComment } = useGrade10MiniProjects();
+  const { 
+    updateProjectContent, 
+    updateProjectStatus, 
+    addComment, 
+    tasks, 
+    fetchTasks,
+    toggleTaskCompletion 
+  } = useGrade10MiniProjects();
   
   const [content, setContent] = useState(project?.content || '');
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -126,13 +135,14 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
     };
   }, [content, project?.id, project?.content, updateProjectContent]);
 
-  // Load comments and versions
+  // Load comments, versions, and tasks
   useEffect(() => {
     if (project?.id) {
       loadComments();
       loadVersionHistory();
+      fetchTasks(project.id);
     }
-  }, [project?.id]);
+  }, [project?.id, fetchTasks]);
 
   const loadComments = async () => {
     try {
@@ -357,10 +367,14 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
 
         <div className="flex-1 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-4 rounded-none border-b">
+            <TabsList className="grid w-full grid-cols-5 rounded-none border-b">
               <TabsTrigger value="editor" className="gap-2">
                 <FileText className="h-4 w-4" />
                 المحرر
+              </TabsTrigger>
+              <TabsTrigger value="tasks" className="gap-2">
+                <CheckSquare className="h-4 w-4" />
+                المهام ({tasks.length})
               </TabsTrigger>
               <TabsTrigger value="comments" className="gap-2">
                 <MessageSquare className="h-4 w-4" />
@@ -398,6 +412,86 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
                   </div>
                 </ScrollArea>
               )}
+            </TabsContent>
+
+            <TabsContent value="tasks" className="flex-1 overflow-hidden mt-0">
+              <div className="h-full flex flex-col">
+                <div className="p-4 border-b bg-muted/30">
+                  <h3 className="font-medium mb-2">المهام الأساسية للمشروع</h3>
+                  <p className="text-sm text-muted-foreground">
+                    أكمل هذه المهام الخمس لإنجاز مشروعك بنجاح
+                  </p>
+                </div>
+                
+                <ScrollArea className="flex-1 p-4">
+                  <div className="space-y-3">
+                    {tasks.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>لا توجد مهام بعد</p>
+                      </div>
+                    ) : (
+                      tasks.map((task, index) => (
+                        <Card key={task.id} className={`transition-all ${task.is_completed ? 'bg-green-50 border-green-200' : ''}`}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                                  {index + 1}
+                                </span>
+                                <button
+                                  onClick={() => toggleTaskCompletion(task.id, !task.is_completed)}
+                                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                    task.is_completed 
+                                      ? 'bg-green-500 border-green-500 text-white' 
+                                      : 'border-gray-300 hover:border-green-500'
+                                  }`}
+                                  disabled={!canEdit}
+                                >
+                                  {task.is_completed && <CheckSquare className="w-3 h-3" />}
+                                </button>
+                              </div>
+                              
+                              <div className="flex-1">
+                                <h4 className={`font-medium mb-1 ${task.is_completed ? 'line-through text-muted-foreground' : ''}`}>
+                                  {task.title}
+                                </h4>
+                                {task.description && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {task.description}
+                                  </p>
+                                )}
+                                {task.completed_at && (
+                                  <p className="text-xs text-green-600 mt-2">
+                                    تم الإنجاز: {new Date(task.completed_at).toLocaleString('ar-EG')}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+                
+                <div className="border-t p-4 bg-muted/30">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      تم إنجاز {tasks.filter(t => t.is_completed).length} من أصل {tasks.length} مهام
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Progress 
+                        value={tasks.length > 0 ? (tasks.filter(t => t.is_completed).length / tasks.length) * 100 : 0} 
+                        className="w-24 h-2" 
+                      />
+                      <span className="text-sm font-medium">
+                        {tasks.length > 0 ? Math.round((tasks.filter(t => t.is_completed).length / tasks.length) * 100) : 0}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="comments" className="flex-1 overflow-hidden mt-0">
