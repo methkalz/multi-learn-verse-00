@@ -2660,6 +2660,7 @@ export type Database = {
           due_date: string | null
           grade: number | null
           id: string
+          project_content: string | null
           school_id: string | null
           status: string
           student_id: string
@@ -2676,6 +2677,7 @@ export type Database = {
           due_date?: string | null
           grade?: number | null
           id?: string
+          project_content?: string | null
           school_id?: string | null
           status?: string
           student_id: string
@@ -2692,6 +2694,7 @@ export type Database = {
           due_date?: string | null
           grade?: number | null
           id?: string
+          project_content?: string | null
           school_id?: string | null
           status?: string
           student_id?: string

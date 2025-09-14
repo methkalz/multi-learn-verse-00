@@ -11,6 +11,7 @@ interface Grade12FinalProject {
   title: string;
   description?: string;
   content?: string;
+  project_content?: string; // إضافة الحقل الجديد
   status: string;
   grade?: number;
   teacher_feedback?: string;
@@ -60,6 +61,7 @@ interface Grade12ProjectRevision {
 export const useGrade12Projects = () => {
   const { userProfile } = useAuth();
   const [projects, setProjects] = useState<Grade12FinalProject[]>([]);
+  const [currentProject, setCurrentProject] = useState<Grade12FinalProject | null>(null);
   const [tasks, setTasks] = useState<Grade12ProjectTask[]>([]);
   const [comments, setComments] = useState<Grade12ProjectComment[]>([]);
   const [revisions, setRevisions] = useState<Grade12ProjectRevision[]>([]);
@@ -421,6 +423,8 @@ export const useGrade12Projects = () => {
 
   return {
     projects,
+    currentProject,
+    setCurrentProject,
     tasks,
     comments,
     revisions,
