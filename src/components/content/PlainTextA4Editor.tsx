@@ -45,12 +45,12 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const autoSaveTimerRef = useRef<NodeJS.Timeout>();
 
-  // A4 dimensions optimized for Arabic text
+  // A4 dimensions with Word-like margins
   const A4_WIDTH = 794; // 210mm
   const A4_HEIGHT = 1123; // 297mm
-  const PAGE_PADDING = 25; // هامش أصغر لاستغلال أكبر للمساحة
-  const LINE_HEIGHT = 26; // ارتفاع مناسب للنص العربي
-  const CHARS_PER_LINE = 75; // عدد أحرف مناسب للنص العربي
+  const PAGE_PADDING = 95; // 2.5cm margins like MS Word default
+  const LINE_HEIGHT = 24; // ارتفاع مناسب للنص العربي
+  const CHARS_PER_LINE = 65; // عدد أحرف مناسب مع الهوامش الجديدة
   const LINES_PER_PAGE = Math.floor((A4_HEIGHT - PAGE_PADDING * 2) / LINE_HEIGHT);
   const CHARS_PER_PAGE = CHARS_PER_LINE * LINES_PER_PAGE;
 
@@ -300,13 +300,49 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
           {pages.map((page, index) => (
             <Card 
               key={page.id}
-              className="page-card relative bg-background shadow-lg"
+              className="page-card relative bg-background shadow-lg border border-border"
               style={{
                 width: `${A4_WIDTH}px`,
                 minHeight: `${A4_HEIGHT}px`,
                 padding: `${PAGE_PADDING}px`,
+                position: 'relative',
               }}
             >
+              {/* Word-like margin indicators */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div 
+                  className="absolute border-l-2 border-primary/30"
+                  style={{ 
+                    left: `${PAGE_PADDING}px`, 
+                    top: `${PAGE_PADDING}px`, 
+                    bottom: `${PAGE_PADDING}px` 
+                  }}
+                />
+                <div 
+                  className="absolute border-r-2 border-primary/30"
+                  style={{ 
+                    right: `${PAGE_PADDING}px`, 
+                    top: `${PAGE_PADDING}px`, 
+                    bottom: `${PAGE_PADDING}px` 
+                  }}
+                />
+                <div 
+                  className="absolute border-t-2 border-primary/30"
+                  style={{ 
+                    top: `${PAGE_PADDING}px`, 
+                    left: `${PAGE_PADDING}px`, 
+                    right: `${PAGE_PADDING}px` 
+                  }}
+                />
+                <div 
+                  className="absolute border-b-2 border-primary/30"
+                  style={{ 
+                    bottom: `${PAGE_PADDING}px`, 
+                    left: `${PAGE_PADDING}px`, 
+                    right: `${PAGE_PADDING}px` 
+                  }}
+                />
+              </div>
               {/* Page Content */}
               <div
                 ref={el => pageRefs.current[index] = el}
