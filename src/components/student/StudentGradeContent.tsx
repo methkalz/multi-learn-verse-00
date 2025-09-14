@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import { useStudentContent } from '@/hooks/useStudentContent';
 import { useStudentProgress } from '@/hooks/useStudentProgress';
+import { useGrade10MiniProjects } from '@/hooks/useGrade10MiniProjects';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { VideoViewer } from './viewers/VideoViewer';
 import { DocumentViewer } from './viewers/DocumentViewer';
 import { LessonViewer } from './viewers/LessonViewer';
 import { ProjectViewer } from './viewers/ProjectViewer';
+import AdvancedProjectEditor from '../content/AdvancedProjectEditor';
 import { 
   Play, 
   FileText, 
@@ -23,9 +29,12 @@ import {
   ExternalLink,
   Trophy,
   Target,
-  Sparkles
+  Sparkles,
+  Plus,
+  Edit3
 } from 'lucide-react';
 import { toast } from 'sonner';
+import type { ProjectFormData } from '@/types/grade10-projects';
 
 export const StudentGradeContent: React.FC = () => {
   const { 
@@ -35,17 +44,40 @@ export const StudentGradeContent: React.FC = () => {
     error
   } = useStudentContent();
   const { updateProgress } = useStudentProgress();
+  const { 
+    projects: miniProjects,
+    createProject,
+    fetchProject,
+    currentProject,
+    setCurrentProject,
+    loading: projectsLoading
+  } = useGrade10MiniProjects();
+  
   const [activeContentTab, setActiveContentTab] = useState('videos');
   
   // Viewer states
   const [selectedContent, setSelectedContent] = useState<any>(null);
   const [viewerType, setViewerType] = useState<'video' | 'document' | 'lesson' | 'project' | null>(null);
+  
+  // Mini Project states
+  const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] = useState(false);
+  const [isProjectEditorOpen, setIsProjectEditorOpen] = useState(false);
+  const [projectFormData, setProjectFormData] = useState<ProjectFormData>({
+    title: '',
+    description: '',
+    due_date: ''
+  });
 
   const currentContent = gradeContent;
 
   const handleContentClick = (content: any, contentType: 'video' | 'document' | 'lesson' | 'project') => {
-    setSelectedContent(content);
-    setViewerType(contentType);
+    if (contentType === 'project' && assignedGrade === '10') {
+      // Handle mini project differently
+      handleMiniProjectClick(content);
+    } else {
+      setSelectedContent(content);
+      setViewerType(contentType);
+    }
   };
 
   const handleContentProgress = async (contentId: string, contentType: any, progress: number, timeSpent: number) => {
@@ -75,6 +107,32 @@ export const StudentGradeContent: React.FC = () => {
     } catch (error) {
       toast.error('حدث خطأ في تسجيل التقدم');
     }
+  };
+
+  
+  // Handle mini project creation
+  const handleCreateMiniProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!projectFormData.title.trim()) {
+      toast.error('يجب إدخال عنوان المشروع');
+      return;
+    }
+
+    const result = await createProject(projectFormData);
+    
+    if (result) {
+      setProjectFormData({ title: '', description: '', due_date: '' });
+      setIsCreateProjectDialogOpen(false);
+      toast.success('تم إنشاء المشروع بنجاح');
+    }
+  };
+
+  // Handle mini project click
+  const handleMiniProjectClick = async (project: any) => {
+    setCurrentProject(project);
+    await fetchProject(project.id);
+    setIsProjectEditorOpen(true);
   };
 
   const closeViewer = () => {
@@ -213,37 +271,42 @@ export const StudentGradeContent: React.FC = () => {
     );
   }
 
+  // Merge mini projects with regular projects for Grade 10
+  const allProjects = assignedGrade === '10' 
+    ? [...(currentContent?.projects || []), ...(miniProjects || [])]
+    : currentContent?.projects || [];
+
   const contentTabs = [
     {
       id: 'videos',
       label: 'الفيديوهات',
       icon: Video,
-      count: currentContent.videos.length,
-      items: currentContent.videos,
+      count: currentContent?.videos?.length || 0,
+      items: currentContent?.videos || [],
       color: 'from-blue-500 to-cyan-500'
     },
     {
       id: 'documents',
       label: 'المستندات',
       icon: FileText,
-      count: currentContent.documents.length,
-      items: currentContent.documents,
+      count: currentContent?.documents?.length || 0,
+      items: currentContent?.documents || [],
       color: 'from-green-500 to-emerald-500'
     },
     {
       id: 'lessons',
       label: 'الدروس',
       icon: BookOpen,
-      count: currentContent.lessons.length,
-      items: currentContent.lessons,
+      count: currentContent?.lessons?.length || 0,
+      items: currentContent?.lessons || [],
       color: 'from-purple-500 to-pink-500'
     },
     {
       id: 'projects',
       label: assignedGrade === '10' ? 'ميني بروجكت' : 'المشاريع',
       icon: Trophy,
-      count: currentContent.projects.length,
-      items: currentContent.projects,
+      count: allProjects.length,
+      items: allProjects,
       color: 'from-orange-500 to-red-500'
     }
   ];
@@ -286,16 +349,96 @@ export const StudentGradeContent: React.FC = () => {
 
         {contentTabs.map((tab) => (
           <TabsContent key={tab.id} value={tab.id} className="mt-8">
+            {/* Add Create Project Button for Grade 10 Projects Tab */}
+            {tab.id === 'projects' && assignedGrade === '10' && (
+              <div className="mb-6 flex justify-center">
+                <Dialog open={isCreateProjectDialogOpen} onOpenChange={setIsCreateProjectDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2" size="lg">
+                      <Plus className="h-5 w-5" />
+                      إنشاء ميني بروجكت جديد
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>إنشاء ميني بروجكت جديد</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleCreateMiniProject} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="title">عنوان المشروع *</Label>
+                        <Input
+                          id="title"
+                          value={projectFormData.title}
+                          onChange={(e) => setProjectFormData(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="مثال: تقرير عن الشبكات الحاسوبية"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="description">وصف المشروع</Label>
+                        <Textarea
+                          id="description"
+                          value={projectFormData.description}
+                          onChange={(e) => setProjectFormData(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="وصف مختصر عن محتوى المشروع وأهدافه"
+                          rows={3}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="due_date">موعد التسليم (اختياري)</Label>
+                        <Input
+                          id="due_date"
+                          type="datetime-local"
+                          value={projectFormData.due_date}
+                          onChange={(e) => setProjectFormData(prev => ({ ...prev, due_date: e.target.value }))}
+                        />
+                      </div>
+                      
+                      <div className="flex gap-2 pt-4">
+                        <Button type="submit" className="flex-1">إنشاء المشروع</Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => setIsCreateProjectDialogOpen(false)}
+                        >
+                          إلغاء
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+            
             {tab.items.length === 0 ? (
               <Card className="text-center p-12 bg-muted/20">
                 <div className="space-y-4">
                   <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
                     <tab.icon className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-medium text-muted-foreground">لا يوجد {tab.label} متاح</h3>
+                  <h3 className="text-lg font-medium text-muted-foreground">
+                    {tab.id === 'projects' && assignedGrade === '10' 
+                      ? 'لا يوجد مشاريع مصغرة' 
+                      : `لا يوجد ${tab.label} متاح`
+                    }
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    لم يتم إضافة أي {tab.label} للصف {assignedGrade} بعد
+                    {tab.id === 'projects' && assignedGrade === '10'
+                      ? 'ابدأ بإنشاء مشروعك الأول باستخدام الزر أعلاه'
+                      : `لم يتم إضافة أي ${tab.label} للصف ${assignedGrade} بعد`
+                    }
                   </p>
+                  {tab.id === 'projects' && assignedGrade === '10' && (
+                    <Button 
+                      className="gap-2 mt-4"
+                      onClick={() => setIsCreateProjectDialogOpen(true)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      إنشاء مشروع جديد
+                    </Button>
+                  )}
                 </div>
               </Card>
             ) : (
@@ -370,6 +513,21 @@ export const StudentGradeContent: React.FC = () => {
           onComplete={() => 
             handleContentComplete(selectedContent.id, 'project', 0)
           }
+        />
+      )}
+
+      {/* Mini Project Editor for Grade 10 */}
+      {currentProject && isProjectEditorOpen && assignedGrade === '10' && (
+        <AdvancedProjectEditor 
+          project={currentProject}
+          isOpen={isProjectEditorOpen}
+          onClose={() => {
+            setIsProjectEditorOpen(false);
+            setCurrentProject(null);
+          }}
+          onSave={() => {
+            // Refresh projects list if needed
+          }}
         />
       )}
     </>
