@@ -61,9 +61,9 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
   };
 
   const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('ar-EG', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric'
     });
   };
