@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import { PaginationBreaks } from 'tiptap-pagination-breaks';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,7 +56,21 @@ const ProfessionalA4Editor = forwardRef<ProfessionalA4EditorRef, ProfessionalA4E
     extensions: [
       StarterKit,
       TextStyle,
-      Color
+      Color,
+      PaginationBreaks.configure({
+        pageSize: {
+          width: A4_WIDTH,
+          height: A4_HEIGHT
+        },
+        pageMargins: {
+          top: PAGE_MARGIN,
+          bottom: PAGE_MARGIN,
+          left: PAGE_MARGIN,
+          right: PAGE_MARGIN
+        },
+        autoPageBreak: true,
+        pageBreakClassName: 'page-break'
+      })
     ],
     content: initialContent,
     editable: !readOnly,
@@ -239,32 +254,88 @@ const ProfessionalA4Editor = forwardRef<ProfessionalA4EditorRef, ProfessionalA4E
         </div>
       </div>
 
-      {/* A4 Document Container */}
-      <div className="w-full max-w-4xl mx-auto">
-        <Card className="shadow-lg">
-          <div 
-            className="mx-auto bg-white"
-            style={{
-              width: `${A4_WIDTH}px`,
-              minHeight: `${A4_HEIGHT}px`,
-              padding: `${PAGE_MARGIN}px`,
-              pageBreakAfter: 'always'
-            }}
-          >
-            <EditorContent 
-              editor={editor}
-              className="min-h-full"
-              style={{
-                width: `${CONTENT_WIDTH}px`,
-                minHeight: `${CONTENT_HEIGHT}px`
-              }}
-            />
-          </div>
-        </Card>
+      {/* A4 Document Container with Pagination */}
+      <div className="w-full max-w-4xl mx-auto space-y-6">
+        <div className="pagination-container">
+          <EditorContent 
+            editor={editor}
+            className="tiptap-editor"
+          />
+        </div>
       </div>
 
-      {/* Print Styles */}
+      {/* Enhanced Pagination & Print Styles */}
       <style>{`
+        /* Pagination Styles */
+        .pagination-container {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        
+        .tiptap-editor .ProseMirror {
+          outline: none;
+          direction: rtl;
+          text-align: right;
+          font-family: 'Arial', 'Tahoma', sans-serif;
+          font-size: 16px;
+          line-height: ${LINE_HEIGHT}px;
+        }
+        
+        /* Page styling */
+        .tiptap-editor .page {
+          width: ${A4_WIDTH}px;
+          height: ${A4_HEIGHT}px;
+          padding: ${PAGE_MARGIN}px;
+          background: white;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          margin: 0 auto 20px;
+          overflow: hidden;
+          page-break-after: always;
+          position: relative;
+        }
+        
+        /* Page break styling */
+        .page-break {
+          page-break-before: always;
+          break-before: page;
+          display: block;
+          height: 1px;
+          border: none;
+          margin: 0;
+          padding: 0;
+        }
+        
+        /* Content area */
+        .tiptap-editor .page-content {
+          width: ${CONTENT_WIDTH}px;
+          min-height: ${CONTENT_HEIGHT}px;
+          max-height: ${CONTENT_HEIGHT}px;
+          overflow: hidden;
+        }
+        
+        /* Page numbers */
+        .page::after {
+          content: counter(page);
+          position: absolute;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 12px;
+          color: #666;
+          direction: ltr;
+        }
+        
+        /* Reset page counter */
+        .pagination-container {
+          counter-reset: page;
+        }
+        
+        .page {
+          counter-increment: page;
+        }
+        
         @media print {
           * {
             -webkit-print-color-adjust: exact !important;
@@ -280,10 +351,27 @@ const ProfessionalA4Editor = forwardRef<ProfessionalA4EditorRef, ProfessionalA4E
             display: none !important;
           }
           
+          .pagination-container {
+            gap: 0;
+          }
+          
+          .page {
+            box-shadow: none;
+            margin: 0;
+            border-radius: 0;
+          }
+          
           body {
             font-family: 'Arial', 'Tahoma', sans-serif;
             direction: rtl;
             text-align: right;
+          }
+        }
+        
+        @media screen {
+          .tiptap-editor {
+            max-width: 100%;
+            overflow-x: auto;
           }
         }
       `}</style>
