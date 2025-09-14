@@ -18,19 +18,42 @@ export const useAutoPageBreak = ({
   // After margins (25.4mm each side): 159.2mm × 246.2mm
   // Convert to pixels (1mm = 3.78px): 602px × 930px
   const A4_PAGE_HEIGHT = 930;
-  const PAGE_END_THRESHOLD = 50; // Space buffer before creating new page
+  const PAGE_END_THRESHOLD = 80; // More conservative threshold
   
   const [pages, setPages] = useState<Page[]>([
     { id: 'page-1', content: initialContent }
   ]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const mutationObserverRef = useRef<MutationObserver | null>(null);
+  
+  // Refs for managing page creation state
+  const isCreatingPageRef = useRef(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pageRefs = useRef<Map<string, HTMLElement>>(new Map());
 
   const addPage = useCallback(() => {
+    // Prevent multiple page creation
+    if (isCreatingPageRef.current) {
+      console.log('Page creation already in progress, skipping...');
+      return null;
+    }
+
+    console.log('Creating new page...');
+    isCreatingPageRef.current = true;
+
     const newPageId = `page-${pages.length + 1}`;
-    setPages(prev => [...prev, { id: newPageId, content: '' }]);
+    setPages(prev => {
+      const newPages = [...prev, { id: newPageId, content: '' }];
+      console.log('Pages updated:', newPages.length);
+      return newPages;
+    });
     setCurrentPageIndex(pages.length);
+
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      isCreatingPageRef.current = false;
+      console.log('Page creation flag reset');
+    }, 500);
+
     return newPageId;
   }, [pages.length]);
 
@@ -47,83 +70,87 @@ export const useAutoPageBreak = ({
   }, [pages, onContentChange]);
 
   const checkIfNearPageEnd = useCallback((pageElement: HTMLElement, pageId: string) => {
-    if (!pageElement) return;
+    if (!pageElement || isCreatingPageRef.current) {
+      return;
+    }
 
     const contentHeight = pageElement.scrollHeight;
     const pageIndex = pages.findIndex(p => p.id === pageId);
     
-    // Only check for the last (active) page
-    if (pageIndex === pages.length - 1 && contentHeight >= A4_PAGE_HEIGHT - PAGE_END_THRESHOLD) {
-      // Create new page and move cursor there
+    console.log(`Checking page ${pageIndex + 1}: height=${contentHeight}, threshold=${A4_PAGE_HEIGHT - PAGE_END_THRESHOLD}`);
+    
+    // Only check for the last (active) page and if we're not already creating a page
+    if (pageIndex === pages.length - 1 && 
+        contentHeight >= A4_PAGE_HEIGHT - PAGE_END_THRESHOLD &&
+        !isCreatingPageRef.current) {
+      
+      console.log('Page overflow detected, creating new page...');
+      
+      // Create new page
       const newPageId = addPage();
       
-      // Focus on the new page after a short delay
-      setTimeout(() => {
-        const newPageElement = pageRefs.current.get(newPageId);
-        if (newPageElement) {
-          const contentArea = newPageElement.querySelector('[contenteditable]') as HTMLElement;
-          if (contentArea) {
-            contentArea.focus();
-            // Place cursor at the beginning of the new page
-            const range = document.createRange();
-            const selection = window.getSelection();
-            range.setStart(contentArea, 0);
-            range.collapse(true);
-            selection?.removeAllRanges();
-            selection?.addRange(range);
+      if (newPageId) {
+        // Focus on the new page after creation
+        setTimeout(() => {
+          const newPageElement = pageRefs.current.get(newPageId);
+          if (newPageElement) {
+            const contentArea = newPageElement.querySelector('[contenteditable]') as HTMLElement;
+            if (contentArea) {
+              contentArea.focus();
+              // Place cursor at the beginning of the new page
+              const range = document.createRange();
+              const selection = window.getSelection();
+              range.setStart(contentArea, 0);
+              range.collapse(true);
+              selection?.removeAllRanges();
+              selection?.addRange(range);
+              console.log('Focus moved to new page');
+            }
           }
-        }
-      }, 100);
+        }, 200);
+      }
     }
   }, [A4_PAGE_HEIGHT, PAGE_END_THRESHOLD, pages, addPage]);
+
+  // Debounced version of checkIfNearPageEnd
+  const debouncedCheckPageEnd = useCallback((pageElement: HTMLElement, pageId: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      checkIfNearPageEnd(pageElement, pageId);
+    }, 100); // 100ms debounce
+  }, [checkIfNearPageEnd]);
 
   const registerPageRef = useCallback((pageId: string, element: HTMLElement | null) => {
     if (element) {
       pageRefs.current.set(pageId, element);
+      console.log(`Registered page ref: ${pageId}`);
       
-      // Set up MutationObserver for real-time content monitoring
-      if (!mutationObserverRef.current) {
-        mutationObserverRef.current = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            if (mutation.type === 'childList' || mutation.type === 'characterData') {
-              const targetElement = mutation.target as HTMLElement;
-              const pageElement = targetElement.closest('[data-page-id]') as HTMLElement;
-              
-              if (pageElement) {
-                const pageId = pageElement.getAttribute('data-page-id');
-                if (pageId) {
-                  // Check immediately for page overflow
-                  requestAnimationFrame(() => {
-                    checkIfNearPageEnd(pageElement, pageId);
-                  });
-                }
-              }
-            }
-          });
-        });
-      }
-      
-      // Observe changes in the page content
-      mutationObserverRef.current.observe(element, {
-        childList: true,
-        subtree: true,
-        characterData: true
-      });
-
-      // Also check on input events for immediate response
+      // Set up input event listener for immediate response
       const contentArea = element.querySelector('[contenteditable]') as HTMLElement;
       if (contentArea) {
         const handleInput = () => {
-          requestAnimationFrame(() => {
-            checkIfNearPageEnd(element, pageId);
-          });
+          // Use debounced version to prevent multiple rapid calls
+          debouncedCheckPageEnd(element, pageId);
+        };
+        
+        const handleKeyDown = (e: KeyboardEvent) => {
+          // Check on Enter key specifically for immediate response
+          if (e.key === 'Enter') {
+            setTimeout(() => {
+              debouncedCheckPageEnd(element, pageId);
+            }, 10);
+          }
         };
         
         contentArea.addEventListener('input', handleInput);
-        contentArea.addEventListener('paste', handleInput);
+        contentArea.addEventListener('keydown', handleKeyDown);
         
-        // Store the handler for cleanup
+        // Store handlers for cleanup
         (element as any)._inputHandler = handleInput;
+        (element as any)._keydownHandler = handleKeyDown;
       }
     } else {
       // Clean up when element is removed
@@ -132,27 +159,28 @@ export const useAutoPageBreak = ({
       
       if (pageId) {
         const element = pageRefs.current.get(pageId);
-        if (element && (element as any)._inputHandler) {
+        if (element) {
           const contentArea = element.querySelector('[contenteditable]') as HTMLElement;
-          if (contentArea) {
+          if (contentArea && (element as any)._inputHandler) {
             contentArea.removeEventListener('input', (element as any)._inputHandler);
-            contentArea.removeEventListener('paste', (element as any)._inputHandler);
+            contentArea.removeEventListener('keydown', (element as any)._keydownHandler);
           }
         }
         pageRefs.current.delete(pageId);
+        console.log(`Cleaned up page ref: ${pageId}`);
       }
     }
-  }, [checkIfNearPageEnd]);
+  }, [debouncedCheckPageEnd]);
 
   const removePage = useCallback((pageId: string) => {
     if (pages.length > 1) {
       setPages(prev => prev.filter(page => page.id !== pageId));
       const element = pageRefs.current.get(pageId);
-      if (element && (element as any)._inputHandler) {
+      if (element) {
         const contentArea = element.querySelector('[contenteditable]') as HTMLElement;
-        if (contentArea) {
+        if (contentArea && (element as any)._inputHandler) {
           contentArea.removeEventListener('input', (element as any)._inputHandler);
-          contentArea.removeEventListener('paste', (element as any)._inputHandler);
+          contentArea.removeEventListener('keydown', (element as any)._keydownHandler);
         }
       }
       pageRefs.current.delete(pageId);
@@ -171,21 +199,19 @@ export const useAutoPageBreak = ({
     }
   }, [initialContent]);
 
-  // Cleanup observer on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (mutationObserverRef.current) {
-        mutationObserverRef.current.disconnect();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
       
       // Cleanup all event listeners
       pageRefs.current.forEach((element, pageId) => {
-        if ((element as any)._inputHandler) {
-          const contentArea = element.querySelector('[contenteditable]') as HTMLElement;
-          if (contentArea) {
-            contentArea.removeEventListener('input', (element as any)._inputHandler);
-            contentArea.removeEventListener('paste', (element as any)._inputHandler);
-          }
+        const contentArea = element.querySelector('[contenteditable]') as HTMLElement;
+        if (contentArea && (element as any)._inputHandler) {
+          contentArea.removeEventListener('input', (element as any)._inputHandler);
+          contentArea.removeEventListener('keydown', (element as any)._keydownHandler);
         }
       });
     };
