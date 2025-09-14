@@ -14,10 +14,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/lib/logger';
+import { getArabicGradeName } from '@/utils/gradeMapping';
 
 interface GradeLevel {
   id: string;
   label: string;
+  code: string;
 }
 
 interface AcademicYear {
@@ -140,8 +142,8 @@ export const ClassForm: React.FC<ClassFormProps> = ({ editingClass, onSuccess, o
       const { data: gradeLevelsData, error: gradeLevelsError } = await supabase
         .from('grade_levels')
         .select('*')
-        .in('label', availableGrades.length > 0 ? availableGrades : ['10', '11', '12'])
-        .order('label');
+        .in('code', availableGrades.length > 0 ? availableGrades : ['10', '11', '12'])
+        .order('code');
 
       if (gradeLevelsError) throw gradeLevelsError;
       

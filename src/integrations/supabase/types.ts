@@ -1117,16 +1117,19 @@ export type Database = {
       }
       grade_levels: {
         Row: {
+          code: string
           created_at_utc: string
           id: string
           label: string
         }
         Insert: {
+          code: string
           created_at_utc?: string
           id?: string
           label: string
         }
         Update: {
+          code?: string
           created_at_utc?: string
           id?: string
           label?: string
