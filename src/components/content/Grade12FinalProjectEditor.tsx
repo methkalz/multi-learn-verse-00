@@ -180,7 +180,7 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
     }
 
     try {
-      // Upload to Supabase Storage - using same bucket as Grade 10
+      // Upload to Supabase Storage - create bucket for grade12 projects if it doesn't exist
       const fileName = `${Date.now()}_${file.name}`;
       const { data, error } = await supabase.storage
         .from('grade10-documents')
