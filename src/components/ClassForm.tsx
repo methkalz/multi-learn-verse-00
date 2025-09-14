@@ -121,12 +121,19 @@ export const ClassForm: React.FC<ClassFormProps> = ({ editingClass, onSuccess, o
 
   const loadInitialData = async () => {
     try {
-      // Load available grade levels based on school package
+      // Load available grade levels from school package
       let availableGrades: string[] = [];
       
       if (userProfile?.school_id) {
-        // Mock package check - in real app, fetch from packages table
-        availableGrades = ['10', '11', '12']; // Default to all grades for now
+        const { data: gradesData, error: gradesError } = await supabase
+          .rpc('get_available_grade_levels', { school_uuid: userProfile.school_id });
+        
+        if (gradesError) {
+          logger.error('Error fetching available grades', gradesError);
+          availableGrades = ['10', '11', '12']; // Fallback
+        } else {
+          availableGrades = gradesData || [];
+        }
       }
 
       // Load grade levels and filter by package

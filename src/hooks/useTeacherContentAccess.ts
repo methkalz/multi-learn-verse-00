@@ -63,17 +63,15 @@ export const useTeacherContentAccess = () => {
 
       // If not a teacher, allow all content based on package
       if (userProfile.role !== 'teacher') {
-        // Fetch school package content
-        const { data: school } = await supabase
-          .from('schools')
-          .select(`
-            active_package:packages(available_grade_contents)
-          `)
-          .eq('id', userProfile.school_id)
-          .single();
+        // Fetch school package content using unified function
+        const { data: packageData, error: packageError } = await supabase
+          .rpc('get_school_active_package', { school_uuid: userProfile.school_id });
 
-        const packageContent = school?.active_package as unknown as PackageContent;
-        const availableGrades = packageContent?.available_grade_contents || [];
+        if (packageError) {
+          logger.error('Error fetching school package', packageError);
+        }
+
+        const availableGrades = (packageData as any)?.available_grade_contents || [];
         
         setAllowedGrades(availableGrades);
         setPackageGrades(availableGrades);
@@ -100,17 +98,15 @@ export const useTeacherContentAccess = () => {
       };
       setContentSettings(settings);
 
-      // Fetch school package content
-      const { data: school } = await supabase
-        .from('schools')
-        .select(`
-          active_package:packages(available_grade_contents)
-        `)
-        .eq('id', userProfile.school_id)
-        .single();
+      // Fetch school package content using unified function
+      const { data: packageData, error: packageError } = await supabase
+        .rpc('get_school_active_package', { school_uuid: userProfile.school_id });
 
-      const packageContent = school?.active_package as unknown as PackageContent;
-      const availableGrades = packageContent?.available_grade_contents || [];
+      if (packageError) {
+        logger.error('Error fetching school package', packageError);
+      }
+
+      const availableGrades = (packageData as any)?.available_grade_contents || [];
       setPackageGrades(availableGrades);
 
       // If settings allow all package content, return all grades

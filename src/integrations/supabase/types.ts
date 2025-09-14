@@ -4111,11 +4111,23 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_available_grade_levels: {
+        Args: { school_uuid: string }
+        Returns: string[]
+      }
       get_exam_question_for_student: {
         Args: { question_id: string }
         Returns: Json
       }
+      get_school_active_package: {
+        Args: { school_uuid: string }
+        Returns: Json
+      }
       get_school_content_settings: {
+        Args: { school_uuid: string }
+        Returns: Json
+      }
+      get_school_package_with_usage: {
         Args: { school_uuid: string }
         Returns: Json
       }

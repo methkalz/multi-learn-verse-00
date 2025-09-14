@@ -199,32 +199,32 @@ const SchoolAdminDashboard = () => {
       const schoolId = userProfile?.school_id;
       if (!schoolId) return;
 
-      // Get active school package
-      const {
-        data: packageData
-      } = await supabase.from('school_packages').select('*').eq('school_id', schoolId).eq('status', 'active').single();
+      // Use unified function to get school package with usage
+      const { data: packageData, error: packageError } = await supabase
+        .rpc('get_school_package_with_usage', { school_uuid: schoolId });
+
+      if (packageError) {
+        logger.error('Error fetching school package', packageError);
+        return;
+      }
+
       if (packageData) {
-        // Get package details
-        const {
-          data: packageDetails
-        } = await supabase.from('packages').select('*').eq('id', packageData.package_id).single();
-        if (packageDetails) {
-          setSchoolPackage({
-            id: packageData.id,
-            name: packageDetails.name,
-            name_ar: packageDetails.name_ar,
-            description_ar: packageDetails.description_ar,
-            max_students: packageDetails.max_students,
-            max_teachers: packageDetails.max_teachers,
-            start_date: packageData.start_date,
-            end_date: packageData.end_date,
-            status: packageData.status,
-            features: Array.isArray(packageDetails.features) ? packageDetails.features.map(f => String(f)) : [],
-            price: packageDetails.price,
-            currency: packageDetails.currency || 'USD',
-            duration_days: packageDetails.duration_days
-          });
-        }
+        const pkg = packageData as any;
+        setSchoolPackage({
+          id: pkg.id,
+          name: pkg.name,
+          name_ar: pkg.name_ar,
+          description_ar: pkg.description_ar,
+          max_students: pkg.max_students,
+          max_teachers: pkg.max_teachers,
+          start_date: pkg.start_date,
+          end_date: pkg.end_date,
+          status: pkg.status,
+          features: Array.isArray(pkg.features) ? pkg.features.map(f => String(f)) : [],
+          price: pkg.price,
+          currency: pkg.currency || 'USD',
+          duration_days: pkg.duration_days
+        });
       }
     } catch (error) {
       logger.error('Error fetching school package', error as Error);
