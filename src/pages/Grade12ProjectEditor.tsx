@@ -84,6 +84,7 @@ const Grade12ProjectEditor: React.FC = () => {
     addPage,
     updatePageContent,
     registerPageRef,
+    manualCheckPageHeight,
     totalPages,
     A4_PAGE_HEIGHT
   } = useAutoPageBreak({
@@ -412,6 +413,7 @@ const Grade12ProjectEditor: React.FC = () => {
                   currentPageIndex={currentPageIndex}
                   onContentChange={updatePageContent}
                   onPageRefChange={registerPageRef}
+                  onManualHeightCheck={manualCheckPageHeight}
                   A4_PAGE_HEIGHT={A4_PAGE_HEIGHT}
                   readOnly={!canEdit}
                 />

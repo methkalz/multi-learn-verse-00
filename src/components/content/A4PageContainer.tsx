@@ -10,6 +10,7 @@ interface A4PageContainerProps {
   currentPageIndex: number;
   onContentChange: (pageId: string, content: string) => void;
   onPageRefChange: (pageId: string, element: HTMLElement | null) => void;
+  onManualHeightCheck?: (pageId: string) => void;
   className?: string;
   readOnly?: boolean;
   A4_PAGE_HEIGHT: number;
@@ -20,6 +21,7 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
   currentPageIndex,
   onContentChange,
   onPageRefChange,
+  onManualHeightCheck,
   className = '',
   readOnly = false,
   A4_PAGE_HEIGHT
@@ -41,32 +43,40 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
 
   const handleContentChange = (pageId: string, content: string) => {
     onContentChange(pageId, content);
+    
+    // Check height after content change - but only occasionally
+    const pageIndex = pages.findIndex(p => p.id === pageId);
+    const isLastPage = pageIndex === pages.length - 1;
+    
+    if (isLastPage && onManualHeightCheck) {
+      // Only check every few characters to avoid spam
+      if (content.length % 50 === 0) {
+        setTimeout(() => {
+          onManualHeightCheck(pageId);
+        }, 500);
+      }
+    }
   };
 
-  const handlePaste = (e: React.ClipboardEvent) => {
+  const handlePaste = (e: React.ClipboardEvent, pageId: string) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
     document.execCommand('insertText', false, text);
+    
+    // Check height after paste
+    if (onManualHeightCheck) {
+      setTimeout(() => {
+        onManualHeightCheck(pageId);
+      }, 100);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, pageId: string) => {
-    // Prevent typing if the page is at maximum height
-    const target = e.currentTarget as HTMLElement;
-    const currentHeight = target.scrollHeight;
-    
-    if (currentHeight >= A4_PAGE_HEIGHT - 40 && // Account for padding
-        e.key.length === 1 && // Only for printable characters
-        !e.ctrlKey && !e.metaKey) { // Allow shortcuts
-      
-      // Check if this is the last page
-      const pageIndex = pages.findIndex(p => p.id === pageId);
-      if (pageIndex === pages.length - 1) {
-        // Let the hook handle page creation
-        return;
-      } else {
-        // Prevent typing on non-last pages that are full
-        e.preventDefault();
-      }
+    // Check height on Enter key
+    if (e.key === 'Enter' && onManualHeightCheck) {
+      setTimeout(() => {
+        onManualHeightCheck(pageId);
+      }, 100);
     }
   };
 
@@ -103,7 +113,7 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
             contentEditable={!readOnly && index === pages.length - 1} // Only last page is editable
             suppressContentEditableWarning={true}
             onInput={(e) => handleContentChange(page.id, e.currentTarget.innerHTML)}
-            onPaste={handlePaste}
+            onPaste={(e) => handlePaste(e, page.id)}
             onKeyDown={(e) => handleKeyDown(e, page.id)}
             className={`
               w-full h-full outline-none p-10
