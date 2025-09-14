@@ -126,11 +126,35 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
     });
   }, [splitTextIntoPages]);
 
-  // معالجة الإدخال
+  // معالجة الإدخال - استخدام innerHTML بدلاً من textContent لإصلاح المؤشر
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>, pageIndex: number) => {
     const target = e.currentTarget;
-    const newContent = target.textContent || '';
+    const newContent = target.innerHTML || '';
     handlePageContentChange(pageIndex, newContent);
+  }, [handlePageContentChange]);
+
+  // معالجة اللصق
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>, pageIndex: number) => {
+    e.preventDefault();
+    const paste = e.clipboardData.getData('text/plain');
+    const target = e.currentTarget;
+    
+    // الحصول على الموضع الحالي للمؤشر
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      const textNode = document.createTextNode(paste);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // تحديث المحتوى
+      const newContent = target.innerHTML || '';
+      handlePageContentChange(pageIndex, newContent);
+    }
   }, [handlePageContentChange]);
 
   // معالجة الضغط على المفاتيح
@@ -248,7 +272,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
   }), [getCombinedContent, splitTextIntoPages, handleSave]);
 
   return (
-    <div className={`plain-text-a4-editor ${className}`} dir="rtl">
+    <div className={`plain-text-a4-editor ${className}`} dir="auto">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-4">
@@ -328,34 +352,26 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                   fontSize: '16px',
                   fontFamily: '"IBM Plex Sans Arabic", "Noto Sans Arabic", "Cairo", "Amiri", "Tahoma", system-ui, sans-serif',
                   textAlign: 'right',
-                  direction: 'rtl',
-                  unicodeBidi: 'embed', // تحسين positioning للـ cursor
+                  direction: 'rtl' as const,
+                  unicodeBidi: 'plaintext',
                   wordWrap: 'break-word',
-                  overflowWrap: 'break-word', // استخدام break-word بدلاً من anywhere
-                  whiteSpace: 'pre-wrap', // العودة لـ pre-wrap للـ cursor positioning
-                  hyphens: 'none', // إيقاف الفصل التلقائي لتجنب مشاكل الـ cursor
-                  wordSpacing: 'normal', // استخدام القيم الافتراضية
-                  letterSpacing: 'normal',
+                  overflowWrap: 'break-word',
+                  whiteSpace: 'pre-wrap',
                   padding: '0',
                   margin: '0',
                   width: '100%',
                   maxWidth: '100%',
                   boxSizing: 'border-box',
-                  textRendering: 'auto', // تبسيط text rendering
-                  fontKerning: 'auto',
-                  caretColor: 'currentColor', // تأكيد لون المؤشر
-                  cursor: 'text', // تأكيد cursor type
-                  position: 'relative', // لضمان positioning صحيح
-                  zIndex: 1
+                  cursor: 'text'
                 }}
                 contentEditable={!readOnly}
                 suppressContentEditableWarning={true}
                 onInput={(e) => handleInput(e, index)}
+                onPaste={(e) => handlePaste(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onFocus={() => setCurrentPageIndex(index)}
-              >
-                {page.content}
-              </div>
+                dangerouslySetInnerHTML={{ __html: page.content }}
+              />
               
               {/* Page Number */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground">
