@@ -72,13 +72,19 @@ export const useStudentContent = () => {
       const videoTable = grade === '10' ? 'grade10_videos' : 
                         grade === '11' ? 'grade11_videos' : 'grade12_videos';
       
-      const { data: videoData, error: videoError } = await (supabase as any)
+      let videoQuery = (supabase as any)
         .from(videoTable)
         .select('id, title, description, video_url, thumbnail_url, duration, category, is_visible, is_active, order_index, created_at')
-        .eq('grade_level', grade)
         .eq('is_active', true)
         .eq('is_visible', true)
         .order('order_index', { ascending: true });
+
+      // Only add grade_level filter for grade10 and grade11 videos (grade12_videos doesn't have this column)
+      if (grade === '10' || grade === '11') {
+        videoQuery = videoQuery.eq('grade_level', grade);
+      }
+      
+      const { data: videoData, error: videoError } = await videoQuery;
       
       if (!videoError && videoData) {
         videos = videoData.map((item: any) => mapToContentItem(item, 'video', grade));
@@ -94,13 +100,17 @@ export const useStudentContent = () => {
       if (grade === '10' || grade === '11') {
         const docTable = grade === '10' ? 'grade10_documents' : 'grade11_documents';
         
-        const { data: docData, error: docError } = await (supabase as any)
+        let docQuery = (supabase as any)
           .from(docTable)
           .select('id, title, description, file_path, category, is_visible, is_active, order_index, created_at')
-          .eq('grade_level', grade)
           .eq('is_active', true)
           .eq('is_visible', true)
           .order('order_index', { ascending: true });
+
+        // Add grade_level filter for documents (they have this column)
+        docQuery = docQuery.eq('grade_level', grade);
+        
+        const { data: docData, error: docError } = await docQuery;
         
         if (!docError && docData) {
           documents = docData.map((item: any) => mapToContentItem(item, 'document', grade));
