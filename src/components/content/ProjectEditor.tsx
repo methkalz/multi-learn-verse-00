@@ -211,25 +211,12 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, isOpen, onClose 
 
           {/* Tasks Tab */}
           <TabsContent value="tasks" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">قائمة المهام</h3>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>التقدم: {progressPercentage}%</span>
-                  <span>مكتملة: {completedTasks} من {tasks.length}</span>
-                </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">قائمة المهام الثابتة</h3>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span>التقدم: {progressPercentage}%</span>
+                <span>مكتملة: {completedTasks} من 5</span>
               </div>
-              
-              {(isOwner || isTeacher) && (
-                <Button 
-                  onClick={() => setIsAddingTask(true)} 
-                  size="sm" 
-                  className="gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  إضافة مهمة
-                </Button>
-              )}
             </div>
 
             {/* Progress Bar */}
@@ -240,75 +227,34 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, isOpen, onClose 
               />
             </div>
 
-            {/* Add Task Form */}
-            {isAddingTask && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">إضافة مهمة جديدة</CardTitle>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setIsAddingTask(false)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Input
-                    placeholder="عنوان المهمة"
-                    value={newTask.title}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
-                  />
-                  <Textarea
-                    placeholder="وصف المهمة (اختياري)"
-                    value={newTask.description}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
-                    rows={2}
-                  />
-                  <div className="flex gap-2">
-                    <Button onClick={handleAddTask}>إضافة المهمة</Button>
-                    <Button variant="outline" onClick={() => setIsAddingTask(false)}>
-                      إلغاء
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Tasks List */}
+            {/* Fixed Tasks List */}
             <div className="space-y-3">
-              {tasks.map((task) => (
+              {tasks.map((task, index) => (
                 <Card key={task.id} className={task.is_completed ? 'bg-muted/50' : ''}>
                   <CardContent className="pt-4">
                     <div className="flex items-start gap-3">
-                      <Checkbox
-                        checked={task.is_completed}
-                        onCheckedChange={(checked) => 
-                          handleTaskToggle(task.id, checked as boolean)
-                        }
-                        disabled={!isOwner}
-                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                          {task.order_index}
+                        </div>
+                        <Checkbox
+                          checked={task.is_completed}
+                          onCheckedChange={(checked) => 
+                            handleTaskToggle(task.id, checked as boolean)
+                          }
+                          disabled={!isOwner}
+                        />
+                      </div>
                       <div className="flex-1">
                         <h4 className={`font-medium ${task.is_completed ? 'line-through text-muted-foreground' : ''}`}>
                           {task.title}
                         </h4>
-                        {task.description && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {task.description}
-                          </p>
+                        {task.completed_at && (
+                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>تم الإكمال: {new Date(task.completed_at).toLocaleDateString('en-GB')}</span>
+                          </div>
                         )}
-                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>تم الإنشاء: {new Date(task.created_at).toLocaleDateString('en-GB')}</span>
-                          {task.completed_at && (
-                            <>
-                              <span>•</span>
-                              <span>تم الإكمال: {new Date(task.completed_at).toLocaleDateString('en-GB')}</span>
-                            </>
-                          )}
-                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -318,7 +264,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, isOpen, onClose 
               {tasks.length === 0 && (
                 <div className="text-center py-8">
                   <CheckSquare className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-muted-foreground">لا توجد مهام بعد</p>
+                  <p className="text-muted-foreground">جاري تحميل المهام...</p>
                 </div>
               )}
             </div>

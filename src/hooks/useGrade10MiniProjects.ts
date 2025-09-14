@@ -59,6 +59,32 @@ export const useGrade10MiniProjects = () => {
     }
   };
 
+  // إنشاء المهام الافتراضية الثابتة
+  const createDefaultTasks = async (projectId: string) => {
+    const defaultTasks = [
+      { title: 'إنشاء صفحة البداية', order_index: 1 },
+      { title: 'اختيار موضوع والشرح عنه', order_index: 2 },
+      { title: 'اشرح عن الشركة التي اخترتها', order_index: 3 },
+      { title: 'ارفق صور من الشاشة', order_index: 4 },
+      { title: 'تغذية مرتدة', order_index: 5 }
+    ];
+
+    const tasksToInsert = defaultTasks.map(task => ({
+      project_id: projectId,
+      title: task.title,
+      description: '',
+      order_index: task.order_index,
+      created_by: userProfile!.user_id,
+      is_completed: false
+    }));
+
+    const { error } = await supabase
+      .from('grade10_project_tasks')
+      .insert(tasksToInsert);
+
+    if (error) throw error;
+  };
+
   // إنشاء مشروع جديد
   const createProject = async (projectData: ProjectFormData) => {
     try {
@@ -81,6 +107,9 @@ export const useGrade10MiniProjects = () => {
         .single();
 
       if (error) throw error;
+
+      // إنشاء المهام الافتراضية للمشروع الجديد
+      await createDefaultTasks(data.id);
       
       setProjects(prev => [(data as Grade10MiniProject), ...prev]);
       toast.success('تم إنشاء المشروع بنجاح');
@@ -216,14 +245,12 @@ export const useGrade10MiniProjects = () => {
         )
       );
 
-      // حساب نسبة التقدم
+      // حساب نسبة التقدم (على أساس 5 مهام ثابتة)
       const updatedTasks = tasks.map(task => 
         task.id === taskId ? { ...task, ...updateData } : task
       );
       const completedCount = updatedTasks.filter(task => task.is_completed).length;
-      const progressPercentage = updatedTasks.length > 0 
-        ? Math.round((completedCount / updatedTasks.length) * 100) 
-        : 0;
+      const progressPercentage = Math.round((completedCount / 5) * 100);
 
       // تحديث نسبة التقدم في المشروع
       if (currentProject) {
