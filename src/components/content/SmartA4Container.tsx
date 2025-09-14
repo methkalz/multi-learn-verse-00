@@ -87,10 +87,10 @@ export const SmartA4Container: React.FC<SmartA4ContainerProps> = ({
             ${index === currentPageIndex ? 'ring-2 ring-primary scale-[1.02]' : 'hover:shadow-xl'}
           `}
           style={{
-            width: '210mm',
-            height: `${A4_PAGE_HEIGHT + 50}px`,
-            minHeight: `${A4_PAGE_HEIGHT + 50}px`,
-            maxHeight: `${A4_PAGE_HEIGHT + 50}px`,
+            width: '794px', // Precise A4 width (210mm = 794px at 96 DPI)
+            height: '1123px', // Precise A4 height (297mm = 1123px at 96 DPI)
+            minHeight: '1123px',
+            maxHeight: '1123px',
             overflow: 'hidden',
           }}
         >
@@ -108,15 +108,15 @@ export const SmartA4Container: React.FC<SmartA4ContainerProps> = ({
             onKeyDown={(e) => handleKeyDown(e, page.id)}
             className="w-full outline-none cursor-text transition-colors duration-200 focus:bg-white focus:ring-2 focus:ring-primary/20"
             style={{
-              height: `${A4_PAGE_HEIGHT}px`,
-              maxHeight: `${A4_PAGE_HEIGHT}px`,
-              padding: '95px', // 2.5cm margins like Word
+              width: '794px',
+              height: '1123px',
+              padding: '96px', // Precise Word-standard margins (2.54cm = 96px at 96 DPI)
               wordWrap: 'break-word',
               hyphens: 'auto',
               direction: 'rtl',
               textAlign: 'right',
               fontSize: '16px',
-              lineHeight: '1.6', // Reduced for better line calculation
+              lineHeight: '1.6',
               fontFamily: '"Times New Roman", serif',
               overflow: 'hidden',
               boxSizing: 'border-box'

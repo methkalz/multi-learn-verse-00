@@ -16,10 +16,10 @@ export const useSmartPageBreak = ({
   initialContent = '',
   linesPerPage = 35
 }: UseSmartPageBreakOptions = {}) => {
-  // A4 dimensions and line calculations with Word-like margins
-  const A4_PAGE_HEIGHT = 760; // Reduced usable height due to 95px margins on top/bottom (950 - 190)
+  // A4 dimensions and line calculations with precise Word-standard margins
+  const A4_PAGE_HEIGHT = 931; // Usable writing area: 1123px - (96px top + 96px bottom margins)
   const LINE_HEIGHT = 26; // 16px font * 1.6 line-height ≈ 26px
-  const MAX_LINES_PER_PAGE = Math.floor(linesPerPage * 0.85); // Reduced to ~30 lines for safety
+  const MAX_LINES_PER_PAGE = Math.floor(A4_PAGE_HEIGHT / LINE_HEIGHT) - 2; // ~33 lines with safety margin
   
   const [pages, setPages] = useState<Page[]>([
     { id: 'page-1', content: initialContent }
