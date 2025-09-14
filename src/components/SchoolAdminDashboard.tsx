@@ -473,9 +473,9 @@ const SchoolAdminDashboard = () => {
             icon: BookOpen,
             path: '/school-classes'
           }, {
-            name: 'المحتوى التعليمي',
+            name: 'المضامين التعليمية',
             icon: BookOpen,
-            path: '/content-management'
+            path: '/educational-content'
           }, {
             name: 'الإعدادات',
             icon: Settings,

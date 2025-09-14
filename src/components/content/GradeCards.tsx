@@ -6,11 +6,13 @@ import { useGradeStats } from '@/hooks/useGradeStats';
 import { useAvailableGrades } from '@/hooks/useAvailableGrades';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useContentPermissions } from '@/hooks/useContentPermissions';
 
 const GradeCards: React.FC = () => {
   const navigate = useNavigate();
   const { stats, loading } = useGradeStats();
   const { availableGrades, isGradeAvailable, loading: gradesLoading, error: gradesError } = useAvailableGrades();
+  const { isManager, accessLevel } = useContentPermissions();
 
   const grades = [
     {
@@ -26,7 +28,7 @@ const GradeCards: React.FC = () => {
       icon: Video,
       color: 'blue',
       gradient: 'from-blue-500 to-blue-700',
-      path: '/content-management/grade-10',
+      path: '/grade10-management',
       stats: {
         videos: stats.grade10.videos,
         documents: stats.grade10.documents,
@@ -46,7 +48,7 @@ const GradeCards: React.FC = () => {
       icon: BookOpen,
       color: 'green',
       gradient: 'from-green-500 to-green-700',
-      path: '/content-management/grade-11',
+      path: '/grade11-management',
       stats: {
         lessons: stats.grade11.lessons,
         games: stats.grade11.games,
@@ -66,7 +68,7 @@ const GradeCards: React.FC = () => {
       icon: Trophy,
       color: 'purple',
       gradient: 'from-purple-500 to-purple-700',
-      path: '/content-management/grade-12',
+      path: '/grade12-management',
       stats: {
         documents: stats.grade12.documents,
         videos: stats.grade12.videos,
@@ -244,7 +246,11 @@ const GradeCards: React.FC = () => {
                     ? 'bg-muted text-muted-foreground border border-border/30' 
                     : `bg-gradient-to-r ${grade.gradient} text-white group-hover:shadow-lg`
                 }`}>
-                  <span>{isDisabled ? 'غير متاح' : 'إدارة المحتوى'}</span>
+                  <span>{isDisabled ? 'غير متاح' : 
+                    isManager ? 'إدارة المحتوى' : 
+                    accessLevel === 'REVIEW' ? 'مراجعة المحتوى' :
+                    accessLevel === 'CUSTOM' ? 'استعراض المحتوى' :
+                    'مشاهدة المحتوى'}</span>
                   {isDisabled ? (
                     <Lock className="h-4 w-4" />
                   ) : (

@@ -386,7 +386,11 @@ const Dashboard = () => {
     { name: 'التقارير', icon: BarChart3, path: '/reports' },
     { name: 'إعدادات النظام', icon: Settings, path: '/system-settings' },
     { name: 'الإشعارات', icon: Bell, path: '/notifications' },
-    { name: 'إدارة مضامين الصفوف', icon: BookOpen, path: '/content-management' },
+    ...(userProfile?.role === 'superadmin' ? [
+      { name: 'إدارة مضامين الصفوف', icon: BookOpen, path: '/content-management' }
+    ] : [
+      { name: 'المضامين التعليمية', icon: BookOpen, path: '/educational-content' }
+    ]),
     ...(userProfile?.role === 'superadmin' ? [
       { name: 'إدارة المدارس', icon: Shield, path: '/school-management' },
       { name: 'إدارة مدراء المدارس', icon: UserCog, path: '/school-admin-management' },
