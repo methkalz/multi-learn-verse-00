@@ -327,22 +327,26 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                   lineHeight: `${LINE_HEIGHT}px`,
                   fontSize: '16px',
                   fontFamily: '"IBM Plex Sans Arabic", "Noto Sans Arabic", "Cairo", "Amiri", "Tahoma", system-ui, sans-serif',
-                  textAlign: 'right', // تنسيق افتراضي للنص العربي
+                  textAlign: 'right',
                   direction: 'rtl',
-                  unicodeBidi: 'plaintext',
+                  unicodeBidi: 'embed', // تحسين positioning للـ cursor
                   wordWrap: 'break-word',
-                  overflowWrap: 'anywhere', // كسر أفضل للكلمات الطويلة
-                  whiteSpace: 'pre-line', // أفضل للنص العربي
-                  hyphens: 'auto',
-                  wordSpacing: '0.05em', // مسافة أقل بين الكلمات
-                  letterSpacing: '0.01em', // مسافة أقل بين الأحرف
+                  overflowWrap: 'break-word', // استخدام break-word بدلاً من anywhere
+                  whiteSpace: 'pre-wrap', // العودة لـ pre-wrap للـ cursor positioning
+                  hyphens: 'none', // إيقاف الفصل التلقائي لتجنب مشاكل الـ cursor
+                  wordSpacing: 'normal', // استخدام القيم الافتراضية
+                  letterSpacing: 'normal',
                   padding: '0',
                   margin: '0',
                   width: '100%',
                   maxWidth: '100%',
                   boxSizing: 'border-box',
-                  textRendering: 'geometricPrecision', // دقة أفضل في العرض
-                  fontKerning: 'normal' // مسافات طبيعية بين الأحرف
+                  textRendering: 'auto', // تبسيط text rendering
+                  fontKerning: 'auto',
+                  caretColor: 'currentColor', // تأكيد لون المؤشر
+                  cursor: 'text', // تأكيد cursor type
+                  position: 'relative', // لضمان positioning صحيح
+                  zIndex: 1
                 }}
                 contentEditable={!readOnly}
                 suppressContentEditableWarning={true}
@@ -379,19 +383,21 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
       <style dangerouslySetInnerHTML={{
         __html: `
           .arabic-text-optimized {
-            font-feature-settings: "liga" 1, "kern" 1, "calt" 1;
+            font-feature-settings: "liga" 1, "kern" 1;
             font-variant-ligatures: common-ligatures;
-            text-rendering: geometricPrecision;
-            -webkit-font-smoothing: antialiased;
+            text-rendering: auto;
+            -webkit-font-smoothing: subpixel-antialiased;
+            -moz-osx-font-smoothing: auto;
           }
           
           .arabic-text-optimized p {
             margin: 0.5em 0;
-            text-indent: 0; // إزالة المسافة في بداية الفقرة
+            text-indent: 0;
           }
           
           .arabic-text-optimized:focus {
-            outline: none;
+            outline: 1px solid hsl(var(--primary) / 0.2);
+            outline-offset: 1px;
           }
           
           .page-card:focus-within .page-margin-indicator {
