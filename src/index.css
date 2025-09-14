@@ -227,63 +227,33 @@ All colors MUST be HSL.
     text-align: right;
   }
 
-  /* Enhanced Arabic text editor styles - Strong overrides */
+  /* Enhanced Arabic text editor styles - Clean and simple */
   .enhanced-arabic-editor {
-    direction: rtl !important;
-    unicode-bidi: embed !important;
-    text-align: right !important;
-  }
-
-  .enhanced-arabic-editor * {
-    direction: rtl !important;
-    unicode-bidi: embed !important;
-    text-align: right !important;
+    text-align: right;
   }
 
   .enhanced-arabic-editor p,
   .enhanced-arabic-editor div,
   .enhanced-arabic-editor span {
-    direction: rtl !important;
-    unicode-bidi: embed !important;
-    text-align: right !important;
+    text-align: right;
     margin: 0.5em 0;
-  }
-
-  /* Override any conflicting global CSS */
-  .enhanced-arabic-editor[contenteditable="true"] {
-    direction: rtl !important;
-    unicode-bidi: embed !important;
-    text-align: right !important;
-  }
-
-  /* Special handling for English text and numbers */
-  .enhanced-arabic-editor .english-text {
-    direction: ltr !important;
-    unicode-bidi: embed !important;
-    text-align: left !important;
-    display: inline;
   }
 
   /* Fix for Arabic text inside tables */
   .enhanced-arabic-editor table td,
   .enhanced-arabic-editor table th {
-    direction: rtl !important;
-    unicode-bidi: embed !important;
-    text-align: right !important;
+    text-align: right;
   }
 
   /* Proper RTL support for lists */
   .enhanced-arabic-editor ul,
   .enhanced-arabic-editor ol {
-    direction: rtl !important;
     padding-inline-start: 2em;
     padding-inline-end: 0;
   }
 
   .enhanced-arabic-editor li {
-    direction: rtl !important;
-    unicode-bidi: embed !important;
-    text-align: right !important;
+    text-align: right;
   }
 
   /* فقرات ونصوص عربية */
