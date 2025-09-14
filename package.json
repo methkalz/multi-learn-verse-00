@@ -69,6 +69,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "tiptap-pagination-breaks": "^1.0.3",
+    "tiptap-pagination-plus": "^1.1.8",
     "vaul": "^0.9.9",
     "zod": "^4.0.17"
   },
