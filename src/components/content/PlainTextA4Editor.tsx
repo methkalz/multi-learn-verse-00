@@ -45,12 +45,12 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const autoSaveTimerRef = useRef<NodeJS.Timeout>();
 
-  // A4 dimensions in pixels (at 96 DPI)
+  // A4 dimensions optimized for Arabic text
   const A4_WIDTH = 794; // 210mm
   const A4_HEIGHT = 1123; // 297mm
-  const PAGE_PADDING = 60;
-  const LINE_HEIGHT = 24;
-  const CHARS_PER_LINE = 70; // تقدير متوسط للأحرف في السطر
+  const PAGE_PADDING = 40; // تقليل الهامش لاستغلال المساحة أكثر
+  const LINE_HEIGHT = 28; // زيادة ارتفاع السطر للنص العربي
+  const CHARS_PER_LINE = 85; // زيادة عدد الأحرف للاستفادة من العرض الكامل
   const LINES_PER_PAGE = Math.floor((A4_HEIGHT - PAGE_PADDING * 2) / LINE_HEIGHT);
   const CHARS_PER_PAGE = CHARS_PER_LINE * LINES_PER_PAGE;
 
@@ -310,26 +310,36 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
               {/* Page Content */}
               <div
                 ref={el => pageRefs.current[index] = el}
-                className="page-content w-full h-full outline-none leading-6 text-foreground"
+                className="page-content w-full h-full outline-none text-foreground arabic-text-optimized"
                 style={{
                   minHeight: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
                   lineHeight: `${LINE_HEIGHT}px`,
-                  fontSize: '14px',
-                  fontFamily: 'system-ui, -apple-system, sans-serif',
-                  textAlign: 'right',
+                  fontSize: '16px', // زيادة حجم الخط للوضوح
+                  fontFamily: '"Noto Sans Arabic", "Cairo", "Amiri", "Tahoma", system-ui, sans-serif',
+                  textAlign: 'justify', // ضبط النص لملء العرض الكامل
                   direction: 'rtl',
                   unicodeBidi: 'plaintext',
                   wordWrap: 'break-word',
                   overflowWrap: 'break-word',
-                  whiteSpace: 'pre-wrap'
+                  whiteSpace: 'pre-wrap',
+                  textJustify: 'inter-word', // تحسين توزيع الكلمات
+                  hyphens: 'auto', // الفصل التلقائي للكلمات
+                  wordSpacing: '0.1em', // تحسين المسافات بين الكلمات
+                  letterSpacing: '0.02em', // تحسين المسافات بين الأحرف
+                  padding: '0', // إزالة أي هامش إضافي
+                  margin: '0',
+                  width: '100%',
+                  maxWidth: '100%',
+                  boxSizing: 'border-box'
                 }}
                 contentEditable={!readOnly}
                 suppressContentEditableWarning={true}
                 onInput={(e) => handleInput(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onFocus={() => setCurrentPageIndex(index)}
-                dangerouslySetInnerHTML={{ __html: page.content }}
-              />
+              >
+                {page.content}
+              </div>
               
               {/* Page Number */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground">
@@ -353,9 +363,27 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
         </div>
       )}
 
-      {/* Print Styles */}
+      {/* Enhanced Styles for Arabic Text */}
       <style dangerouslySetInnerHTML={{
         __html: `
+          .arabic-text-optimized {
+            font-feature-settings: "liga" 1, "kern" 1, "calt" 1;
+            font-variant-ligatures: common-ligatures;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+          
+          .arabic-text-optimized p {
+            margin: 0.5em 0;
+            text-indent: 1em;
+          }
+          
+          .arabic-text-optimized:focus {
+            outline: 2px solid hsl(var(--primary) / 0.3);
+            outline-offset: 2px;
+          }
+          
           @media print {
             .plain-text-a4-editor .flex:first-child,
             .plain-text-a4-editor .flex:last-child {
@@ -380,7 +408,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
               page-break-after: always;
               width: 210mm !important;
               height: 297mm !important;
-              padding: 20mm !important;
+              padding: 15mm !important;
             }
             
             .page-card:last-child {
@@ -388,9 +416,17 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
             }
             
             .page-content {
-              font-size: 12pt !important;
-              line-height: 1.5 !important;
+              font-size: 14pt !important;
+              line-height: 1.6 !important;
               color: black !important;
+              text-align: justify !important;
+              font-family: "Noto Sans Arabic", "Cairo", "Amiri", "Tahoma", serif !important;
+            }
+            
+            .arabic-text-optimized {
+              text-justify: inter-word !important;
+              word-spacing: 0.1em !important;
+              letter-spacing: 0.02em !important;
             }
             
             body {
