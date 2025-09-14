@@ -367,23 +367,52 @@ const Grade12ProjectEditor: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="editor" className="mt-6">
-            <div className="project-editor-container">
-              {/* A4 Pages Container */}
-              <div className="a4-page">
+          <TabsContent value="editor" className="space-y-4">
+            <div className="flex flex-col h-full">
+              {/* Editor Toolbar - Fixed at top */}
+              <div className="bg-white rounded-lg shadow-sm border mb-4 p-2">
                 <EnhancedDocumentEditor
                   content={content}
                   onChange={setContent}
-                  placeholder="ابدأ كتابة مشروعك هنا..."
+                  readOnly={!canEdit}
                   autoSave={true}
                   onSave={handleManualSave}
-                  readOnly={!canEdit}
+                  toolbarOnly={true}
+                  targetElementId="a4-content-editor"
                 />
               </div>
-              
-              {/* Page Indicator */}
-              <div className="page-indicator">
-                صفحة 1
+
+              {/* A4 Pages Container */}
+              <div className="flex-1 overflow-y-auto bg-gray-100 p-6">
+                <div className="max-w-[21cm] mx-auto space-y-4">
+                  {/* A4 Page 1 */}
+                  <div className="a4-page bg-white shadow-lg mx-auto">
+                    <div
+                      id="a4-content-editor"
+                      contentEditable={canEdit}
+                      className="a4-content w-full h-full p-8 focus:outline-none"
+                      style={{
+                        fontFamily: 'Arial, sans-serif',
+                        fontSize: '12pt',
+                        lineHeight: '1.5',
+                        direction: 'rtl',
+                        textAlign: 'right',
+                        minHeight: '29.7cm'
+                      }}
+                      onInput={(e) => {
+                        const target = e.target as HTMLElement;
+                        setContent(target.innerHTML);
+                      }}
+                      dangerouslySetInnerHTML={{ __html: content }}
+                      suppressContentEditableWarning={true}
+                    />
+                  </div>
+                  
+                  {/* Page Indicator */}
+                  <div className="text-center py-2 text-sm text-gray-500">
+                    صفحة 1 من 1
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>

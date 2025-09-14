@@ -54,6 +54,8 @@ interface EnhancedDocumentEditorProps {
   autoSave?: boolean;
   onSave?: () => void;
   readOnly?: boolean;
+  toolbarOnly?: boolean;
+  targetElementId?: string;
 }
 
 interface FindReplaceState {
@@ -70,7 +72,9 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
   placeholder = "ابدأ الكتابة هنا...",
   autoSave = false,
   onSave,
-  readOnly = false
+  readOnly = false,
+  toolbarOnly = false,
+  targetElementId = "main-editor"
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -142,9 +146,20 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
 
   const formatDocument = (command: string, value?: string) => {
     if (readOnly) return;
-    document.execCommand(command, false, value);
-    editorRef.current?.focus();
-    updateContent();
+    
+    if (toolbarOnly) {
+      const targetElement = document.getElementById(targetElementId);
+      if (targetElement) {
+        targetElement.focus();
+        document.execCommand(command, false, value);
+        const newContent = targetElement.innerHTML;
+        onChange(newContent);
+      }
+    } else {
+      document.execCommand(command, false, value);
+      editorRef.current?.focus();
+      updateContent();
+    }
   };
 
   const updateContent = () => {
@@ -756,75 +771,79 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
         className="hidden"
       />
 
-      {/* Editor Area with Enhanced Scrolling */}
-      <div 
-        className={`${isA4Mode ? 'max-w-4xl mx-auto bg-white shadow-lg overflow-y-auto max-h-screen' : 'overflow-y-auto max-h-[70vh]'}`}
-        style={isA4Mode ? { 
-          minHeight: '29.7cm',
-          scrollBehavior: 'smooth'
-        } : {
-          scrollBehavior: 'smooth'
-        }}
-      >
-        <div
-          ref={editorRef}
-          contentEditable={!readOnly}
-          dir="auto"
-          className={`outline-none document-editor ${isA4Mode ? 'p-16' : 'p-6'} min-h-[500px] focus:outline-none focus:ring-2 focus:ring-primary/20`}
-          style={{ 
-            lineHeight: '1.8',
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '16px',
-            scrollbarWidth: 'auto',
-            scrollbarColor: '#cbd5e1 #f1f5f9',
-            overflowWrap: 'break-word',
-            wordBreak: 'break-word',
-            ...(isA4Mode && { 
-              width: '21cm',
+      {/* Main Editor Content - Only show if not toolbar-only mode */}
+      {!toolbarOnly && (
+        <>
+          <div 
+            className={`${isA4Mode ? 'max-w-4xl mx-auto bg-white shadow-lg overflow-y-auto max-h-screen' : 'overflow-y-auto max-h-[70vh]'}`}
+            style={isA4Mode ? { 
               minHeight: '29.7cm',
-              margin: '0 auto',
-              padding: '2cm',
-              backgroundColor: 'white',
-              pageBreakInside: 'avoid',
-              breakInside: 'avoid'
-            })
-          }}
-          onInput={updateContent}
-          onBlur={updateContent}
-          onPaste={handlePaste}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          suppressContentEditableWarning={true}
-          data-placeholder={placeholder}
-        >
-          {!content && (
-            <p className="text-muted-foreground">{placeholder}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Status Bar */}
-      <div className="bg-muted/30 px-4 py-2 border-t text-xs text-muted-foreground">
-        <div className="flex justify-between items-center">
-          <div className="flex gap-4">
-            <span>الكلمات: {wordCount.words}</span>
-            <span>الأحرف: {wordCount.chars}</span>
-            <span>الأحرف (بدون مسافات): {wordCount.charsNoSpaces}</span>
-            <span>الصفحات: {pageCount}</span>
-          </div>
-          
-          <div className="flex gap-2 items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsA4Mode(!isA4Mode)}
-              className="text-xs"
+              scrollBehavior: 'smooth'
+            } : {
+              scrollBehavior: 'smooth'
+            }}
+          >
+            <div
+              ref={editorRef}
+              contentEditable={!readOnly}
+              dir="auto"
+              className={`outline-none document-editor ${isA4Mode ? 'p-16' : 'p-6'} min-h-[500px] focus:outline-none focus:ring-2 focus:ring-primary/20`}
+              style={{ 
+                lineHeight: '1.8',
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '16px',
+                scrollbarWidth: 'auto',
+                scrollbarColor: '#cbd5e1 #f1f5f9',
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                ...(isA4Mode && { 
+                  width: '21cm',
+                  minHeight: '29.7cm',
+                  margin: '0 auto',
+                  padding: '2cm',
+                  backgroundColor: 'white',
+                  pageBreakInside: 'avoid',
+                  breakInside: 'avoid'
+                })
+              }}
+              onInput={updateContent}
+              onBlur={updateContent}
+              onPaste={handlePaste}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              suppressContentEditableWarning={true}
+              data-placeholder={placeholder}
             >
-              {isA4Mode ? 'عرض عادي' : 'عرض A4'}
-            </Button>
+              {!content && (
+                <p className="text-muted-foreground">{placeholder}</p>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* Status Bar */}
+          <div className="bg-muted/30 px-4 py-2 border-t text-xs text-muted-foreground">
+            <div className="flex justify-between items-center">
+              <div className="flex gap-4">
+                <span>الكلمات: {wordCount.words}</span>
+                <span>الأحرف: {wordCount.chars}</span>
+                <span>الأحرف (بدون مسافات): {wordCount.charsNoSpaces}</span>
+                <span>الصفحات: {pageCount}</span>
+              </div>
+              
+              <div className="flex gap-2 items-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsA4Mode(!isA4Mode)}
+                  className="text-xs"
+                >
+                  {isA4Mode ? 'عرض عادي' : 'عرض A4'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Find & Replace Dialog */}
       <Dialog open={findReplace.isOpen} onOpenChange={(open) => setFindReplace(prev => ({ ...prev, isOpen: open }))}>
