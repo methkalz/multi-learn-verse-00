@@ -368,20 +368,24 @@ const Grade12ProjectEditor: React.FC = () => {
           </TabsList>
 
           <TabsContent value="editor" className="mt-6">
-            <Card>
-              <CardContent className="p-0">
-                <div className="project-editor-container">
-                  <EnhancedDocumentEditor
-                    content={content}
-                    onChange={setContent}
-                    placeholder="ابدأ كتابة مشروعك هنا..."
-                    autoSave={true}
-                    onSave={handleManualSave}
-                    readOnly={!canEdit}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="project-editor-container">
+              {/* A4 Pages Container */}
+              <div className="a4-page">
+                <EnhancedDocumentEditor
+                  content={content}
+                  onChange={setContent}
+                  placeholder="ابدأ كتابة مشروعك هنا..."
+                  autoSave={true}
+                  onSave={handleManualSave}
+                  readOnly={!canEdit}
+                />
+              </div>
+              
+              {/* Page Indicator */}
+              <div className="page-indicator">
+                صفحة 1
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="comments" className="mt-6">
@@ -572,23 +576,54 @@ const Grade12ProjectEditor: React.FC = () => {
         .project-editor-container {
           /* Isolate editor styles from global CSS */
           isolation: isolate;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: #f0f0f0;
+          min-height: calc(100vh - 120px);
+          padding: 2rem 1rem;
+        }
+        
+        .a4-page {
+          width: 21cm;
+          min-height: 29.7cm;
+          max-height: 29.7cm;
+          background: white;
+          margin: 0 auto 2cm auto;
+          padding: 2.5cm;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          border: 1px solid #ddd;
+          overflow: hidden;
+          position: relative;
+          page-break-after: always;
         }
         
         .project-editor-container .document-editor {
           font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          direction: ltr;
-          text-align: start;
-          line-height: 1.8;
-          min-height: 600px;
-          padding: 2rem;
+          text-align: right;
+          line-height: 1.6;
           border: none;
           outline: none;
-          background: white;
+          background: transparent;
+          width: 100%;
+          height: 100%;
+          overflow: visible;
         }
         
         .project-editor-container .document-editor:focus {
           outline: none;
-          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .project-editor-container .document-editor p {
+          margin: 0 0 1em 0;
+          direction: auto;
+        }
+        
+        .project-editor-container .document-editor h1,
+        .project-editor-container .document-editor h2,
+        .project-editor-container .document-editor h3 {
+          margin: 1.5em 0 0.5em 0;
+          direction: auto;
         }
         
         .project-editor-container .document-editor table {
@@ -618,6 +653,55 @@ const Grade12ProjectEditor: React.FC = () => {
           height: auto;
           border-radius: 8px;
           margin: 10px 0;
+          display: block;
+        }
+        
+        .project-editor-container .document-editor ul,
+        .project-editor-container .document-editor ol {
+          margin: 1em 0;
+          padding-right: 2em;
+          direction: auto;
+        }
+        
+        .project-editor-container .document-editor li {
+          margin: 0.5em 0;
+          direction: auto;
+        }
+        
+        .page-indicator {
+          position: fixed;
+          bottom: 2rem;
+          right: 2rem;
+          background: rgba(0,0,0,0.8);
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-size: 0.875rem;
+          z-index: 1000;
+        }
+        
+        /* Print styles */
+        @media print {
+          .project-editor-container {
+            background: white;
+            padding: 0;
+          }
+          
+          .a4-page {
+            margin: 0;
+            box-shadow: none;
+            border: none;
+            page-break-after: always;
+          }
+          
+          .page-indicator {
+            display: none;
+          }
+        }
+        
+        /* Auto page break functionality */
+        .auto-page-break {
+          page-break-before: always;
         }
       `}</style>
     </div>

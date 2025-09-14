@@ -127,90 +127,17 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
     }
   }, []);
 
+  // تحديث المحتوى الأولي فقط عند التحميل الأول
   useEffect(() => {
-    if (editorRef.current && content) {
-      // حفظ موضع المؤشر قبل التحديث
-      const selection = window.getSelection();
-      let range = null;
-      let startOffset = 0;
-      let endOffset = 0;
-      let startContainer = null;
-      let endContainer = null;
-      
-      // التحقق من وجود selection و ranges قبل الوصول إليها
-      if (selection && selection.rangeCount > 0) {
-        try {
-          range = selection.getRangeAt(0);
-          startOffset = range.startOffset;
-          endOffset = range.endOffset;
-          startContainer = range.startContainer;
-          endContainer = range.endContainer;
-        } catch (error) {
-          // في حالة الخطأ، تجاهل حفظ الموضع
-          console.warn('Failed to save cursor position:', error);
-        }
-      }
-      
-      // تحديث المحتوى فقط إذا كان مختلفاً
-      if (editorRef.current.innerHTML !== content) {
-        editorRef.current.innerHTML = content;
-        
-        // استعادة موضع المؤشر فقط إذا كان محفوظاً
-        if (selection && range && startContainer && endContainer) {
-          try {
-            const newRange = document.createRange();
-            // العثور على العقدة المناسبة في المحتوى الجديد
-            const walker = document.createTreeWalker(
-              editorRef.current,
-              NodeFilter.SHOW_TEXT,
-              null
-            );
-            
-            let node;
-            let currentOffset = 0;
-            let targetStartNode = null;
-            let targetEndNode = null;
-            let targetStartOffset = startOffset;
-            let targetEndOffset = endOffset;
-            
-            // البحث عن النودة المناسبة
-            while (node = walker.nextNode()) {
-              const nodeLength = node.textContent?.length || 0;
-              if (currentOffset + nodeLength >= targetStartOffset && !targetStartNode) {
-                targetStartNode = node;
-                targetStartOffset = targetStartOffset - currentOffset;
-              }
-              if (currentOffset + nodeLength >= targetEndOffset && !targetEndNode) {
-                targetEndNode = node;
-                targetEndOffset = targetEndOffset - currentOffset;
-                break;
-              }
-              currentOffset += nodeLength;
-            }
-            
-            if (targetStartNode) {
-              newRange.setStart(targetStartNode, Math.min(targetStartOffset, targetStartNode.textContent?.length || 0));
-              newRange.setEnd(targetEndNode || targetStartNode, Math.min(targetEndOffset, (targetEndNode || targetStartNode).textContent?.length || 0));
-              selection.removeAllRanges();
-              selection.addRange(newRange);
-            }
-          } catch (error) {
-            // في حالة الخطأ، ضع المؤشر في النهاية
-            console.warn('Failed to restore cursor position:', error);
-            try {
-              const newRange = document.createRange();
-              newRange.selectNodeContents(editorRef.current);
-              newRange.collapse(false);
-              selection.removeAllRanges();
-              selection.addRange(newRange);
-            } catch (fallbackError) {
-              console.warn('Failed to set fallback cursor position:', fallbackError);
-            }
-          }
-        }
-      }
+    if (editorRef.current && content && !editorRef.current.innerHTML) {
+      editorRef.current.innerHTML = content;
       updateStatistics();
     }
+  }, []);
+
+  // تحديث الإحصائيات عند تغيير المحتوى
+  useEffect(() => {
+    updateStatistics();
   }, [content, updateStatistics]);
 
   const formatDocument = (command: string, value?: string) => {
