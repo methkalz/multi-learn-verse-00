@@ -326,13 +326,13 @@ const Grade11LessonContentDisplay: React.FC<Grade11LessonContentDisplayProps> = 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full max-w-none">
       {/* Lesson Content */}
       {!hideHeader && (
-        <div className="prose prose-sm max-w-none">
+        <div className="prose prose-sm max-w-none w-full">
           <h6 className="font-medium text-sm mb-2">{lesson.title}</h6>
           {lesson.content && (
-            <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+            <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words max-w-full">
               {lesson.content}
             </div>
           )}

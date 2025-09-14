@@ -50,7 +50,7 @@ const Grade11LessonDetailsModal: React.FC<Grade11LessonDetailsModalProps> = ({ l
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 gap-0">
+      <DialogContent className="max-w-4xl h-[85vh] p-0 gap-0 flex flex-col">
         {/* Header */}
         <DialogHeader className="p-6 pb-4 bg-muted/30 border-b">
           <div className="flex items-start justify-between">
@@ -86,30 +86,32 @@ const Grade11LessonDetailsModal: React.FC<Grade11LessonDetailsModalProps> = ({ l
         </DialogHeader>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden">
           <Tabs defaultValue="content" className="h-full flex flex-col">
-            <div className="px-6 pt-4">
+            <div className="px-6 pt-4 pb-2 border-b bg-background">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="content">محتوى الدرس</TabsTrigger>
                 <TabsTrigger value="media">الوسائط المرفقة</TabsTrigger>
               </TabsList>
             </div>
 
-            <div className="flex-1 overflow-hidden">
-              <TabsContent value="content" className="h-full mt-4">
-                <ScrollArea className="h-full px-6 pb-6">
-                  <div className="space-y-6">
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <TabsContent value="content" className="h-full m-0 data-[state=active]:flex data-[state=active]:flex-col">
+                <ScrollArea className="flex-1 px-6 py-4">
+                  <div className="space-y-6 max-w-none">
                     {/* Lesson Content */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-lg">محتوى الدرس</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <Grade11LessonContentDisplay 
-                          lesson={lesson}
+                      <CardContent className="prose prose-sm max-w-none break-words">
+                        <div className="text-sm leading-relaxed break-words max-w-full overflow-wrap-anywhere">
+                          <Grade11LessonContentDisplay 
+                            lesson={lesson}
                           defaultExpanded={true}
-                          showControls={false}
-                        />
+                            showControls={false}
+                          />
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -151,8 +153,8 @@ const Grade11LessonDetailsModal: React.FC<Grade11LessonDetailsModalProps> = ({ l
                 </ScrollArea>
               </TabsContent>
 
-              <TabsContent value="media" className="h-full mt-4">
-                <ScrollArea className="h-full px-6 pb-6">
+              <TabsContent value="media" className="h-full m-0 data-[state=active]:flex data-[state=active]:flex-col">
+                <ScrollArea className="flex-1 px-6 py-4">
                   <div className="space-y-4">
                     {!lesson.media || lesson.media.length === 0 ? (
                       <Card className="text-center p-12">

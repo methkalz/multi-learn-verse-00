@@ -1063,6 +1063,39 @@ All colors MUST be HSL.
   }
 }
 
+/* Lesson content display improvements */
+.lesson-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+.lesson-content p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.lesson-content pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: auto;
+}
+
+/* Dialog content improvements */
+[data-radix-scroll-area-viewport] {
+  max-width: 100% !important;
+}
+
+.prose {
+  max-width: none !important;
+}
+
+.prose p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
 .celebration-sparkles {
   animation: golden-sparkle 2s ease-in-out infinite;
 }
