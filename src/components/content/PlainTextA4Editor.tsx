@@ -308,41 +308,16 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                 position: 'relative',
               }}
             >
-              {/* Word-like margin indicators - only show on focus */}
-              <div className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-200 page-margins">
-                <div 
-                  className="absolute border-l border-primary/40"
-                  style={{ 
-                    left: `${PAGE_PADDING}px`, 
-                    top: `${PAGE_PADDING}px`, 
-                    bottom: `${PAGE_PADDING}px` 
-                  }}
-                />
-                <div 
-                  className="absolute border-r border-primary/40"
-                  style={{ 
-                    right: `${PAGE_PADDING}px`, 
-                    top: `${PAGE_PADDING}px`, 
-                    bottom: `${PAGE_PADDING}px` 
-                  }}
-                />
-                <div 
-                  className="absolute border-t border-primary/40"
-                  style={{ 
-                    top: `${PAGE_PADDING}px`, 
-                    left: `${PAGE_PADDING}px`, 
-                    right: `${PAGE_PADDING}px` 
-                  }}
-                />
-                <div 
-                  className="absolute border-b border-primary/40"
-                  style={{ 
-                    bottom: `${PAGE_PADDING}px`, 
-                    left: `${PAGE_PADDING}px`, 
-                    right: `${PAGE_PADDING}px` 
-                  }}
-                />
-              </div>
+              {/* Word-like margin indicator - single border around writing area */}
+              <div 
+                className="absolute pointer-events-none opacity-0 transition-opacity duration-200 page-margins border border-primary/40"
+                style={{ 
+                  left: `${PAGE_PADDING}px`, 
+                  top: `${PAGE_PADDING}px`, 
+                  right: `${PAGE_PADDING}px`,
+                  bottom: `${PAGE_PADDING}px`
+                }}
+              />
               {/* Page Content */}
               <div
                 ref={el => pageRefs.current[index] = el}
