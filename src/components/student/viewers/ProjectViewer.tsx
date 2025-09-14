@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { useStudentAssignedGrade } from '@/hooks/useStudentAssignedGrade';
+import Grade10MiniProjectEditor from '@/components/content/Grade10MiniProjectEditor';
 import { Trophy, X, CheckCircle, FileText, Target, Calendar, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -32,6 +34,7 @@ export const ProjectViewer: React.FC<ProjectViewerProps> = ({
   onProgress,
   onComplete 
 }) => {
+  const { assignedGrade } = useStudentAssignedGrade();
   const [workTime, setWorkTime] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -121,6 +124,26 @@ export const ProjectViewer: React.FC<ProjectViewerProps> = ({
       day: 'numeric'
     });
   };
+
+  // For Grade 10 students, use the Mini Project Editor
+  if (assignedGrade === '10') {
+    return (
+      <Grade10MiniProjectEditor
+        project={project}
+        isOpen={isOpen}
+        onClose={() => {
+          // Save final progress before closing
+          if (progress > 0) {
+            onProgress(progress, workTime);
+          }
+          onClose();
+        }}
+        onSave={() => {
+          onComplete?.();
+        }}
+      />
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

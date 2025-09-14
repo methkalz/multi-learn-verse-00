@@ -11,7 +11,7 @@ import { useGrade10MiniProjects } from '@/hooks/useGrade10MiniProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { ModernLoader } from '@/components/ui/ModernLoader';
 import { toast } from '@/hooks/use-toast';
-import ProjectEditor from './ProjectEditor';
+import Grade10MiniProjectEditor from './Grade10MiniProjectEditor';
 import type { ProjectFormData } from '@/types/grade10-projects';
 
 const Grade10MiniProjects: React.FC = () => {
@@ -306,14 +306,17 @@ const Grade10MiniProjects: React.FC = () => {
         </Card>
       )}
 
-      {/* Project Editor Dialog */}
+      {/* Mini Project Editor Dialog */}
       {currentProject && (
-        <ProjectEditor 
+        <Grade10MiniProjectEditor 
           project={currentProject}
           isOpen={isProjectEditorOpen}
           onClose={() => {
             setIsProjectEditorOpen(false);
             setCurrentProject(null);
+          }}
+          onSave={() => {
+            // Refresh projects list if needed
           }}
         />
       )}

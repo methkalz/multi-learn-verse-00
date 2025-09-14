@@ -240,7 +240,7 @@ export const StudentGradeContent: React.FC = () => {
     },
     {
       id: 'projects',
-      label: 'المشاريع',
+      label: assignedGrade === '10' ? 'ميني بروجكت' : 'المشاريع',
       icon: Trophy,
       count: currentContent.projects.length,
       items: currentContent.projects,
