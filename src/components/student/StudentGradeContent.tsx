@@ -6,6 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { VideoViewer } from './viewers/VideoViewer';
+import { DocumentViewer } from './viewers/DocumentViewer';
+import { LessonViewer } from './viewers/LessonViewer';
+import { ProjectViewer } from './viewers/ProjectViewer';
 import { 
   Play, 
   FileText, 
@@ -32,12 +36,28 @@ export const StudentGradeContent: React.FC = () => {
   } = useStudentContent();
   const { updateProgress } = useStudentProgress();
   const [activeContentTab, setActiveContentTab] = useState('videos');
+  
+  // Viewer states
+  const [selectedContent, setSelectedContent] = useState<any>(null);
+  const [viewerType, setViewerType] = useState<'video' | 'document' | 'lesson' | 'project' | null>(null);
 
   const currentContent = gradeContent;
 
-  const handleContentClick = async (contentId: string, contentType: any, title: string) => {
+  const handleContentClick = (content: any, contentType: 'video' | 'document' | 'lesson' | 'project') => {
+    setSelectedContent(content);
+    setViewerType(contentType);
+  };
+
+  const handleContentProgress = async (contentId: string, contentType: any, progress: number, timeSpent: number) => {
     try {
-      // Award points based on content type
+      await updateProgress(contentId, contentType, progress, timeSpent, 0);
+    } catch (error) {
+      console.error('Error updating progress:', error);
+    }
+  };
+
+  const handleContentComplete = async (contentId: string, contentType: any, timeSpent: number) => {
+    try {
       const pointsMap = {
         video: 10,
         document: 5,
@@ -47,14 +67,19 @@ export const StudentGradeContent: React.FC = () => {
 
       const points = pointsMap[contentType] || 5;
       
-      await updateProgress(contentId, contentType, 100, 5, points);
+      await updateProgress(contentId, contentType, 100, timeSpent, points);
       
-      toast.success(`تم إكمال ${title} بنجاح! +${points} نقطة`, {
+      toast.success(`تم إكمال ${selectedContent?.title} بنجاح! +${points} نقطة`, {
         description: 'تم تسجيل تقدمك في النظام'
       });
     } catch (error) {
       toast.error('حدث خطأ في تسجيل التقدم');
     }
+  };
+
+  const closeViewer = () => {
+    setSelectedContent(null);
+    setViewerType(null);
   };
 
   const ContentCard: React.FC<{ 
@@ -124,7 +149,7 @@ export const StudentGradeContent: React.FC = () => {
 
               <Button
                 size="sm"
-                onClick={() => handleContentClick(item.id, type, item.title)}
+                onClick={() => handleContentClick(item, type)}
                 className="shrink-0"
               >
                 {isCompleted ? 'مراجعة' : 'ابدأ'}
@@ -224,16 +249,17 @@ export const StudentGradeContent: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8 px-4">
-      {/* Simple Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-foreground">
-          محتوى الصف {assignedGrade}
-        </h1>
-        <p className="text-muted-foreground text-base">
-          تصفح المواد التعليمية واكتسب النقاط
-        </p>
-      </div>
+    <>
+      <div className="space-y-8 px-4">
+        {/* Simple Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-foreground">
+            محتوى الصف {assignedGrade}
+          </h1>
+          <p className="text-muted-foreground text-base">
+            تصفح المواد التعليمية واكتسب النقاط
+          </p>
+        </div>
 
       {/* Content Tabs */}
       <Tabs value={activeContentTab} onValueChange={setActiveContentTab} className="w-full">
@@ -288,6 +314,64 @@ export const StudentGradeContent: React.FC = () => {
           </TabsContent>
         ))}
       </Tabs>
-    </div>
+      </div>
+
+      {/* Content Viewers */}
+      {viewerType === 'video' && selectedContent && (
+        <VideoViewer
+          isOpen={true}
+          onClose={closeViewer}
+          video={selectedContent}
+          onProgress={(progress, watchTime) => 
+            handleContentProgress(selectedContent.id, 'video', progress, watchTime)
+          }
+          onComplete={() => 
+            handleContentComplete(selectedContent.id, 'video', 0)
+          }
+        />
+      )}
+
+      {viewerType === 'document' && selectedContent && (
+        <DocumentViewer
+          isOpen={true}
+          onClose={closeViewer}
+          document={selectedContent}
+          onProgress={(progress, readTime) => 
+            handleContentProgress(selectedContent.id, 'document', progress, readTime)
+          }
+          onComplete={() => 
+            handleContentComplete(selectedContent.id, 'document', 0)
+          }
+        />
+      )}
+
+      {viewerType === 'lesson' && selectedContent && (
+        <LessonViewer
+          isOpen={true}
+          onClose={closeViewer}
+          lesson={selectedContent}
+          onProgress={(progress, studyTime) => 
+            handleContentProgress(selectedContent.id, 'lesson', progress, studyTime)
+          }
+          onComplete={() => 
+            handleContentComplete(selectedContent.id, 'lesson', 0)
+          }
+        />
+      )}
+
+      {viewerType === 'project' && selectedContent && (
+        <ProjectViewer
+          isOpen={true}
+          onClose={closeViewer}
+          project={selectedContent}
+          onProgress={(progress, workTime) => 
+            handleContentProgress(selectedContent.id, 'project', progress, workTime)
+          }
+          onComplete={() => 
+            handleContentComplete(selectedContent.id, 'project', 0)
+          }
+        />
+      )}
+    </>
   );
 };
