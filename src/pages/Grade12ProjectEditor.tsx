@@ -576,7 +576,8 @@ const Grade12ProjectEditor: React.FC = () => {
         
         .project-editor-container .document-editor {
           font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          text-align: right;
+          direction: ltr;
+          text-align: start;
           line-height: 1.8;
           min-height: 600px;
           padding: 2rem;
@@ -585,23 +586,9 @@ const Grade12ProjectEditor: React.FC = () => {
           background: white;
         }
         
-        .project-editor-container .document-editor p,
-        .project-editor-container .document-editor div,
-        .project-editor-container .document-editor span {
-          direction: auto;
-          text-align: inherit;
-        }
-        
         .project-editor-container .document-editor:focus {
           outline: none;
           box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        }
-        
-        .project-editor-container .document-editor p,
-        .project-editor-container .document-editor div,
-        .project-editor-container .document-editor span {
-          text-align: inherit;
-          direction: auto;
         }
         
         .project-editor-container .document-editor table {
