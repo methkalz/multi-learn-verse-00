@@ -184,7 +184,7 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
       const fileName = `${Date.now()}_${file.name}`;
       const { data, error } = await supabase.storage
         .from('grade10-documents')
-        .upload(`grade12-final-projects/${project.id}/${fileName}`, file);
+        .upload(`grade12-final-projects/${userProfile?.user_id}/${fileName}`, file);
 
       if (error) throw error;
 
