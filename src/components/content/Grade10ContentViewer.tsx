@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Files, Video } from 'lucide-react';
 import Grade10FileLibrary from './Grade10FileLibrary';
+import Grade10VideoViewer from './Grade10VideoViewer';
 import { useGrade10Files } from '@/hooks/useGrade10Files';
 
 const Grade10ContentViewer: React.FC = () => {
@@ -49,11 +50,10 @@ const Grade10ContentViewer: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="videos" className="mt-6">
-          <div className="text-center py-8">
-            <Video className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">فيديوهات الصف العاشر</h3>
-            <p className="text-muted-foreground">مكتبة الفيديوهات التعليمية للصف العاشر</p>
-          </div>
+          <Grade10VideoViewer
+            videos={videos}
+            loading={loading}
+          />
         </TabsContent>
       </Tabs>
     </div>
