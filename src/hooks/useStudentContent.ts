@@ -68,13 +68,14 @@ export const useStudentContent = () => {
     let lessons: StudentContentItem[] = [];
 
     try {
-      // Fetch videos using raw query to avoid type issues
+      // Fetch videos using specific table based on grade
       const videoTable = grade === '10' ? 'grade10_videos' : 
                         grade === '11' ? 'grade11_videos' : 'grade12_videos';
       
       const { data: videoData, error: videoError } = await (supabase as any)
         .from(videoTable)
         .select('id, title, description, video_url, thumbnail_url, duration, category, is_visible, is_active, order_index, created_at')
+        .eq('grade_level', grade)
         .eq('is_active', true)
         .eq('is_visible', true)
         .order('order_index', { ascending: true });
@@ -82,6 +83,8 @@ export const useStudentContent = () => {
       if (!videoError && videoData) {
         videos = videoData.map((item: any) => mapToContentItem(item, 'video', grade));
       }
+      
+      logger.info(`Found ${videos.length} videos for grade ${grade}`);
     } catch (err) {
       logger.warn('Could not fetch videos', { error: err });
     }
@@ -94,6 +97,7 @@ export const useStudentContent = () => {
         const { data: docData, error: docError } = await (supabase as any)
           .from(docTable)
           .select('id, title, description, file_path, category, is_visible, is_active, order_index, created_at')
+          .eq('grade_level', grade)
           .eq('is_active', true)
           .eq('is_visible', true)
           .order('order_index', { ascending: true });
@@ -102,6 +106,8 @@ export const useStudentContent = () => {
           documents = docData.map((item: any) => mapToContentItem(item, 'document', grade));
         }
       }
+      
+      logger.info(`Found ${documents.length} documents for grade ${grade}`);
     } catch (err) {
       logger.warn('Could not fetch documents', { error: err });
     }
@@ -129,6 +135,7 @@ export const useStudentContent = () => {
         const { data: lessonData, error: lessonError } = await (supabase as any)
           .from('grade11_lessons')
           .select('id, title, description, is_active, order_index, created_at')
+          .eq('grade_level', grade)
           .eq('is_active', true)
           .order('order_index', { ascending: true });
 
@@ -136,6 +143,8 @@ export const useStudentContent = () => {
           lessons = lessonData.map((item: any) => mapToContentItem(item, 'lesson', grade));
         }
       }
+      
+      logger.info(`Found ${lessons.length} lessons for grade ${grade}`);
     } catch (err) {
       logger.warn('Could not fetch lessons', { error: err });
     }

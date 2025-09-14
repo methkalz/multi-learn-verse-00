@@ -2159,6 +2159,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          is_active: boolean | null
           order_index: number
           title: string
           topic_id: string
@@ -2168,6 +2169,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean | null
           order_index?: number
           title: string
           topic_id: string
@@ -2177,6 +2179,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean | null
           order_index?: number
           title?: string
           topic_id?: string
@@ -2506,6 +2509,9 @@ export type Database = {
           duration: string | null
           grade_level: string
           id: string
+          is_active: boolean | null
+          is_visible: boolean | null
+          order_index: number | null
           owner_user_id: string
           school_id: string | null
           source_type: string | null
@@ -2521,6 +2527,9 @@ export type Database = {
           duration?: string | null
           grade_level?: string
           id?: string
+          is_active?: boolean | null
+          is_visible?: boolean | null
+          order_index?: number | null
           owner_user_id: string
           school_id?: string | null
           source_type?: string | null
@@ -2536,6 +2545,9 @@ export type Database = {
           duration?: string | null
           grade_level?: string
           id?: string
+          is_active?: boolean | null
+          is_visible?: boolean | null
+          order_index?: number | null
           owner_user_id?: string
           school_id?: string | null
           source_type?: string | null
