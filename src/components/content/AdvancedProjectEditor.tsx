@@ -104,14 +104,19 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
         await updateProjectContent(project.id, content);
         setLastSaved(new Date());
         
-        // Save version history
+        // Save auto version history (max 5 versions)
         const newVersion: ProjectVersion = {
-          id: `v_${Date.now()}`,
+          id: `auto_${Date.now()}`,
           content,
           timestamp: new Date().toISOString(),
           changes: `تحديث تلقائي - ${new Date().toLocaleTimeString('en-US')}`
         };
-        setVersions(prev => [newVersion, ...prev.slice(0, 9)]); // Keep last 10 versions
+        setVersions(prev => {
+          const autoVersions = prev.filter(v => v.id.startsWith('auto_'));
+          const manualVersions = prev.filter(v => v.id.startsWith('manual_'));
+          const updatedAutoVersions = [newVersion, ...autoVersions.slice(0, 4)]; // Keep 5 auto versions
+          return [...updatedAutoVersions, ...manualVersions];
+        });
         
         toast({
           title: "حُفظ تلقائياً",
@@ -128,7 +133,7 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
       } finally {
         setIsAutoSaving(false);
       }
-    }, 5000); // Auto-save after 5 seconds of inactivity
+    }, 600000); // Auto-save after 10 minutes of inactivity
 
     return () => {
       if (autoSaveIntervalRef.current) {
@@ -205,14 +210,19 @@ const AdvancedProjectEditor: React.FC<AdvancedProjectEditorProps> = ({
       await updateProjectContent(project.id, content);
       setLastSaved(new Date());
       
-      // Add to version history
+      // Add to manual version history (max 3 versions)
       const newVersion: ProjectVersion = {
-        id: `v_${Date.now()}`,
+        id: `manual_${Date.now()}`,
         content,
         timestamp: new Date().toISOString(),
         changes: `حفظ يدوي - ${new Date().toLocaleTimeString('en-US')}`
       };
-      setVersions(prev => [newVersion, ...prev.slice(0, 9)]);
+      setVersions(prev => {
+        const autoVersions = prev.filter(v => v.id.startsWith('auto_'));
+        const manualVersions = prev.filter(v => v.id.startsWith('manual_'));
+        const updatedManualVersions = [newVersion, ...manualVersions.slice(0, 2)]; // Keep 3 manual versions
+        return [...autoVersions, ...updatedManualVersions];
+      });
       
       toast({
         title: "تم الحفظ",

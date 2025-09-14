@@ -61,7 +61,7 @@ const Grade10MiniProjectEditor: React.FC<Grade10MiniProjectEditorProps> = ({
       } finally {
         setIsAutoSaving(false);
       }
-    }, 3000); // Auto-save after 3 seconds of inactivity
+    }, 600000); // Auto-save after 10 minutes of inactivity
 
     return () => clearTimeout(autoSaveTimer);
   }, [content, project?.id, project?.content, updateProjectContent]);

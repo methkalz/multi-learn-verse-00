@@ -90,14 +90,19 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
       try {
         await updateProject(project.id, { project_content: content });
         
-        // Save version for auto-save
+        // Save auto version history (max 5 versions)
         const newVersion: Version = {
-          id: `v_${Date.now()}`,
+          id: `auto_${Date.now()}`,
           content,
           timestamp: new Date().toISOString(),
           changes: `تحديث تلقائي - ${new Date().toLocaleTimeString('en-US')}`
         };
-        setVersions(prev => [newVersion, ...prev.slice(0, 9)]); // Keep last 10 versions
+        setVersions(prev => {
+          const autoVersions = prev.filter(v => v.id.startsWith('auto_'));
+          const manualVersions = prev.filter(v => v.id.startsWith('manual_'));
+          const updatedAutoVersions = [newVersion, ...autoVersions.slice(0, 4)]; // Keep 5 auto versions
+          return [...updatedAutoVersions, ...manualVersions];
+        });
         
         setLastSaved(new Date());
         toast({
@@ -110,7 +115,7 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
       } finally {
         setIsAutoSaving(false);
       }
-    }, 3000); // Auto-save after 3 seconds of inactivity
+    }, 600000); // Auto-save after 10 minutes of inactivity
 
     return () => clearTimeout(autoSaveTimer);
   }, [content, project?.id, project?.project_content, updateProject]);
@@ -121,14 +126,19 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
     try {
       await updateProject(project.id, { project_content: content });
       
-      // Save version for manual save
+      // Add to manual version history (max 3 versions)
       const newVersion: Version = {
-        id: `v_${Date.now()}`,
+        id: `manual_${Date.now()}`,
         content,
         timestamp: new Date().toISOString(),
         changes: `حفظ يدوي - ${new Date().toLocaleTimeString('en-US')}`
       };
-      setVersions(prev => [newVersion, ...prev.slice(0, 9)]);
+      setVersions(prev => {
+        const autoVersions = prev.filter(v => v.id.startsWith('auto_'));
+        const manualVersions = prev.filter(v => v.id.startsWith('manual_'));
+        const updatedManualVersions = [newVersion, ...manualVersions.slice(0, 2)]; // Keep 3 manual versions
+        return [...autoVersions, ...updatedManualVersions];
+      });
       
       setLastSaved(new Date());
       toast({
