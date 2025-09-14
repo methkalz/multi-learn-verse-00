@@ -16,7 +16,11 @@ export const LazySchoolClasses = lazy(() => retryDynamicImport(() => import('@/p
 export const LazyUserManagement = lazy(() => retryDynamicImport(() => import('@/pages/UserManagement')));
 export const LazySystemSettings = lazy(() => retryDynamicImport(() => import('@/pages/SystemSettings')));
 export const LazyContentManagement = lazy(() => retryDynamicImport(() => import('@/pages/ContentManagement')));
-export const LazyEducationalContent = lazy(() => retryDynamicImport(() => import('@/pages/EducationalContent')));
+export const LazyEducationalContent = createLazyComponentWithFallback(
+  () => import('@/pages/EducationalContent'),
+  'EducationalContent',
+  { maxRetries: 5, delay: 1500, backoffMultiplier: 2 }
+);
 export const LazyGrade10Management = lazy(() => retryDynamicImport(() => import('@/pages/Grade10Management')));
 export const LazyGrade11Management = createLazyComponentWithFallback(
   () => import('@/pages/Grade11Management'),
