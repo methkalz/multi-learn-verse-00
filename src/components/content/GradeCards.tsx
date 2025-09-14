@@ -133,52 +133,68 @@ const GradeCards: React.FC = () => {
               key={grade.id}
               className={`group transition-all duration-300 border-0 overflow-hidden relative ${
                 isDisabled 
-                  ? 'opacity-50 cursor-not-allowed' 
+                  ? 'opacity-75 cursor-not-allowed bg-muted/30' 
                   : 'cursor-pointer hover:shadow-2xl hover:-translate-y-2'
               }`}
               onClick={() => isAvailable && navigate(grade.path)}
             >
-              {/* خلفية متدرجة */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${grade.gradient} ${
-                isDisabled ? 'opacity-2' : 'opacity-5 group-hover:opacity-10'
+              {/* خلفية متدرجة - رمادية للمغلق، ملونة للمتاح */}
+              <div className={`absolute inset-0 ${
+                isDisabled 
+                  ? 'bg-gradient-to-br from-muted to-muted/50 opacity-30' 
+                  : `bg-gradient-to-br ${grade.gradient} opacity-5 group-hover:opacity-10`
               } transition-opacity duration-300`} />
               
               {/* أيقونة القفل للصفوف غير المتاحة */}
               {isDisabled && (
-                <div className="absolute top-4 right-4 z-10 bg-destructive/20 rounded-full p-2">
-                  <Lock className="h-4 w-4 text-destructive" />
+                <div className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm rounded-full p-2 shadow-sm border border-border/20">
+                  <Lock className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
               
               <CardHeader className="text-center pb-4 relative flex flex-col items-center">
-                <div className={`inline-flex items-center justify-center w-20 h-20 mx-auto mb-4 bg-gradient-to-br ${grade.gradient} rounded-full text-white shadow-lg ${
-                  isDisabled ? '' : 'group-hover:scale-110'
+                <div className={`inline-flex items-center justify-center w-20 h-20 mx-auto mb-4 rounded-full text-white shadow-lg ${
+                  isDisabled 
+                    ? 'bg-gradient-to-br from-muted-foreground to-muted-foreground/80' 
+                    : `bg-gradient-to-br ${grade.gradient} group-hover:scale-110`
                 } transition-transform duration-300`}>
                   <IconComponent className="h-10 w-10" />
                 </div>
                 
-                <CardTitle className="text-2xl font-bold text-foreground mb-2">
+                <CardTitle className={`text-2xl font-bold mb-2 ${
+                  isDisabled ? 'text-muted-foreground' : 'text-foreground'
+                }`}>
                   {grade.name}
                 </CardTitle>
                 
-                <p className="text-muted-foreground text-center leading-relaxed">
+                <p className={`text-center leading-relaxed ${
+                  isDisabled ? 'text-muted-foreground/70' : 'text-muted-foreground'
+                }`}>
                   {grade.description}
                 </p>
               </CardHeader>
 
-            <CardContent className="space-y-6 relative">
-              {/* المميزات */}
-              <div className="space-y-3">
-                <h4 className="font-semibold text-foreground">المميزات الرئيسية:</h4>
-                <ul className="space-y-2">
-                  {grade.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${grade.gradient}`} />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <CardContent className="space-y-6 relative">
+                {/* المميزات */}
+                <div className="space-y-3">
+                  <h4 className={`font-semibold ${
+                    isDisabled ? 'text-muted-foreground' : 'text-foreground'
+                  }`}>المميزات الرئيسية:</h4>
+                  <ul className="space-y-2">
+                    {grade.features.map((feature, index) => (
+                      <li key={index} className={`flex items-center gap-3 text-sm ${
+                        isDisabled ? 'text-muted-foreground/70' : 'text-muted-foreground'
+                      }`}>
+                        <div className={`w-2 h-2 rounded-full ${
+                          isDisabled 
+                            ? 'bg-muted-foreground/40' 
+                            : `bg-gradient-to-r ${grade.gradient}`
+                        }`} />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
               {/* الإحصائيات */}
               <div className="pt-4 border-t border-border/50">
@@ -195,10 +211,16 @@ const GradeCards: React.FC = () => {
                   <div className="grid grid-cols-3 gap-3">
                     {Object.entries(grade.stats).map(([key, value]) => (
                       <div key={key} className="text-center flex flex-col items-center justify-center p-2">
-                        <div className={`text-2xl font-bold bg-gradient-to-r ${grade.gradient} bg-clip-text text-transparent mb-1`}>
+                        <div className={`text-2xl font-bold mb-1 ${
+                          isDisabled 
+                            ? 'text-muted-foreground' 
+                            : `bg-gradient-to-r ${grade.gradient} bg-clip-text text-transparent`
+                        }`}>
                           {value}
                         </div>
-                        <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                        <div className={`text-xs flex items-center justify-center gap-1 ${
+                          isDisabled ? 'text-muted-foreground/70' : 'text-muted-foreground'
+                        }`}>
                           {key === 'videos' && <><PlayCircle className="h-3 w-3" />فيديو</>}
                           {key === 'documents' && <><FileText className="h-3 w-3" />مستند</>}
                           {key === 'lessons' && <><BookOpen className="h-3 w-3" />درس</>}
@@ -217,9 +239,11 @@ const GradeCards: React.FC = () => {
 
               {/* زر الدخول */}
               <div className="pt-4">
-                <div className={`w-full bg-gradient-to-r ${grade.gradient} text-white rounded-lg p-3 text-center font-medium transition-all duration-300 ${
-                  isDisabled ? '' : 'group-hover:shadow-lg'
-                } flex items-center justify-center gap-2`}>
+                <div className={`w-full rounded-lg p-3 text-center font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
+                  isDisabled 
+                    ? 'bg-muted text-muted-foreground border border-border/30' 
+                    : `bg-gradient-to-r ${grade.gradient} text-white group-hover:shadow-lg`
+                }`}>
                   <span>{isDisabled ? 'غير متاح' : 'إدارة المحتوى'}</span>
                   {isDisabled ? (
                     <Lock className="h-4 w-4" />
