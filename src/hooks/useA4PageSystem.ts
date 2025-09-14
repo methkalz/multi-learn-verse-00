@@ -14,11 +14,13 @@ export const useA4PageSystem = ({
   initialContent = '',
   onContentChange
 }: UseA4PageSystemOptions = {}) => {
-  // A4 precise dimensions at 96 DPI
+  // A4 precise dimensions with line-based calculations
   const A4_WIDTH = 794; // 210mm = 794px
   const A4_HEIGHT = 1123; // 297mm = 1123px
   const MARGIN = 96; // 2.54cm = 96px (Word standard)
-  const USABLE_HEIGHT = A4_HEIGHT - (MARGIN * 2); // 931px
+  const USABLE_HEIGHT = 931; // A4_HEIGHT - (MARGIN * 2)
+  const LINE_HEIGHT = 24; // 16px font * 1.5 line-height = 24px
+  const MAX_LINES_PER_PAGE = Math.floor(USABLE_HEIGHT / LINE_HEIGHT); // ~38 lines
 
   const [pages, setPages] = useState<Page[]>([
     { id: 'page-1', content: initialContent }
@@ -36,32 +38,26 @@ export const useA4PageSystem = ({
 
   const generatePageId = () => `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  // Accurate overflow detection using Range API
+  // Simple and accurate line-based overflow detection
   const isContentOverflowing = (element: HTMLElement): boolean => {
     if (!element) return false;
     
-    // Get actual content height without overflow restrictions
-    const range = document.createRange();
-    range.selectNodeContents(element);
-    const rects = range.getClientRects();
+    // Count actual lines based on content height and line height
+    const computedStyle = window.getComputedStyle(element);
+    const actualLineHeight = parseInt(computedStyle.lineHeight) || LINE_HEIGHT;
+    const actualLines = Math.ceil(element.scrollHeight / actualLineHeight);
     
-    let totalHeight = 0;
-    for (let i = 0; i < rects.length; i++) {
-      totalHeight += rects[i].height;
-    }
+    const isOverflowing = actualLines > MAX_LINES_PER_PAGE;
     
-    // Add some padding for safety
-    const contentHeight = Math.max(totalHeight, element.scrollHeight);
-    const isOverflowing = contentHeight > USABLE_HEIGHT;
-    
-    console.log('Overflow check:', {
-      contentHeight,
-      usableHeight: USABLE_HEIGHT,
+    console.log('⚡ Line-based overflow check:', {
+      scrollHeight: element.scrollHeight,
+      lineHeight: actualLineHeight,
+      actualLines,
+      maxLines: MAX_LINES_PER_PAGE,
       isOverflowing,
-      pageId: element.getAttribute('data-page-id')
+      content: element.textContent?.substring(0, 50) + '...'
     });
     
-    range.detach();
     return isOverflowing;
   };
 
@@ -182,7 +178,7 @@ export const useA4PageSystem = ({
     });
   }, [onContentChange]);
 
-  // Handle content overflow immediately
+  // Handle content overflow immediately - no delays
   const handleContentOverflow = useCallback((pageId: string) => {
     if (isProcessing.current) return;
     
@@ -192,51 +188,65 @@ export const useA4PageSystem = ({
     isProcessing.current = true;
     
     try {
+      console.log('🚨 IMMEDIATE PAGE BREAK TRIGGERED!');
+      
       // Get cursor position before split
       const cursorPos = getCursorPosition(pageElement);
       
-      // Split content
-      const { keep, overflow } = splitContentAtOverflow(pageElement);
+      // Split content at current cursor position or last complete line
+      const content = pageElement.textContent || '';
+      const lines = content.split('\n');
+      
+      // Keep first MAX_LINES_PER_PAGE lines, move rest to new page
+      const keepLines = lines.slice(0, MAX_LINES_PER_PAGE);
+      const overflowLines = lines.slice(MAX_LINES_PER_PAGE);
+      
+      const keep = keepLines.join('\n');
+      const overflow = overflowLines.join('\n');
       
       if (overflow.trim()) {
-        // Create new page
-        const newPageId = addPage();
-        
-        // Update current page content
+        // Update current page immediately
         pageElement.textContent = keep;
         updatePageContent(pageId, keep);
         
-        // Update new page content
-        setTimeout(() => {
+        // Create new page and add overflow content
+        const newPageId = addPage();
+        
+        // Set up new page immediately
+        requestAnimationFrame(() => {
           const newPageElement = pageRefs.current[newPageId];
           if (newPageElement) {
             newPageElement.textContent = overflow;
             updatePageContent(newPageId, overflow);
             
-            // Move cursor to new page if it was in overflow content
-            if (cursorPos > keep.length) {
-              const newCursorPos = cursorPos - keep.length;
-              newPageElement.focus();
-              setCursorPosition(newPageElement, newCursorPos);
-              
-              // Update current page index
-              const newPageIndex = pages.length; // Will be updated after addPage
-              setCurrentPageIndex(newPageIndex);
-            }
+            // Move focus to new page immediately
+            newPageElement.focus();
+            setCursorPosition(newPageElement, 0);
+            
+            // Update current page index
+            setCurrentPageIndex(pages.length);
+            
+            // Scroll to new page
+            newPageElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
           }
-        }, 10);
+        });
         
-        console.log('Content overflowed to new page:', {
+        console.log('✅ Content moved to new page:', {
           sourcePageId: pageId,
           newPageId,
-          keepLength: keep.length,
-          overflowLength: overflow.length
+          keepLines: keepLines.length,
+          overflowLines: overflowLines.length
         });
       }
     } finally {
-      isProcessing.current = false;
+      setTimeout(() => {
+        isProcessing.current = false;
+      }, 100); // Brief delay to prevent rapid firing
     }
-  }, [pages, updatePageContent, addPage]);
+  }, [pages, updatePageContent, addPage, MAX_LINES_PER_PAGE]);
 
   const handlePageInput = useCallback((pageId: string, content: string) => {
     // Update content immediately

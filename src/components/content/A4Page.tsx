@@ -76,6 +76,16 @@ const A4Page: React.FC<A4PageProps> = ({
     if (contentRef.current && !readOnly) {
       const content = contentRef.current.textContent || '';
       onInput(content);
+      
+      // Immediate overflow check after each input
+      const lines = Math.ceil(contentRef.current.scrollHeight / 24); // 24px line height
+      if (lines > 38) { // MAX_LINES_PER_PAGE
+        console.log('⚡ INPUT OVERFLOW DETECTED - IMMEDIATE ACTION!', {
+          lines,
+          scrollHeight: contentRef.current.scrollHeight,
+          content: content.substring(0, 50) + '...'
+        });
+      }
     }
   };
 
@@ -198,7 +208,7 @@ const A4Page: React.FC<A4PageProps> = ({
           fontSize: '16px',
           lineHeight: '1.5', // 24px line height
           fontFamily: '"Times New Roman", "Amiri", serif',
-          overflow: 'hidden',
+          overflow: 'visible', // Allow content to be measured accurately
           boxSizing: 'border-box',
           whiteSpace: 'pre-wrap'
         }}
