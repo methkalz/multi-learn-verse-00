@@ -126,36 +126,18 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
     });
   }, [splitTextIntoPages]);
 
-  // معالجة الإدخال - استخدام innerHTML بدلاً من textContent لإصلاح المؤشر
+  // معالجة الإدخال - مبسطة مثل RealPageContainer
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>, pageIndex: number) => {
-    const target = e.currentTarget;
-    const newContent = target.innerHTML || '';
+    const newContent = e.currentTarget.innerHTML;
     handlePageContentChange(pageIndex, newContent);
   }, [handlePageContentChange]);
 
-  // معالجة اللصق
+  // معالجة اللصق - مبسطة مثل RealPageContainer
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>, pageIndex: number) => {
     e.preventDefault();
-    const paste = e.clipboardData.getData('text/plain');
-    const target = e.currentTarget;
-    
-    // الحصول على الموضع الحالي للمؤشر
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-      const textNode = document.createTextNode(paste);
-      range.insertNode(textNode);
-      range.setStartAfter(textNode);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-      // تحديث المحتوى
-      const newContent = target.innerHTML || '';
-      handlePageContentChange(pageIndex, newContent);
-    }
-  }, [handlePageContentChange]);
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+  }, []);
 
   // معالجة الضغط على المفاتيح
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, pageIndex: number) => {
@@ -272,7 +254,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
   }), [getCombinedContent, splitTextIntoPages, handleSave]);
 
   return (
-    <div className={`plain-text-a4-editor ${className}`} dir="auto">
+    <div className={`plain-text-a4-editor ${className}`} dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-4">
@@ -348,21 +330,18 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                 className="page-content w-full h-full outline-none text-foreground arabic-text-optimized"
                 style={{
                   minHeight: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
-                  lineHeight: `${LINE_HEIGHT}px`,
+                  lineHeight: '24px',
                   fontSize: '16px',
-                  fontFamily: '"IBM Plex Sans Arabic", "Noto Sans Arabic", "Cairo", "Amiri", "Tahoma", system-ui, sans-serif',
+                  fontFamily: "'Arial', 'Tahoma', sans-serif",
                   textAlign: 'right',
-                  direction: 'rtl' as const,
-                  unicodeBidi: 'plaintext',
-                  wordWrap: 'break-word',
-                  overflowWrap: 'break-word',
-                  whiteSpace: 'pre-wrap',
+                  direction: 'rtl',
                   padding: '0',
                   margin: '0',
                   width: '100%',
                   maxWidth: '100%',
                   boxSizing: 'border-box',
-                  cursor: 'text'
+                  outline: 'none',
+                  border: 'none'
                 }}
                 contentEditable={!readOnly}
                 suppressContentEditableWarning={true}
