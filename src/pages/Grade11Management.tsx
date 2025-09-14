@@ -31,8 +31,8 @@ const Grade11Management: React.FC = () => {
     });
   }, [userProfile]);
 
-  // تحديد ما إذا كان المستخدم مدير مدرسة أم معلم
-  const canManageContent = userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
+  // تحديد ما إذا كان المستخدم سوبر آدمن فقط
+  const canManageContent = userProfile?.role === 'superadmin';
   
   console.log('✅ Grade11Management permissions check:', { canManageContent });
   

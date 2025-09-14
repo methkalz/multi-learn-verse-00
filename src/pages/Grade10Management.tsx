@@ -35,8 +35,8 @@ const Grade10Management: React.FC = () => {
     );
   }
   
-  // تحديد ما إذا كان المستخدم مدير مدرسة أم معلم
-  const canManageContent = userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
+  // تحديد ما إذا كان المستخدم سوبر آدمن فقط
+  const canManageContent = userProfile?.role === 'superadmin';
   return <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <AppHeader title="إدارة محتوى الصف العاشر" showBackButton={true} backPath="/content-management" showLogout={true} />
       

@@ -8,8 +8,8 @@ import Grade12ContentViewer from '@/components/content/Grade12ContentViewer';
 const Grade12Management: React.FC = () => {
   const { userProfile } = useAuth();
   
-  // تحديد ما إذا كان المستخدم مدير مدرسة أم معلم
-  const canManageContent = userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
+  // تحديد ما إذا كان المستخدم سوبر آدمن فقط
+  const canManageContent = userProfile?.role === 'superadmin';
   return <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <AppHeader title="إدارة محتوى الصف الثاني عشر" showBackButton={true} backPath="/content-management" showLogout={true} />
       
