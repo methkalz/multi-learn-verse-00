@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Plus, FileText, CheckSquare, MessageSquare, Calendar, Eye, Edit3, Clock } from 'lucide-react';
+import { Plus, FileText, CheckSquare, MessageSquare, Calendar, Eye, Edit3, Clock, Trash2 } from 'lucide-react';
 import { useGrade10MiniProjects } from '@/hooks/useGrade10MiniProjects';
 import { useAuth } from '@/hooks/useAuth';
 import { ModernLoader } from '@/components/ui/ModernLoader';
@@ -21,7 +22,8 @@ const Grade10MiniProjects: React.FC = () => {
     createProject, 
     fetchProject,
     currentProject,
-    setCurrentProject 
+    setCurrentProject,
+    deleteProject 
   } = useGrade10MiniProjects();
   
   const { userProfile } = useAuth();
@@ -61,6 +63,16 @@ const Grade10MiniProjects: React.FC = () => {
     setCurrentProject(project);
     await fetchProject(project.id);
     setIsProjectEditorOpen(true);
+  };
+
+  const handleDeleteProject = async (projectId: string, projectTitle: string) => {
+    const success = await deleteProject(projectId);
+    if (success) {
+      toast({
+        title: "تم الحذف",
+        description: `تم حذف المشروع "${projectTitle}" بنجاح`
+      });
+    }
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -262,6 +274,43 @@ const Grade10MiniProjects: React.FC = () => {
                     <Edit3 className="h-4 w-4" />
                     تحرير
                   </Button>
+                )}
+                {/* Delete Button - visible to project owner or admins */}
+                {((userProfile?.role === 'student' && project.student_id === userProfile?.user_id) ||
+                  ['teacher', 'school_admin', 'superadmin'].includes(userProfile?.role || '')) && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        className="gap-2"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        حذف
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>تأكيد حذف المشروع</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          هل أنت متأكد من حذف المشروع "{project.title}"؟
+                          <br />
+                          <strong className="text-destructive">
+                            هذا الإجراء لا يمكن التراجع عنه وسيتم حذف جميع البيانات المرتبطة بالمشروع (المهام، التعليقات، الملفات).
+                          </strong>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => handleDeleteProject(project.id, project.title)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          حذف المشروع
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
               </div>
 

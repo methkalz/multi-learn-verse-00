@@ -341,6 +341,69 @@ export const useGrade10MiniProjects = () => {
     }
   };
 
+  // حذف مشروع
+  const deleteProject = async (projectId: string) => {
+    try {
+      if (!userProfile?.user_id) {
+        toast.error('يجب تسجيل الدخول أولاً');
+        return false;
+      }
+
+      // حذف الملفات من التخزين أولاً
+      const { data: projectFiles } = await supabase
+        .from('grade10_project_files')
+        .select('file_path')
+        .eq('project_id', projectId);
+
+      if (projectFiles && projectFiles.length > 0) {
+        const filePaths = projectFiles.map(file => file.file_path);
+        await supabase.storage
+          .from('grade10-documents')
+          .remove(filePaths);
+      }
+
+      // حذف الملفات من قاعدة البيانات
+      await supabase
+        .from('grade10_project_files')
+        .delete()
+        .eq('project_id', projectId);
+
+      // حذف التعليقات
+      await supabase
+        .from('grade10_project_comments')
+        .delete()
+        .eq('project_id', projectId);
+
+      // حذف المهام
+      await supabase
+        .from('grade10_project_tasks')
+        .delete()
+        .eq('project_id', projectId);
+
+      // حذف المشروع
+      const { error } = await supabase
+        .from('grade10_mini_projects')
+        .delete()
+        .eq('id', projectId);
+
+      if (error) throw error;
+
+      // تحديث القائمة المحلية
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      
+      if (currentProject?.id === projectId) {
+        setCurrentProject(null);
+      }
+
+      toast.success('تم حذف المشروع بنجاح');
+      return true;
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast.error('حدث خطأ في حذف المشروع');
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -357,6 +420,7 @@ export const useGrade10MiniProjects = () => {
     createProject,
     updateProjectContent,
     updateProjectStatus,
+    deleteProject,
     fetchTasks,
     addTask,
     toggleTaskCompletion,
