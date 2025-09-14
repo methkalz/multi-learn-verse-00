@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
 import { useGrade10MiniProjects } from '@/hooks/useGrade10MiniProjects';
-import DocumentEditor from './DocumentEditor';
+import AdvancedProjectEditor from './AdvancedProjectEditor';
 import { 
   Save, 
   X, 
@@ -194,114 +194,12 @@ const Grade10MiniProjectEditor: React.FC<Grade10MiniProjectEditorProps> = ({
   if (!project) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] p-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl mb-2">{project.title}</DialogTitle>
-              <div className="flex items-center gap-3">
-                <Badge className={getStatusColor(project.status)}>
-                  {getStatusText(project.status)}
-                </Badge>
-                {project.progress_percentage !== undefined && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>التقدم: {project.progress_percentage}%</span>
-                    <Progress value={project.progress_percentage} className="w-20 h-2" />
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {canEdit && (
-                <>
-                  {/* Image Upload Button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="gap-2"
-                  >
-                    <ImageIcon className="h-4 w-4" />
-                    رفع صورة
-                  </Button>
-                  
-                  {/* Save Button */}
-                  <Button
-                    onClick={handleSave}
-                    size="sm"
-                    className="gap-2"
-                    disabled={isAutoSaving}
-                  >
-                    <Save className="h-4 w-4" />
-                    {isAutoSaving ? 'جاري الحفظ...' : 'حفظ'}
-                  </Button>
-                </>
-              )}
-              
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </DialogHeader>
-
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
-
-        <div className="flex-1 overflow-hidden">
-          {canEdit ? (
-            <div className="h-full">
-              <DocumentEditor
-                content={content}
-                onChange={setContent}
-                placeholder="ابدأ بكتابة مشروعك هنا... يمكنك إضافة النصوص والجداول والصور"
-              />
-            </div>
-          ) : (
-            <div className="h-full overflow-auto p-6">
-              <div 
-                className="prose prose-lg max-w-none"
-                style={{ direction: 'rtl' }}
-                dangerouslySetInnerHTML={{ __html: project.content || '<p class="text-muted-foreground">لا يوجد محتوى في هذا المشروع بعد.</p>' }}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Status Bar */}
-        <div className="px-6 py-3 border-t bg-muted/30">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
-              {project.due_date && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  <span>موعد التسليم: {new Date(project.due_date).toLocaleDateString('ar-EG')}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>تم الإنشاء: {new Date(project.created_at).toLocaleDateString('ar-EG')}</span>
-              </div>
-            </div>
-            
-            {lastSaved && (
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-600" />
-                <span>آخر حفظ: {lastSaved.toLocaleTimeString('ar-EG')}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <AdvancedProjectEditor
+      project={project}
+      isOpen={isOpen}
+      onClose={onClose}
+      onSave={onSave}
+    />
   );
 };
 
