@@ -1,8 +1,8 @@
 import React from 'react';
-import SimpleA4PageEditor, { SimpleA4PageEditorRef } from './SimpleA4PageEditor';
+import PlainTextA4Editor, { PlainTextA4EditorRef } from './PlainTextA4Editor';
 
-// Re-export the new simple A4 page editor as the default A4 editor
-export interface ProfessionalA4EditorRef extends SimpleA4PageEditorRef {}
+// Re-export the new plain text A4 editor as the default A4 editor
+export interface ProfessionalA4EditorRef extends PlainTextA4EditorRef {}
 
 interface ProfessionalA4EditorProps {
   initialContent?: string;
@@ -15,7 +15,7 @@ interface ProfessionalA4EditorProps {
 }
 
 const ProfessionalA4Editor = React.forwardRef<ProfessionalA4EditorRef, ProfessionalA4EditorProps>((props, ref) => {
-  return <SimpleA4PageEditor {...props} ref={ref} />;
+  return <PlainTextA4Editor {...props} ref={ref} />;
 });
 
 ProfessionalA4Editor.displayName = 'ProfessionalA4Editor';
