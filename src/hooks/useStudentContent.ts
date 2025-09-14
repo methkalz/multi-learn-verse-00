@@ -42,182 +42,149 @@ export const useStudentContent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchContentForGrade = async (grade: string): Promise<GradeContent> => {
-    try {
-      // Initialize arrays
-      let videos: StudentContentItem[] = [];
-      let documents: StudentContentItem[] = [];
-      let projects: StudentContentItem[] = [];
-      let lessons: StudentContentItem[] = [];
+  const mapToContentItem = (item: any, contentType: 'video' | 'document' | 'project' | 'lesson', grade: string): StudentContentItem => {
+    return {
+      id: String(item.id),
+      title: String(item.title || ''),
+      description: String(item.description || ''),
+      content_type: contentType,
+      grade_level: grade,
+      category: String(item.category || ''),
+      file_path: String(item.file_path || ''),
+      video_url: String(item.video_url || ''),
+      thumbnail_url: String(item.thumbnail_url || ''),
+      duration: String(item.duration || ''),
+      is_visible: Boolean(item.is_visible),
+      is_active: Boolean(item.is_active),
+      order_index: Number(item.order_index) || 0,
+      created_at: String(item.created_at || '')
+    };
+  };
 
-      // Fetch videos based on grade
-      try {
-        const videoTable = grade === '10' ? 'grade10_videos' : 
-                          grade === '11' ? 'grade11_videos' : 'grade12_videos';
+  const fetchContentForGrade = async (grade: string): Promise<GradeContent> => {
+    let videos: StudentContentItem[] = [];
+    let documents: StudentContentItem[] = [];
+    let projects: StudentContentItem[] = [];
+    let lessons: StudentContentItem[] = [];
+
+    try {
+      // Fetch videos using raw query to avoid type issues
+      const videoTable = grade === '10' ? 'grade10_videos' : 
+                        grade === '11' ? 'grade11_videos' : 'grade12_videos';
+      
+      const { data: videoData, error: videoError } = await (supabase as any)
+        .from(videoTable)
+        .select('id, title, description, video_url, thumbnail_url, duration, category, is_visible, is_active, order_index, created_at')
+        .eq('is_active', true)
+        .eq('is_visible', true)
+        .order('order_index', { ascending: true });
+      
+      if (!videoError && videoData) {
+        videos = videoData.map((item: any) => mapToContentItem(item, 'video', grade));
+      }
+    } catch (err) {
+      logger.warn('Could not fetch videos', { error: err });
+    }
+
+    try {
+      // Fetch documents for grades 10 and 11
+      if (grade === '10' || grade === '11') {
+        const docTable = grade === '10' ? 'grade10_documents' : 'grade11_documents';
         
-        const response = await supabase
-          .from(videoTable)
-          .select('*')
+        const { data: docData, error: docError } = await (supabase as any)
+          .from(docTable)
+          .select('id, title, description, file_path, category, is_visible, is_active, order_index, created_at')
           .eq('is_active', true)
           .eq('is_visible', true)
           .order('order_index', { ascending: true });
         
-        if (response.data) {
-          videos = response.data.map((item: any) => ({
-            id: item.id,
-            title: item.title || '',
-            description: item.description,
-            content_type: 'video' as const,
-            grade_level: grade,
-            category: item.category,
-            video_url: item.video_url,
-            thumbnail_url: item.thumbnail_url,
-            duration: item.duration,
-            is_visible: item.is_visible || true,
-            is_active: item.is_active || true,
-            order_index: item.order_index || 0,
-            created_at: item.created_at,
-          }));
-        }
-      } catch (err) {
-        logger.warn('Could not fetch videos', { error: err });
-      }
-
-      // Fetch documents for grades 10 and 11
-      try {
-        if (grade === '10' || grade === '11') {
-          const docTable = grade === '10' ? 'grade10_documents' : 'grade11_documents';
-          const response = await supabase
-            .from(docTable)
-            .select('*')
-            .eq('is_active', true)
-            .eq('is_visible', true)
-            .order('order_index', { ascending: true });
-          
-          if (response.data) {
-            documents = response.data.map((item: any) => ({
-              id: item.id,
-              title: item.title || '',
-              description: item.description,
-              content_type: 'document' as const,
-              grade_level: grade,
-              category: item.category,
-              file_path: item.file_path,
-              is_visible: item.is_visible || true,
-              is_active: item.is_active || true,
-              order_index: item.order_index || 0,
-              created_at: item.created_at,
-            }));
-          }
-        }
-      } catch (err) {
-        logger.warn('Could not fetch documents', { error: err });
-      }
-
-      // Fetch projects for grade 10
-      try {
-        if (grade === '10' && user) {
-          const response = await supabase
-            .from('grade10_mini_projects')
-            .select('*')
-            .eq('student_id', user.id)
-            .order('created_at', { ascending: false });
-
-          if (response.data) {
-            projects = response.data.map((item: any) => ({
-              id: item.id,
-              title: item.title || '',
-              description: item.description,
-              content_type: 'project' as const,
-              grade_level: grade,
-              is_visible: true,
-              is_active: true,
-              order_index: 0,
-              created_at: item.created_at,
-            }));
-          }
-        }
-      } catch (err) {
-        logger.warn('Could not fetch projects', { error: err });
-      }
-
-      // Fetch lessons for grade 11
-      try {
-        if (grade === '11') {
-          const response = await supabase
-            .from('grade11_lessons')
-            .select('*')
-            .eq('is_active', true)
-            .order('order_index', { ascending: true });
-
-          if (response.data) {
-            lessons = response.data.map((item: any) => ({
-              id: item.id,
-              title: item.title || '',
-              description: item.description || '',
-              content_type: 'lesson' as const,
-              grade_level: grade,
-              is_visible: true,
-              is_active: item.is_active || true,
-              order_index: item.order_index || 0,
-              created_at: item.created_at,
-            }));
-          }
-        }
-      } catch (err) {
-        logger.warn('Could not fetch lessons', { error: err });
-      }
-
-      // Get progress data
-      const allItems = [...videos, ...documents, ...projects, ...lessons];
-      const allContentIds = allItems.map(item => item.id);
-
-      if (allContentIds.length > 0 && user) {
-        try {
-          const response = await supabase
-            .from('student_progress')
-            .select('*')
-            .eq('student_id', user.id)
-            .in('content_id', allContentIds);
-
-          if (response.data) {
-            const progressMap = new Map();
-            response.data.forEach((p: any) => {
-              progressMap.set(`${p.content_id}-${p.content_type}`, {
-                progress_percentage: p.progress_percentage,
-                completed_at: p.completed_at,
-                points_earned: p.points_earned,
-                time_spent_minutes: p.time_spent_minutes
-              });
-            });
-
-            // Add progress to items
-            [videos, documents, projects, lessons].forEach(itemArray => {
-              itemArray.forEach(item => {
-                const progressKey = `${item.id}-${item.content_type}`;
-                if (progressMap.has(progressKey)) {
-                  item.progress = progressMap.get(progressKey);
-                }
-              });
-            });
-          }
-        } catch (err) {
-          logger.warn('Could not fetch progress data', { error: err });
+        if (!docError && docData) {
+          documents = docData.map((item: any) => mapToContentItem(item, 'document', grade));
         }
       }
-
-      return {
-        grade,
-        videos,
-        documents,
-        projects,
-        lessons
-      };
-
     } catch (err) {
-      logger.error(`Error fetching content for grade ${grade}`, err as Error);
-      throw err;
+      logger.warn('Could not fetch documents', { error: err });
     }
+
+    try {
+      // Fetch projects for grade 10
+      if (grade === '10' && user) {
+        const { data: projectData, error: projectError } = await (supabase as any)
+          .from('grade10_mini_projects')
+          .select('id, title, description, created_at')
+          .eq('student_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (!projectError && projectData) {
+          projects = projectData.map((item: any) => mapToContentItem(item, 'project', grade));
+        }
+      }
+    } catch (err) {
+      logger.warn('Could not fetch projects', { error: err });
+    }
+
+    try {
+      // Fetch lessons for grade 11
+      if (grade === '11') {
+        const { data: lessonData, error: lessonError } = await (supabase as any)
+          .from('grade11_lessons')
+          .select('id, title, description, is_active, order_index, created_at')
+          .eq('is_active', true)
+          .order('order_index', { ascending: true });
+
+        if (!lessonError && lessonData) {
+          lessons = lessonData.map((item: any) => mapToContentItem(item, 'lesson', grade));
+        }
+      }
+    } catch (err) {
+      logger.warn('Could not fetch lessons', { error: err });
+    }
+
+    // Get progress data
+    const allItems = [...videos, ...documents, ...projects, ...lessons];
+    const allContentIds = allItems.map(item => item.id);
+
+    if (allContentIds.length > 0 && user) {
+      try {
+        const { data: progressData, error: progressError } = await (supabase as any)
+          .from('student_progress')
+          .select('content_id, content_type, progress_percentage, completed_at, points_earned, time_spent_minutes')
+          .eq('student_id', user.id)
+          .in('content_id', allContentIds);
+
+        if (!progressError && progressData) {
+          const progressMap = new Map();
+          progressData.forEach((p: any) => {
+            progressMap.set(`${p.content_id}-${p.content_type}`, {
+              progress_percentage: p.progress_percentage,
+              completed_at: p.completed_at,
+              points_earned: p.points_earned,
+              time_spent_minutes: p.time_spent_minutes
+            });
+          });
+
+          // Add progress to items
+          [videos, documents, projects, lessons].forEach(itemArray => {
+            itemArray.forEach(item => {
+              const progressKey = `${item.id}-${item.content_type}`;
+              if (progressMap.has(progressKey)) {
+                item.progress = progressMap.get(progressKey);
+              }
+            });
+          });
+        }
+      } catch (err) {
+        logger.warn('Could not fetch progress data', { error: err });
+      }
+    }
+
+    return {
+      grade,
+      videos,
+      documents,
+      projects,
+      lessons
+    };
   };
 
   const fetchAssignedGradeContent = async () => {
