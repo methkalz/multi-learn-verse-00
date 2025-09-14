@@ -51,6 +51,9 @@ import {
   LazyPairMatchingPage,
   withLazyLoading
 } from "@/components/LazyComponents";
+
+// Lazy load Grade 12 Project Editor
+const Grade12ProjectEditorPage = React.lazy(() => import('@/pages/Grade12ProjectEditor'));
 import { PageLoading } from "@/components/ui/LoadingComponents";
 
 // Global React Query client configuration for server state management
@@ -141,9 +144,13 @@ const App = () => {
                         </Suspense>
                       </ErrorBoundary>
                     } />
-                    <Route path="/grade12-management" element={<LazyGrade12Management />} />
+                     <Route path="/grade12-management" element={<LazyGrade12Management />} />
+                     <Route 
+                       path="/grade12-project-editor/:projectId" 
+                       element={<Suspense fallback={<PageLoading message="جاري تحميل محرر المشروع..." />}><Grade12ProjectEditorPage /></Suspense>} 
+                     />
                    
-                   {/* Pair matching game route */}
+                    {/* Pair matching game route */}
                    <Route path="/pair-matching/:gameId?" element={<LazyPairMatchingPage />} />
                   
                    {/* Question management for interactive games */}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStudentContent } from '@/hooks/useStudentContent';
 import { useStudentProgress } from '@/hooks/useStudentProgress';
 import { useGrade10MiniProjects } from '@/hooks/useGrade10MiniProjects';
@@ -17,7 +18,6 @@ import { DocumentViewer } from './viewers/DocumentViewer';
 import { LessonViewer } from './viewers/LessonViewer';
 import { ProjectViewer } from './viewers/ProjectViewer';
 import AdvancedProjectEditor from '../content/AdvancedProjectEditor';
-import Grade12FinalProjectEditor from '../content/Grade12FinalProjectEditor';
 import { 
   Play, 
   FileText, 
@@ -80,12 +80,13 @@ export const StudentGradeContent: React.FC = () => {
 
   // Final Project states for Grade 12
   const [isCreateFinalProjectDialogOpen, setIsCreateFinalProjectDialogOpen] = useState(false);
-  const [isFinalProjectEditorOpen, setIsFinalProjectEditorOpen] = useState(false);
   const [finalProjectFormData, setFinalProjectFormData] = useState({
     title: '',
     description: '',
     due_date: ''
   });
+
+  const navigate = useNavigate();
 
   const currentContent = gradeContent;
 
@@ -179,10 +180,9 @@ export const StudentGradeContent: React.FC = () => {
     }
   };
 
-  // Handle final project click
+  // Handle final project click - navigate to full page editor
   const handleFinalProjectClick = async (project: any) => {
-    setCurrentFinalProject(project);
-    setIsFinalProjectEditorOpen(true);
+    navigate(`/grade12-project-editor/${project.id}`);
   };
 
   const closeViewer = () => {
@@ -659,20 +659,6 @@ export const StudentGradeContent: React.FC = () => {
         />
       )}
 
-      {/* Final Project Editor for Grade 12 */}
-      {currentFinalProject && isFinalProjectEditorOpen && assignedGrade === '12' && (
-        <Grade12FinalProjectEditor 
-          project={currentFinalProject}
-          isOpen={isFinalProjectEditorOpen}
-          onClose={() => {
-            setIsFinalProjectEditorOpen(false);
-            setCurrentFinalProject(null);
-          }}
-          onSave={() => {
-            // Refresh projects list if needed
-          }}
-        />
-      )}
     </>
   );
 };

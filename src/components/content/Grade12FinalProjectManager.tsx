@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +27,6 @@ import {
 } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
-import Grade12ProjectEditor from './Grade12ProjectEditor';
 import Grade12FinalProjectForm from './Grade12FinalProjectForm';
 
 const Grade12FinalProjectManager: React.FC = () => {
@@ -42,9 +42,7 @@ const Grade12FinalProjectManager: React.FC = () => {
   } = useGrade12Projects();
 
   const [showProjectForm, setShowProjectForm] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<any>(null);
   const [editingProject, setEditingProject] = useState<any>(null);
-  const [viewMode, setViewMode] = useState<'student' | 'teacher'>('student');
 
   const isTeacher = userProfile?.role === 'teacher' || userProfile?.role === 'school_admin' || userProfile?.role === 'superadmin';
 
@@ -101,11 +99,10 @@ const Grade12FinalProjectManager: React.FC = () => {
     }
   };
 
-  // تحرير المشروع
-  const handleEditProject = (project: any, mode: 'student' | 'teacher' = 'student') => {
-    setSelectedProject(project);
-    setViewMode(mode);
-    fetchTasks(project.id);
+  // تحرير المشروع - التوجيه إلى الصفحة المنفصلة
+  const navigate = useNavigate();
+  const handleEditProject = (project: any) => {
+    navigate(`/grade12-project-editor/${project.id}`);
   };
 
   // تحديث حالة المشروع
@@ -140,22 +137,6 @@ const Grade12FinalProjectManager: React.FC = () => {
     );
   }
 
-  if (selectedProject) {
-    return (
-      <Grade12ProjectEditor
-        project={selectedProject}
-        viewMode={viewMode}
-        onClose={() => {
-          setSelectedProject(null);
-          setViewMode('student');
-        }}
-        onSave={() => {
-          fetchProjects();
-          setSelectedProject(null);
-        }}
-      />
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -332,24 +313,12 @@ const Grade12FinalProjectManager: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleEditProject(project, isTeacher ? 'teacher' : 'student')}
+                      onClick={() => handleEditProject(project)}
                       className="flex-1 gap-2"
                     >
-                      <Eye className="h-4 w-4" />
-                      {isTeacher ? 'مراجعة' : 'فتح'}
+                      <Edit3 className="h-4 w-4" />
+                      تحرير المشروع
                     </Button>
-                    
-                    {isTeacher && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditProject(project, 'student')}
-                        className="gap-2"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                        عرض الطالب
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>
