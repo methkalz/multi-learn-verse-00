@@ -1,8 +1,8 @@
 import React from 'react';
-import MultiPageA4Editor, { MultiPageA4EditorRef } from './MultiPageA4Editor';
+import MultiPageTipTapEditor, { MultiPageTipTapEditorRef } from './MultiPageTipTapEditor';
 
-// Re-export the new multi-page editor as the default A4 editor
-export interface ProfessionalA4EditorRef extends MultiPageA4EditorRef {}
+// Re-export the new TipTap multi-page editor as the default A4 editor
+export interface ProfessionalA4EditorRef extends MultiPageTipTapEditorRef {}
 
 interface ProfessionalA4EditorProps {
   initialContent?: string;
@@ -15,7 +15,7 @@ interface ProfessionalA4EditorProps {
 }
 
 const ProfessionalA4Editor = React.forwardRef<ProfessionalA4EditorRef, ProfessionalA4EditorProps>((props, ref) => {
-  return <MultiPageA4Editor {...props} ref={ref} />;
+  return <MultiPageTipTapEditor {...props} ref={ref} />;
 });
 
 ProfessionalA4Editor.displayName = 'ProfessionalA4Editor';
