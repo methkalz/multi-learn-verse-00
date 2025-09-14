@@ -48,9 +48,9 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
   // A4 dimensions optimized for Arabic text
   const A4_WIDTH = 794; // 210mm
   const A4_HEIGHT = 1123; // 297mm
-  const PAGE_PADDING = 40; // تقليل الهامش لاستغلال المساحة أكثر
-  const LINE_HEIGHT = 28; // زيادة ارتفاع السطر للنص العربي
-  const CHARS_PER_LINE = 85; // زيادة عدد الأحرف للاستفادة من العرض الكامل
+  const PAGE_PADDING = 25; // هامش أصغر لاستغلال أكبر للمساحة
+  const LINE_HEIGHT = 26; // ارتفاع مناسب للنص العربي
+  const CHARS_PER_LINE = 75; // عدد أحرف مناسب للنص العربي
   const LINES_PER_PAGE = Math.floor((A4_HEIGHT - PAGE_PADDING * 2) / LINE_HEIGHT);
   const CHARS_PER_PAGE = CHARS_PER_LINE * LINES_PER_PAGE;
 
@@ -314,23 +314,25 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                 style={{
                   minHeight: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
                   lineHeight: `${LINE_HEIGHT}px`,
-                  fontSize: '16px', // زيادة حجم الخط للوضوح
-                  fontFamily: '"Noto Sans Arabic", "Cairo", "Amiri", "Tahoma", system-ui, sans-serif',
-                  textAlign: 'justify', // ضبط النص لملء العرض الكامل
+                  fontSize: '16px',
+                  fontFamily: '"IBM Plex Sans Arabic", "Noto Sans Arabic", "Cairo", "Amiri", "Tahoma", system-ui, sans-serif',
+                  textAlign: 'start', // محاذاة البداية للنص العربي
                   direction: 'rtl',
                   unicodeBidi: 'plaintext',
                   wordWrap: 'break-word',
-                  overflowWrap: 'break-word',
-                  whiteSpace: 'pre-wrap',
-                  textJustify: 'inter-word', // تحسين توزيع الكلمات
-                  hyphens: 'auto', // الفصل التلقائي للكلمات
-                  wordSpacing: '0.1em', // تحسين المسافات بين الكلمات
-                  letterSpacing: '0.02em', // تحسين المسافات بين الأحرف
-                  padding: '0', // إزالة أي هامش إضافي
+                  overflowWrap: 'anywhere', // كسر أفضل للكلمات الطويلة
+                  whiteSpace: 'pre-line', // أفضل للنص العربي
+                  textJustify: 'inter-word',
+                  hyphens: 'auto',
+                  wordSpacing: '0.05em', // مسافة أقل بين الكلمات
+                  letterSpacing: '0.01em', // مسافة أقل بين الأحرف
+                  padding: '0',
                   margin: '0',
                   width: '100%',
                   maxWidth: '100%',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  textRendering: 'geometricPrecision', // دقة أفضل في العرض
+                  fontKerning: 'normal' // مسافات طبيعية بين الأحرف
                 }}
                 contentEditable={!readOnly}
                 suppressContentEditableWarning={true}
@@ -369,14 +371,15 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
           .arabic-text-optimized {
             font-feature-settings: "liga" 1, "kern" 1, "calt" 1;
             font-variant-ligatures: common-ligatures;
-            text-rendering: optimizeLegibility;
+            text-rendering: geometricPrecision;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            text-align-last: justify; // ضبط السطر الأخير
           }
           
           .arabic-text-optimized p {
             margin: 0.5em 0;
-            text-indent: 1em;
+            text-indent: 0; // إزالة المسافة في بداية الفقرة
           }
           
           .arabic-text-optimized:focus {
