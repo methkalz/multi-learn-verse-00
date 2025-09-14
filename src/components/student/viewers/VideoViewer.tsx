@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Volume2, VolumeX, X, CheckCircle } from 'lucide-react';
+import { Play, X, CheckCircle, Video, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface VideoViewerProps {
@@ -14,6 +13,7 @@ interface VideoViewerProps {
     title: string;
     description?: string;
     video_url: string;
+    source_type?: string;
     duration?: number;
   };
   onProgress: (progress: number, watchTime: number) => void;
@@ -24,128 +24,128 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({
   isOpen, 
   onClose, 
   video, 
-  onProgress,
   onComplete 
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [watchTime, setWatchTime] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const progressUpdateRef = useRef<NodeJS.Timeout>();
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     if (isOpen && !hasStarted) {
       setHasStarted(true);
       toast.info('بدأت مشاهدة الفيديو', {
-        description: 'ستحصل على النقاط عند إكمال المشاهدة'
+        description: 'ستحصل على النقاط عند تشغيل الفيديو'
       });
     }
   }, [isOpen, hasStarted]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  const handleVideoPlay = () => {
+    if (!isCompleted) {
+      setIsCompleted(true);
+      onComplete();
+      toast.success('تم إكمال الفيديو بنجاح!', {
+        description: 'تم إضافة النقاط إلى رصيدك'
+      });
+    }
+  };
 
-    const updateProgress = () => {
-      const currentTime = video.currentTime;
-      const duration = video.duration;
-      
-      if (duration > 0) {
-        const progressPercent = (currentTime / duration) * 100;
-        setProgress(progressPercent);
-        setWatchTime(currentTime);
+  const extractYouTubeId = (url: string): string | null => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /youtube\.com\/v\/([^&\n?#]+)/,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
+  };
 
-        // Update progress every 5 seconds
-        if (progressUpdateRef.current) {
-          clearTimeout(progressUpdateRef.current);
-        }
-        
-        progressUpdateRef.current = setTimeout(() => {
-          onProgress(progressPercent, currentTime);
-        }, 5000);
-
-        // Mark as complete if watched 90% or more
-        if (progressPercent >= 90 && !isCompleted) {
-          setIsCompleted(true);
-          onComplete();
-          toast.success('تم إكمال الفيديو بنجاح!', {
-            description: 'تم إضافة النقاط إلى رصيدك'
-          });
-        }
+  const renderVideoPlayer = () => {
+    if (video.source_type === 'youtube' || video.video_url.includes('youtube.com') || video.video_url.includes('youtu.be')) {
+      const videoId = extractYouTubeId(video.video_url);
+      if (videoId) {
+        return (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}`}
+            className="w-full h-96 rounded-lg"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            onLoad={handleVideoPlay}
+          />
+        );
       }
-    };
-
-    video.addEventListener('timeupdate', updateProgress);
-    
-    return () => {
-      video.removeEventListener('timeupdate', updateProgress);
-      if (progressUpdateRef.current) {
-        clearTimeout(progressUpdateRef.current);
-      }
-    };
-  }, [onProgress, onComplete, isCompleted]);
-
-  const togglePlayPause = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (isPlaying) {
-      video.pause();
-    } else {
-      video.play();
     }
-    setIsPlaying(!isPlaying);
-  };
 
-  const toggleMute = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.muted = !isMuted;
-    setIsMuted(!isMuted);
-  };
-
-  const handleClose = () => {
-    // Save final progress before closing
-    if (progress > 0) {
-      onProgress(progress, watchTime);
-    }
-    onClose();
-  };
-
-  const getVideoUrl = (url: string) => {
-    // Handle YouTube URLs
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const videoId = url.includes('youtu.be') 
-        ? url.split('/').pop()?.split('?')[0]
-        : url.split('v=')[1]?.split('&')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
+    if (video.source_type === 'google_drive' || video.video_url.includes('drive.google.com')) {
+      return (
+        <iframe
+          src={video.video_url}
+          className="w-full h-96 rounded-lg"
+          allow="autoplay"
+          allowFullScreen
+          onLoad={handleVideoPlay}
+        />
+      );
     }
     
-    // Handle Vimeo URLs
-    if (url.includes('vimeo.com')) {
-      const videoId = url.split('/').pop();
-      return `https://player.vimeo.com/video/${videoId}`;
+    if (video.source_type === 'direct' || video.video_url.includes('.mp4') || video.video_url.includes('.webm')) {
+      return (
+        <video
+          src={video.video_url}
+          controls
+          className="w-full h-96 rounded-lg"
+          onPlay={handleVideoPlay}
+        >
+          متصفحك لا يدعم تشغيل الفيديو
+        </video>
+      );
     }
-    
-    // Direct video URLs
-    return url;
-  };
 
-  const isEmbedded = video.video_url.includes('youtube.com') || 
-                    video.video_url.includes('youtu.be') || 
-                    video.video_url.includes('vimeo.com');
+    // Handle vimeo
+    if (video.source_type === 'vimeo' || video.video_url.includes('vimeo.com')) {
+      const videoId = video.video_url.split('/').pop()?.split('?')[0];
+      return (
+        <iframe
+          src={`https://player.vimeo.com/video/${videoId}`}
+          className="w-full h-96 rounded-lg"
+          allowFullScreen
+          onLoad={handleVideoPlay}
+        />
+      );
+    }
+
+    // Fallback for unknown types
+    return (
+      <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Video className="mx-auto h-12 w-12 text-muted-foreground" />
+          <p className="text-muted-foreground">لا يمكن عرض هذا الفيديو مباشرة</p>
+          <Button 
+            onClick={() => {
+              window.open(video.video_url, '_blank');
+              handleVideoPlay();
+            }}
+            className="flex items-center gap-2"
+          >
+            <ExternalLink className="w-4 h-4" />
+            فتح في صفحة جديدة
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0">
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
             <div className="space-y-1 flex-1">
-              <DialogTitle className="text-xl font-bold">{video.title}</DialogTitle>
+              <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                <Play className="w-5 h-5" />
+                {video.title}
+              </DialogTitle>
               {video.description && (
                 <p className="text-sm text-muted-foreground">{video.description}</p>
               )}
@@ -157,7 +157,7 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({
                   مكتمل
                 </Badge>
               )}
-              <Button variant="ghost" size="sm" onClick={handleClose}>
+              <Button variant="ghost" size="sm" onClick={onClose}>
                 <X className="w-4 h-4" />
               </Button>
             </div>
@@ -166,67 +166,13 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({
 
         <div className="px-6 pb-6 space-y-4">
           {/* Video Player */}
-          <div className="relative bg-black rounded-lg overflow-hidden">
-            {isEmbedded ? (
-              <iframe
-                src={getVideoUrl(video.video_url)}
-                className="w-full aspect-video"
-                allowFullScreen
-                title={video.title}
-              />
-            ) : (
-              <div className="relative">
-                <video
-                  ref={videoRef}
-                  src={video.video_url}
-                  className="w-full aspect-video"
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                />
-                
-                {/* Custom Controls */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={togglePlayPause}
-                      className="text-white hover:bg-white/20"
-                    >
-                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={toggleMute}
-                      className="text-white hover:bg-white/20"
-                    >
-                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                    </Button>
-                    
-                    <div className="flex-1 text-white text-sm">
-                      {Math.floor(watchTime / 60)}:{Math.floor(watchTime % 60).toString().padStart(2, '0')}
-                      {video.duration && ` / ${Math.floor(video.duration / 60)}:${Math.floor(video.duration % 60).toString().padStart(2, '0')}`}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Progress Bar */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">تقدم المشاهدة</span>
-              <span className="font-medium">{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
+          <div className="bg-black rounded-lg overflow-hidden">
+            {renderVideoPlayer()}
           </div>
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={handleClose}>
+            <Button variant="outline" onClick={onClose}>
               إغلاق
             </Button>
             {isCompleted && (
