@@ -229,6 +229,7 @@ All colors MUST be HSL.
 
   /* Enhanced Arabic text editor styles - Clean and simple */
   .enhanced-arabic-editor {
+    direction: rtl;
     text-align: right;
   }
 
