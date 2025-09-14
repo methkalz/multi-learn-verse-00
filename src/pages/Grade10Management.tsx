@@ -1,6 +1,7 @@
 import React from 'react';
 import { Video } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useBackPath } from '@/hooks/useBackPath';
 import { Button } from '@/components/ui/button';
 import AppHeader from '@/components/shared/AppHeader';
 import AppFooter from '@/components/shared/AppFooter';
@@ -8,6 +9,7 @@ import Grade10Content from '@/components/content/Grade10Content';
 import Grade10ContentViewer from '@/components/content/Grade10ContentViewer';
 const Grade10Management: React.FC = () => {
   const { userProfile, loading } = useAuth();
+  const { contentBackPath } = useBackPath();
   
   // التأكد من أن المستخدم مسجل دخول ولديه profile
   if (loading) {
@@ -38,7 +40,7 @@ const Grade10Management: React.FC = () => {
   // تحديد ما إذا كان المستخدم سوبر آدمن فقط
   const canManageContent = userProfile?.role === 'superadmin';
   return <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <AppHeader title="إدارة محتوى الصف العاشر" showBackButton={true} backPath="/content-management" showLogout={true} />
+      <AppHeader title="إدارة محتوى الصف العاشر" showBackButton={true} backPath={contentBackPath} showLogout={true} />
       
       <main className="container mx-auto px-6 py-8 flex-1">
         <div className="max-w-7xl mx-auto space-y-8">
