@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import Grade12VideoViewer from './Grade12VideoViewer';
 
 const Grade12ContentViewer: React.FC = () => {
   // استخدام hook قاعدة البيانات للعرض فقط
@@ -69,87 +70,7 @@ const Grade12ContentViewer: React.FC = () => {
         </TabsList>
 
         <TabsContent value="videos" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Video className="h-5 w-5 text-purple-600" />
-                الفيديوهات التعليمية
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {videos.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {videos.map((video) => (
-                    <Card key={video.id} className="border-l-4 border-l-purple-500 hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="space-y-3">
-                          {/* صورة مصغرة للفيديو */}
-                          <div className="relative">
-                            {video.thumbnail_url ? (
-                              <img 
-                                src={video.thumbnail_url} 
-                                alt={video.title}
-                                className="w-full h-32 object-cover rounded-lg border border-border"
-                                onError={(e) => {
-                                  e.currentTarget.src = '/placeholder.svg';
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center border border-border">
-                                <Video className="h-8 w-8 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/20 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                              <Button 
-                                size="sm"
-                                onClick={() => openVideo(video.video_url)}
-                                className="bg-white/90 text-black hover:bg-white"
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                مشاهدة
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <h4 className="font-semibold text-foreground mb-1 line-clamp-2">
-                              {video.title}
-                            </h4>
-                            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                              {video.description || 'لا يوجد وصف'}
-                            </p>
-                            
-                            <div className="flex flex-wrap gap-2">
-                              <Badge variant="outline" className="text-xs">
-                                <Video className="h-3 w-3 mr-1" />
-                                فيديو
-                              </Badge>
-                              {video.duration && (
-                                <Badge variant="outline" className="text-xs">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  {video.duration}
-                                </Badge>
-                              )}
-                              <Badge variant="outline" className="text-xs">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                {format(new Date(video.created_at), 'dd/MM/yyyy', { locale: ar })}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Video className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold mb-2">لا توجد فيديوهات</h3>
-                  <p className="text-muted-foreground">لم يتم إضافة أي فيديوهات تعليمية بعد</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <Grade12VideoViewer videos={videos} loading={loading} />
         </TabsContent>
 
         <TabsContent value="documents" className="mt-6">
