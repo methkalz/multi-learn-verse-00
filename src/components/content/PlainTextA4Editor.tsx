@@ -327,13 +327,12 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                   lineHeight: `${LINE_HEIGHT}px`,
                   fontSize: '16px',
                   fontFamily: '"IBM Plex Sans Arabic", "Noto Sans Arabic", "Cairo", "Amiri", "Tahoma", system-ui, sans-serif',
-                  textAlign: 'start', // محاذاة البداية للنص العربي
+                  textAlign: 'right', // تنسيق افتراضي للنص العربي
                   direction: 'rtl',
                   unicodeBidi: 'plaintext',
                   wordWrap: 'break-word',
                   overflowWrap: 'anywhere', // كسر أفضل للكلمات الطويلة
                   whiteSpace: 'pre-line', // أفضل للنص العربي
-                  textJustify: 'inter-word',
                   hyphens: 'auto',
                   wordSpacing: '0.05em', // مسافة أقل بين الكلمات
                   letterSpacing: '0.01em', // مسافة أقل بين الأحرف
@@ -384,8 +383,6 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
             font-variant-ligatures: common-ligatures;
             text-rendering: geometricPrecision;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            text-align-last: justify; // ضبط السطر الأخير
           }
           
           .arabic-text-optimized p {
