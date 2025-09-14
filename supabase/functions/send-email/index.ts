@@ -141,6 +141,12 @@ serve(async (req: Request) => {
 
     if (!emailResponse.ok) {
       const errorText = await emailResponse.text();
+      
+      // Handle specific Resend API errors
+      if (emailResponse.status === 403 && errorText.includes('You can only send testing emails')) {
+        throw new Error(`قيود البيئة التجريبية: يمكن إرسال الإيميلات فقط إلى البريد المسجل في Resend. لإرسال إيميلات لعناوين أخرى، يجب تفعيل نطاق مخصص في resend.com/domains`);
+      }
+      
       throw new Error(`Resend API error: ${emailResponse.status} - ${errorText}`);
     }
 

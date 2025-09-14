@@ -120,17 +120,18 @@ serve(async (req) => {
       }
     }
 
-    // Check if user already exists and handle orphaned users
+    // Check if user already exists and handle different scenarios
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
     const existingAuthUser = existingUsers.users?.find(u => u.email === email);
     
     let userId: string;
+    let isExistingUser = false;
     
     if (existingAuthUser) {
       // Check if user has a profile or is orphaned
       const { data: existingProfile } = await supabaseAdmin
         .from('profiles')
-        .select('user_id')
+        .select('user_id, role, full_name')
         .eq('user_id', existingAuthUser.id)
         .single();
 
@@ -143,39 +144,99 @@ serve(async (req) => {
           console.error('Error deleting orphaned user:', deleteError);
         }
       } else {
-        // User exists with profile - return error
-        console.error('Teacher with this email already exists');
+        // User exists with profile - check if we can convert role
+        if (existingProfile.role === 'student') {
+          console.log('Converting existing student to teacher...');
+          
+          // Update existing user's role to teacher
+          const { error: updateProfileError } = await supabaseAdmin
+            .from('profiles')
+            .update({
+              role: 'teacher',
+              full_name: fullName,
+              phone: phone || null,
+              school_id: currentProfile.school_id
+            })
+            .eq('user_id', existingAuthUser.id);
+
+          if (updateProfileError) {
+            console.error('Error updating user role:', updateProfileError);
+            return new Response(
+              JSON.stringify({ error: 'فشل في تحديث دور المستخدم' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          // Update auth user metadata
+          const { error: updateUserError } = await supabaseAdmin.auth.admin.updateUserById(
+            existingAuthUser.id,
+            {
+              email,
+              password,
+              user_metadata: {
+                full_name: fullName,
+                phone: phone || null,
+                role: 'teacher',
+                school_id: currentProfile.school_id
+              }
+            }
+          );
+
+          if (updateUserError) {
+            console.error('Error updating auth user:', updateUserError);
+          }
+
+          userId = existingAuthUser.id;
+          isExistingUser = true;
+          console.log('Successfully converted user to teacher:', userId);
+        } else {
+          // User exists as teacher or admin - return detailed error
+          console.error('User already exists with role:', existingProfile.role);
+          return new Response(
+            JSON.stringify({ 
+              error: `المستخدم ${email} موجود مسبقاً بدور: ${existingProfile.role === 'teacher' ? 'معلم' : existingProfile.role}`,
+              existingUser: {
+                email: email,
+                role: existingProfile.role,
+                name: existingProfile.full_name
+              }
+            }),
+            { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
+    // Create user in Supabase Auth only if not already existing
+    let newUser = null;
+    
+    if (!isExistingUser) {
+      const createResult = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true, // Auto-confirm email
+        user_metadata: {
+          full_name: fullName,
+          phone: phone || null,
+          role: 'teacher',
+          school_id: currentProfile.school_id
+        }
+      });
+
+      if (createResult.error || !createResult.data.user) {
+        console.error('Error creating user:', createResult.error);
         return new Response(
-          JSON.stringify({ error: 'يوجد معلم بهذا البريد الإلكتروني مسبقاً' }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: `فشل في إنشاء المستخدم: ${createResult.error?.message || 'خطأ غير معروف'}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
+      newUser = createResult.data;
+      userId = newUser.user.id;
+      console.log('User created successfully with teacher profile:', newUser.user.id);
+    } else {
+      console.log('Using existing user converted to teacher:', userId);
     }
-
-    // Create user in Supabase Auth with complete metadata
-    const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Auto-confirm email
-      user_metadata: {
-        full_name: fullName,
-        phone: phone || null,
-        role: 'teacher',
-        school_id: currentProfile.school_id
-      }
-    });
-
-    if (createUserError || !newUser.user) {
-      console.error('Error creating user:', createUserError);
-      return new Response(
-        JSON.stringify({ error: `فشل في إنشاء المستخدم: ${createUserError?.message || 'خطأ غير معروف'}` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    userId = newUser.user.id;
-
-    console.log('User created successfully with teacher profile:', newUser.user.id);
 
     // Wait a moment for trigger to complete
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -239,13 +300,15 @@ serve(async (req) => {
         actor_user_id: currentUser.user.id,
         action: 'CREATE_TEACHER',
         entity: 'profiles',
-        entity_id: newUser.user.id,
+        entity_id: userId,
         payload_json: {
           teacher_email: email,
           teacher_name: fullName,
           school_id: currentProfile.school_id,
           assigned_classes: classIds.length,
-          welcome_email_sent: sendWelcomeEmail
+          welcome_email_sent: sendWelcomeEmail,
+          is_existing_user: isExistingUser,
+          action_type: isExistingUser ? 'converted_to_teacher' : 'created_new_teacher'
         }
       });
 
@@ -254,8 +317,9 @@ serve(async (req) => {
         success: true, 
         emailSent: emailSent,
         emailError: emailError,
+        isExistingUser: isExistingUser,
         teacher: {
-          id: newUser.user.id,
+          id: userId,
           email: email,
           fullName: fullName,
           phone: phone,

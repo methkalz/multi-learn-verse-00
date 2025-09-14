@@ -249,6 +249,19 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
           setEmailStatus('error');
           setEmailErrorMessage('فشل في إرسال البريد الإلكتروني');
         }
+        
+        // Handle specific error cases
+        if (error.message?.includes('موجود مسبقاً')) {
+          // This means user exists with incompatible role
+          const errorMessage = error.message || "المستخدم موجود مسبقاً";
+          toast({
+            variant: "destructive",
+            title: "خطأ في إنشاء المعلم",
+            description: errorMessage
+          });
+          return; // Don't throw, just show error and return
+        }
+        
         throw new Error(error.message || "فشل في إنشاء المعلم");
       }
 
@@ -260,13 +273,18 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
         throw new Error(data?.error || "فشل في إنشاء المعلم");
       }
 
+      // Determine if this was a conversion or new user creation
+      const isConversion = data?.isExistingUser || false;
+      const actionVerb = isConversion ? "تم تحويل" : "تم إضافة";
+      const actionDescription = isConversion ? "من طالب إلى معلم" : "كمعلم جديد";
+
       // Check email status from response
       if (sendWelcomeEmail) {
         if (data?.emailSent) {
           setEmailStatus('success');
           toast({
-            title: "تم إضافة المعلم بنجاح",
-            description: `تم إضافة ${newTeacher.full_name} كمعلم جديد وإرسال بريد ترحيبي إلى ${newTeacher.email}`
+            title: `${actionVerb} المستخدم بنجاح`,
+            description: `${actionVerb} ${newTeacher.full_name} ${actionDescription} وتم إرسال بريد ترحيبي إلى ${newTeacher.email}`
           });
           
           // Keep the success status visible for a moment before resetting
@@ -278,9 +296,15 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
         } else {
           setEmailStatus('error');
           setEmailErrorMessage(data?.emailError || 'فشل في إرسال البريد الإلكتروني');
+          
+          // Show warning about email failure and Resend limitations
+          const emailErrorDetails = data?.emailError?.includes('methkal88@gmail.com') 
+            ? 'في البيئة التجريبية، يمكن إرسال الإيميلات فقط إلى البريد المسجل في Resend (methkal88@gmail.com). لإرسال إيميلات لعناوين أخرى، يجب تفعيل نطاق مخصص في Resend.'
+            : data?.emailError || 'فشل في إرسال البريد الإلكتروني';
+          
           toast({
-            title: "تم إضافة المعلم بنجاح",
-            description: `تم إضافة ${newTeacher.full_name} كمعلم جديد ولكن فشل في إرسال البريد الإلكتروني`,
+            title: `${actionVerb} المستخدم بنجاح`,
+            description: `${actionVerb} ${newTeacher.full_name} ${actionDescription} ولكن فشل في إرسال البريد الإلكتروني: ${emailErrorDetails}`,
             variant: "destructive"
           });
           
@@ -288,12 +312,12 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
           setTimeout(() => {
             setEmailStatus('idle');
             setEmailErrorMessage('');
-          }, 5000);
+          }, 8000);
         }
       } else {
         toast({
-          title: "تم إضافة المعلم بنجاح", 
-          description: `تم إضافة ${newTeacher.full_name} كمعلم جديد`
+          title: `${actionVerb} المستخدم بنجاح`, 
+          description: `${actionVerb} ${newTeacher.full_name} ${actionDescription}`
         });
         
         // Reset form immediately if no email was sent

@@ -43,6 +43,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { UserRoleManager } from '@/components/UserRoleManager';
 import { 
   Users, 
   UserPlus, 
@@ -67,6 +68,7 @@ import {
   CheckCircle,
   XCircle,
   Trash,
+  Settings,
   UserMinus,
   Award,
   LogIn
@@ -140,6 +142,7 @@ const UserManagement: React.FC = () => {
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [showPinLoginDialog, setShowPinLoginDialog] = useState(false);
   const [selectedUserForPin, setSelectedUserForPin] = useState<User | null>(null);
+  const [showRoleManager, setShowRoleManager] = useState(false);
   const [editUserData, setEditUserData] = useState<{
     user_id: string;
     full_name: string;
@@ -598,6 +601,11 @@ const UserManagement: React.FC = () => {
     }
   ];
 
+  // Show role manager if requested
+  if (showRoleManager) {
+    return <UserRoleManager onBack={() => setShowRoleManager(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col" dir="rtl">
       <AppHeader 
@@ -697,6 +705,15 @@ const UserManagement: React.FC = () => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowRoleManager(true)}
+                  className="h-8"
+                >
+                  <Settings className="h-3 w-3 ml-1" />
+                  إدارة الأدوار
+                </Button>
                 {selectedUsers.length > 0 && (
                   <div className="flex items-center gap-2 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg animate-in slide-in-from-top-2">
                     <Badge variant="secondary" className="text-xs">
