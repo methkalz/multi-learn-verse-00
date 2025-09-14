@@ -1,30 +1,10 @@
 import React, { useEffect, useImperativeHandle, forwardRef, useState, useRef, useCallback } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { TextStyle } from '@tiptap/extension-text-style';
-import { Color } from '@tiptap/extension-color';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Save, Printer, FileText, Clock, ChevronUp, ChevronDown } from 'lucide-react';
+import { Save, Printer, FileText, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-
-// A4 page dimensions in pixels (96 DPI)
-const A4_WIDTH = 794; // 21cm at 96 DPI
-const A4_HEIGHT = 1123; // 29.7cm at 96 DPI
-const PAGE_MARGIN = 76; // 2cm margins
-const CONTENT_WIDTH = A4_WIDTH - (PAGE_MARGIN * 2);
-const CONTENT_HEIGHT = A4_HEIGHT - (PAGE_MARGIN * 2);
-const LINE_HEIGHT = 24;
-const CHARS_PER_LINE = 80; // Approximate characters per line for Arabic text
-const LINES_PER_PAGE = Math.floor(CONTENT_HEIGHT / LINE_HEIGHT); // ~42 lines per page
-
-interface Page {
-  id: string;
-  content: string;
-  wordCount: number;
-}
+import RealPageContainer from './RealPageContainer';
 
 interface MultiPageA4EditorProps {
   initialContent?: string;
@@ -54,129 +34,33 @@ const MultiPageA4Editor = forwardRef<MultiPageA4EditorRef, MultiPageA4EditorProp
 }, ref) => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [pages, setPages] = useState<Page[]>([{ id: '1', content: '', wordCount: 0 }]);
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [currentContent, setCurrentContent] = useState(initialContent);
+  const [wordCount, setWordCount] = useState(0);
+  const [pageCount, setPageCount] = useState(1);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
-  const pagesContainerRef = useRef<HTMLDivElement>(null);
-  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const pageContainerRef = useRef<{ getContent: () => string; setContent: (content: string) => void }>(null);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      TextStyle,
-      Color
-    ],
-    content: initialContent,
-    editable: !readOnly,
-    onUpdate: ({ editor }) => {
-      const content = editor.getHTML();
-      const text = editor.getText();
-      
-      // Split content into pages based on estimated length
-      splitContentIntoPages(content, text);
-      
-      // Trigger content change
-      onContentChange?.(content);
-      
-      // Auto-save logic
-      if (autoSave && onSave) {
-        if (autoSaveTimeoutRef.current) {
-          clearTimeout(autoSaveTimeoutRef.current);
-        }
-        autoSaveTimeoutRef.current = setTimeout(() => {
-          handleAutoSave(content);
-        }, autoSaveInterval);
-      }
-    },
-    editorProps: {
-      attributes: {
-        class: cn(
-          'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
-          'min-h-full p-0 text-foreground',
-          'font-serif leading-relaxed',
-          '[&>*]:!max-w-none [&>*]:!w-full'
-        ),
-        style: `
-          direction: rtl;
-          text-align: right;
-          line-height: ${LINE_HEIGHT}px;
-          font-family: 'Arial', 'Tahoma', sans-serif;
-          font-size: 16px;
-          min-height: ${CONTENT_HEIGHT}px;
-        `
-      }
-    }
-  });
-
-  const splitContentIntoPages = useCallback((htmlContent: string, textContent: string) => {
-    if (!textContent.trim()) {
-      setPages([{ id: '1', content: '', wordCount: 0 }]);
-      return;
-    }
-
-    // Estimate characters per page (considering Arabic text)
-    const charsPerPage = LINES_PER_PAGE * CHARS_PER_LINE;
-    const estimatedPages = Math.ceil(textContent.length / charsPerPage);
+  // Handle content changes from RealPageContainer
+  const handleContentChange = useCallback((content: string) => {
+    setCurrentContent(content);
     
-    const newPages: Page[] = [];
+    // Calculate word count
+    const words = content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word.length > 0);
+    setWordCount(words.length);
     
-    if (estimatedPages <= 1) {
-      // Single page
-      const wordCount = textContent.trim().split(/\s+/).filter(word => word.length > 0).length;
-      newPages.push({
-        id: '1',
-        content: htmlContent,
-        wordCount
-      });
-    } else {
-      // Multiple pages - split content
-      const sentences = htmlContent.split(/(?<=[.!?])\s+/);
-      let currentPageContent = '';
-      let currentTextLength = 0;
-      let pageId = 1;
-      
-      for (const sentence of sentences) {
-        const sentenceText = sentence.replace(/<[^>]*>/g, ''); // Remove HTML tags for length calculation
-        
-        if (currentTextLength + sentenceText.length > charsPerPage && currentPageContent) {
-          // Current page is full, create new page
-          const wordCount = currentPageContent.replace(/<[^>]*>/g, '').trim()
-            .split(/\s+/).filter(word => word.length > 0).length;
-          
-          newPages.push({
-            id: pageId.toString(),
-            content: currentPageContent.trim(),
-            wordCount
-          });
-          
-          pageId++;
-          currentPageContent = sentence;
-          currentTextLength = sentenceText.length;
-        } else {
-          currentPageContent += (currentPageContent ? ' ' : '') + sentence;
-          currentTextLength += sentenceText.length;
-        }
+    // Trigger external content change
+    onContentChange?.(content);
+    
+    // Auto-save logic
+    if (autoSave && onSave) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
       }
-      
-      // Add the last page
-      if (currentPageContent) {
-        const wordCount = currentPageContent.replace(/<[^>]*>/g, '').trim()
-          .split(/\s+/).filter(word => word.length > 0).length;
-        
-        newPages.push({
-          id: pageId.toString(),
-          content: currentPageContent.trim(),
-          wordCount
-        });
-      }
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        handleAutoSave(content);
+      }, autoSaveInterval);
     }
-    
-    setPages(newPages);
-  }, []);
-
-  const getTotalWordCount = useCallback(() => {
-    return pages.reduce((total, page) => total + page.wordCount, 0);
-  }, [pages]);
+  }, [onContentChange, autoSave, onSave, autoSaveInterval]);
 
   const handleAutoSave = async (content: string) => {
     if (!onSave || isSaving) return;
@@ -194,12 +78,11 @@ const MultiPageA4Editor = forwardRef<MultiPageA4EditorRef, MultiPageA4EditorProp
   };
 
   const handleManualSave = async () => {
-    if (!editor || !onSave || isSaving) return;
+    if (!onSave || isSaving) return;
     
     try {
       setIsSaving(true);
-      const content = editor.getHTML();
-      await onSave(content);
+      await onSave(currentContent);
       setLastSaved(new Date());
       toast.success('تم حفظ المستند بنجاح');
     } catch (error) {
@@ -216,17 +99,6 @@ const MultiPageA4Editor = forwardRef<MultiPageA4EditorRef, MultiPageA4EditorProp
     }
   };
 
-  const scrollToPage = (pageIndex: number) => {
-    const pageElement = pageRefs.current[pageIndex];
-    if (pageElement && pagesContainerRef.current) {
-      pageElement.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
-      setCurrentPageIndex(pageIndex);
-    }
-  };
-
   const formatLastSaved = (date: Date | null) => {
     if (!date) return 'لم يتم الحفظ بعد';
     const now = new Date();
@@ -239,18 +111,27 @@ const MultiPageA4Editor = forwardRef<MultiPageA4EditorRef, MultiPageA4EditorProp
 
   // Expose methods through ref
   useImperativeHandle(ref, () => ({
-    getContent: () => editor?.getHTML() || '',
-    setContent: (content: string) => editor?.commands.setContent(content),
-    focus: () => editor?.commands.focus(),
+    getContent: () => currentContent,
+    setContent: (content: string) => {
+      setCurrentContent(content);
+      handleContentChange(content);
+    },
+    focus: () => {
+      // Focus the first editable page
+      const firstEditablePage = document.querySelector('[contenteditable="true"]') as HTMLElement;
+      if (firstEditablePage) {
+        firstEditablePage.focus();
+      }
+    },
     save: handleManualSave
   }));
 
-  // Update editor content when initialContent changes
+  // Update content when initialContent changes
   useEffect(() => {
-    if (editor && initialContent !== editor.getHTML()) {
-      editor.commands.setContent(initialContent);
+    if (initialContent !== currentContent) {
+      setCurrentContent(initialContent);
     }
-  }, [editor, initialContent]);
+  }, [initialContent]);
 
   // Cleanup auto-save timeout
   useEffect(() => {
@@ -261,13 +142,31 @@ const MultiPageA4Editor = forwardRef<MultiPageA4EditorRef, MultiPageA4EditorProp
     };
   }, []);
 
-  if (!editor) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // Calculate page count from content
+  useEffect(() => {
+    const tempDiv = document.createElement('div');
+    tempDiv.style.cssText = `
+      position: absolute;
+      visibility: hidden;
+      width: 642px;
+      direction: rtl;
+      text-align: right;
+      font-family: 'Arial', 'Tahoma', sans-serif;
+      font-size: 16px;
+      line-height: 24px;
+      padding: 0;
+      margin: 0;
+    `;
+    
+    tempDiv.innerHTML = currentContent;
+    document.body.appendChild(tempDiv);
+    
+    const height = tempDiv.scrollHeight;
+    const calculatedPageCount = Math.max(1, Math.ceil(height / 971)); // CONTENT_HEIGHT = 971px
+    
+    document.body.removeChild(tempDiv);
+    setPageCount(calculatedPageCount);
+  }, [currentContent]);
 
   return (
     <div className={cn('w-full mx-auto', className)}>
@@ -277,17 +176,12 @@ const MultiPageA4Editor = forwardRef<MultiPageA4EditorRef, MultiPageA4EditorProp
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
-              {getTotalWordCount().toLocaleString('ar')} كلمة
+              {wordCount.toLocaleString('ar')} كلمة
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline">
-              {pages.length.toLocaleString('ar')} صفحة
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">
-              الصفحة {(currentPageIndex + 1).toLocaleString('ar')} من {pages.length.toLocaleString('ar')}
+              {pageCount.toLocaleString('ar')} صفحة
             </Badge>
           </div>
           {lastSaved && (
@@ -307,28 +201,6 @@ const MultiPageA4Editor = forwardRef<MultiPageA4EditorRef, MultiPageA4EditorProp
         </div>
         
         <div className="flex items-center gap-2">
-          {/* Page navigation */}
-          {pages.length > 1 && (
-            <>
-              <Button
-                onClick={() => scrollToPage(Math.max(0, currentPageIndex - 1))}
-                disabled={currentPageIndex === 0}
-                size="sm"
-                variant="ghost"
-              >
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-              <Button
-                onClick={() => scrollToPage(Math.min(pages.length - 1, currentPageIndex + 1))}
-                disabled={currentPageIndex === pages.length - 1}
-                size="sm"
-                variant="ghost"
-              >
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-          
           {onSave && !readOnly && (
             <Button
               onClick={handleManualSave}
@@ -351,209 +223,13 @@ const MultiPageA4Editor = forwardRef<MultiPageA4EditorRef, MultiPageA4EditorProp
         </div>
       </div>
 
-      {/* Multi-Page Document Container */}
-      <div 
-        ref={pagesContainerRef}
-        className="w-full max-w-4xl mx-auto space-y-6"
-      >
-        {readOnly ? (
-          // Read-only mode: Display split content across multiple pages
-          pages.map((page, index) => (
-            <Card 
-              key={page.id}
-              ref={(el) => {
-                pageRefs.current[index] = el;
-              }}
-              className="shadow-lg page-container"
-            >
-              <div 
-                className="mx-auto bg-white page-content"
-                style={{
-                  width: `${A4_WIDTH}px`,
-                  height: `${A4_HEIGHT}px`,
-                  padding: `${PAGE_MARGIN}px`,
-                  position: 'relative'
-                }}
-              >
-                <div 
-                  className="readonly-page-content"
-                  style={{
-                    width: `${CONTENT_WIDTH}px`,
-                    height: `${CONTENT_HEIGHT}px`,
-                    overflow: 'hidden',
-                    direction: 'rtl',
-                    textAlign: 'right',
-                    fontFamily: "'Arial', 'Tahoma', sans-serif",
-                    fontSize: '16px',
-                    lineHeight: `${LINE_HEIGHT}px`
-                  }}
-                  dangerouslySetInnerHTML={{ __html: page.content }}
-                />
-                
-                {/* Page number */}
-                <div 
-                  className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground"
-                  style={{ direction: 'ltr' }}
-                >
-                  صفحة {(index + 1).toLocaleString('ar')} من {pages.length.toLocaleString('ar')}
-                </div>
-              </div>
-            </Card>
-          ))
-        ) : (
-          // Edit mode: Single editor that spans across pages visually
-          <Card className="shadow-lg page-container">
-            <div 
-              className="mx-auto bg-white page-content"
-              style={{
-                width: `${A4_WIDTH}px`,
-                minHeight: `${A4_HEIGHT * pages.length}px`,
-                padding: `${PAGE_MARGIN}px`,
-                position: 'relative'
-              }}
-            >
-              <EditorContent 
-                editor={editor}
-                className="min-h-full"
-                style={{
-                  width: `${CONTENT_WIDTH}px`,
-                  minHeight: `${CONTENT_HEIGHT * pages.length}px`
-                }}
-              />
-              
-              {/* Page break indicators */}
-              {pages.length > 1 && Array.from({ length: pages.length - 1 }, (_, i) => (
-                <div
-                  key={i}
-                  className="absolute left-0 right-0 border-t-2 border-dashed border-muted-foreground/30"
-                  style={{
-                    top: `${A4_HEIGHT * (i + 1) - PAGE_MARGIN}px`,
-                    zIndex: 10
-                  }}
-                />
-              ))}
-              
-              {/* Page numbers for edit mode */}
-              {pages.map((_, index) => (
-                <div
-                  key={index}
-                  className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground"
-                  style={{ 
-                    direction: 'ltr',
-                    top: `${A4_HEIGHT * (index + 1) - 40}px`
-                  }}
-                >
-                  صفحة {(index + 1).toLocaleString('ar')} من {pages.length.toLocaleString('ar')}
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
-      </div>
-
-      {/* Enhanced Print Styles */}
-      <style>{`
-        /* Page Container Styles */
-        .page-container {
-          page-break-after: always;
-          break-after: page;
-        }
-        
-        .page-content {
-          position: relative;
-        }
-        
-        /* Editor Styles */
-        .ProseMirror {
-          outline: none;
-          direction: rtl;
-          text-align: right;
-          font-family: 'Arial', 'Tahoma', sans-serif;
-          font-size: 16px;
-          line-height: ${LINE_HEIGHT}px;
-          padding: 0;
-          margin: 0;
-        }
-        
-        /* Readonly page content */
-        .readonly-page-content {
-          padding: 0;
-          margin: 0;
-        }
-        
-        .readonly-page-content p {
-          margin: 0 0 1em 0;
-          line-height: ${LINE_HEIGHT}px;
-        }
-        
-        .readonly-page-content h1,
-        .readonly-page-content h2,
-        .readonly-page-content h3,
-        .readonly-page-content h4,
-        .readonly-page-content h5,
-        .readonly-page-content h6 {
-          margin: 1em 0 0.5em 0;
-          line-height: 1.2;
-        }
-        
-        /* Page break indicators in edit mode */
-        .page-break-indicator {
-          width: 100%;
-          height: 2px;
-          background: repeating-linear-gradient(
-            to right,
-            transparent,
-            transparent 10px,
-            #9ca3af 10px,
-            #9ca3af 20px
-          );
-          opacity: 0.5;
-          pointer-events: none;
-        }
-        
-        @media print {
-          * {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
-          
-          @page {
-            size: A4;
-            margin: 0;
-          }
-          
-          .no-print {
-            display: none !important;
-          }
-          
-          .page-container {
-            box-shadow: none !important;
-            border: none !important;
-            margin: 0 !important;
-            page-break-after: always;
-          }
-          
-          .page-content {
-            margin: 0 !important;
-          }
-          
-          body {
-            font-family: 'Arial', 'Tahoma', sans-serif;
-            direction: rtl;
-            text-align: right;
-          }
-          
-          .page-break-indicator {
-            display: none !important;
-          }
-        }
-        
-        @media screen {
-          .page-container:not(:last-child) {
-            margin-bottom: 20px;
-          }
-        }
-      `}</style>
+      {/* Real Page Container */}
+      <RealPageContainer
+        htmlContent={currentContent}
+        readOnly={readOnly}
+        onContentChange={handleContentChange}
+        className="w-full"
+      />
     </div>
   );
 });
