@@ -7,6 +7,7 @@ import AppFooter from '@/components/shared/AppFooter';
 import Grade11Content from '@/components/content/Grade11Content';
 import Grade11ContentViewer from '@/components/content/Grade11ContentViewer';
 import Grade11SchoolAdminViewer from '@/components/content/Grade11SchoolAdminViewer';
+import Grade11CourseViewer from '@/components/content/Grade11CourseViewer';
 import GamesSection from '@/components/content/GamesSection';
 import { EducationalTermsManager } from '@/components/content/EducationalTermsManager';
 import { ContentGameLauncher } from '@/components/content/ContentGameLauncher';
@@ -79,10 +80,8 @@ const Grade11Management: React.FC = () => {
               <div className="animate-fade-in">
                 {canManageContent ? (
                   <Grade11Content />
-                ) : isSchoolAdmin ? (
-                  <Grade11SchoolAdminViewer />
                 ) : (
-                  <Grade11ContentViewer />
+                  <Grade11CourseViewer />
                 )}
               </div>
             </TabsContent>
