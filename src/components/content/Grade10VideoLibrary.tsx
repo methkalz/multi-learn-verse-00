@@ -87,13 +87,32 @@ const Grade10VideoLibrary: React.FC = () => {
     }
     
     if (video.source_type === 'youtube' && video.video_url) {
-      const videoId = video.video_url.split('/embed/')[1]?.split('?')[0];
+      const videoId = extractYouTubeId(video.video_url);
       if (videoId) {
-        return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+        return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      }
+    }
+    
+    if (video.source_type === 'google_drive' && video.video_url) {
+      const fileId = extractGoogleDriveId(video.video_url);
+      if (fileId) {
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
       }
     }
     
     return '/placeholder.svg';
+  };
+
+  const extractYouTubeId = (url: string): string | null => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const extractGoogleDriveId = (url: string): string | null => {
+    const regex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
   };
 
   const formatDate = (dateString: string) => {
