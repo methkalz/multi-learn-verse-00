@@ -78,14 +78,10 @@ const ImageResizer = () => {
       .enhanced-arabic-editor:focus {
         outline: none;
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        direction: rtl !important;
-        text-align: right !important;
       }
 
       .enhanced-arabic-editor p {
         margin: 1em 0;
-        direction: rtl;
-        text-align: right;
       }
 
       .enhanced-arabic-editor p:first-child {
@@ -94,19 +90,6 @@ const ImageResizer = () => {
 
       .enhanced-arabic-editor p:last-child {
         margin-bottom: 0;
-      }
-
-      /* Ensure all text elements maintain RTL direction */
-      .enhanced-arabic-editor * {
-        direction: rtl;
-        text-align: right;
-        unicode-bidi: normal;
-      }
-
-      /* Prevent text reversal */
-      .enhanced-arabic-editor[contenteditable="true"] {
-        unicode-bidi: bidi-override;
-        direction: rtl;
       }
       
       /* Table enhancements */
