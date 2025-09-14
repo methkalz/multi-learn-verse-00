@@ -12,7 +12,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
 import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
+import { useAutoPageBreak } from '@/hooks/useAutoPageBreak';
 import EnhancedDocumentEditor from '@/components/content/EnhancedDocumentEditor';
+import { A4PageContainer } from '@/components/content/A4PageContainer';
 import { 
   Save, 
   ArrowLeft, 
@@ -66,12 +68,32 @@ const Grade12ProjectEditor: React.FC = () => {
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [wordCount, setWordCount] = useState(0);
 
   // Comments and versions states
   const [comments, setComments] = useState<Comment[]>([]);
   const [versions, setVersions] = useState<Version[]>([]);
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('editor');
+
+  // Auto page break system
+  const {
+    pages,
+    currentPageIndex,
+    setCurrentPageIndex,
+    addPage,
+    updatePageContent,
+    registerPageRef,
+    totalPages
+  } = useAutoPageBreak({
+    initialContent: project?.project_content || '',
+    onContentChange: (newContent) => {
+      setContent(newContent);
+      // Update word count
+      const text = newContent.replace(/<[^>]*>/g, '').replace(/<!-- PAGE_BREAK -->/g, '');
+      setWordCount(text.split(/\s+/).filter(word => word.length > 0).length);
+    }
+  });
 
   // Load project data
   useEffect(() => {
@@ -367,10 +389,10 @@ const Grade12ProjectEditor: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="editor" className="space-y-4">
+          <TabsContent value="editor" className="space-y-4 h-full">
             <div className="flex flex-col h-full">
               {/* Editor Toolbar - Fixed at top */}
-              <div className="bg-white rounded-lg shadow-sm border mb-4 p-2">
+              <div className="bg-background border-b p-4 sticky top-0 z-10">
                 <EnhancedDocumentEditor
                   content={content}
                   onChange={setContent}
@@ -382,37 +404,20 @@ const Grade12ProjectEditor: React.FC = () => {
                 />
               </div>
 
-              {/* A4 Pages Container */}
-              <div className="flex-1 overflow-y-auto bg-gray-100 p-6">
-                <div className="max-w-[21cm] mx-auto space-y-4">
-                  {/* A4 Page 1 */}
-                  <div className="a4-page bg-white shadow-lg mx-auto">
-                    <div
-                      id="a4-content-editor"
-                      contentEditable={canEdit}
-                      className="a4-content w-full h-full p-8 focus:outline-none"
-                      style={{
-                        fontFamily: 'Arial, sans-serif',
-                        fontSize: '12pt',
-                        lineHeight: '1.5',
-                        direction: 'rtl',
-                        textAlign: 'right',
-                        minHeight: '29.7cm'
-                      }}
-                      onInput={(e) => {
-                        const target = e.target as HTMLElement;
-                        setContent(target.innerHTML);
-                      }}
-                      dangerouslySetInnerHTML={{ __html: content }}
-                      suppressContentEditableWarning={true}
-                    />
-                  </div>
-                  
-                  {/* Page Indicator */}
-                  <div className="text-center py-2 text-sm text-gray-500">
-                    صفحة 1 من 1
-                  </div>
-                </div>
+              {/* A4 Pages Container - Scrollable */}
+              <div className="flex-1 overflow-y-auto">
+                <A4PageContainer
+                  pages={pages}
+                  currentPageIndex={currentPageIndex}
+                  onPageContentChange={updatePageContent}
+                  onRegisterPageRef={registerPageRef}
+                  readOnly={!canEdit}
+                />
+              </div>
+              
+              {/* Page Info */}
+              <div className="bg-background border-t p-2 text-center text-sm text-muted-foreground">
+                صفحة {currentPageIndex + 1} من {totalPages} • {wordCount} كلمة
               </div>
             </div>
           </TabsContent>
@@ -525,9 +530,7 @@ const Grade12ProjectEditor: React.FC = () => {
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    {content.split(/\s+/).filter(word => word.length > 0).length}
-                  </div>
+                  <div className="text-2xl font-bold">{wordCount}</div>
                 </CardContent>
               </Card>
               
@@ -538,6 +541,16 @@ const Grade12ProjectEditor: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{content.length}</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">عدد الصفحات</CardTitle>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{totalPages}</div>
                 </CardContent>
               </Card>
               
