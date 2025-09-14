@@ -713,9 +713,10 @@ const EnhancedDocumentEditor: React.FC<EnhancedDocumentEditorProps> = ({
         <div
           ref={editorRef}
           contentEditable={!readOnly}
-          dir="auto"
+          dir="rtl"
           className={`outline-none enhanced-arabic-editor ${isA4Mode ? 'p-16' : 'p-6'} min-h-[500px]`}
           style={{ 
+            unicodeBidi: 'embed',
             lineHeight: '1.8',
             fontFamily: 'Arial, sans-serif',
             fontSize: '16px',

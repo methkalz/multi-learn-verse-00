@@ -227,61 +227,63 @@ All colors MUST be HSL.
     text-align: right;
   }
 
-  /* Enhanced Arabic text editor styles */
+  /* Enhanced Arabic text editor styles - Strong overrides */
   .enhanced-arabic-editor {
-    unicode-bidi: plaintext;
-    text-align: start;
+    direction: rtl !important;
+    unicode-bidi: embed !important;
+    text-align: right !important;
   }
 
-  .enhanced-arabic-editor p {
-    unicode-bidi: plaintext;
-    text-align: start;
+  .enhanced-arabic-editor * {
+    direction: rtl !important;
+    unicode-bidi: embed !important;
+    text-align: right !important;
+  }
+
+  .enhanced-arabic-editor p,
+  .enhanced-arabic-editor div,
+  .enhanced-arabic-editor span {
+    direction: rtl !important;
+    unicode-bidi: embed !important;
+    text-align: right !important;
     margin: 0.5em 0;
   }
 
-  .enhanced-arabic-editor div {
-    unicode-bidi: plaintext;
-    text-align: start;
+  /* Override any conflicting global CSS */
+  .enhanced-arabic-editor[contenteditable="true"] {
+    direction: rtl !important;
+    unicode-bidi: embed !important;
+    text-align: right !important;
   }
 
-  .enhanced-arabic-editor[dir="rtl"], 
-  .enhanced-arabic-editor *[dir="rtl"] {
-    text-align: right;
-  }
-
-  .enhanced-arabic-editor[dir="ltr"], 
-  .enhanced-arabic-editor *[dir="ltr"] {
-    text-align: left;
-  }
-
-  /* Better handling for mixed content */
-  .enhanced-arabic-editor span:lang(ar) {
-    direction: rtl;
-    text-align: right;
-  }
-
-  .enhanced-arabic-editor span:lang(en) {
-    direction: ltr;
-    text-align: left;
+  /* Special handling for English text and numbers */
+  .enhanced-arabic-editor .english-text {
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+    text-align: left !important;
+    display: inline;
   }
 
   /* Fix for Arabic text inside tables */
   .enhanced-arabic-editor table td,
   .enhanced-arabic-editor table th {
-    unicode-bidi: plaintext;
-    text-align: start;
+    direction: rtl !important;
+    unicode-bidi: embed !important;
+    text-align: right !important;
   }
 
   /* Proper RTL support for lists */
   .enhanced-arabic-editor ul,
   .enhanced-arabic-editor ol {
+    direction: rtl !important;
     padding-inline-start: 2em;
     padding-inline-end: 0;
   }
 
   .enhanced-arabic-editor li {
-    unicode-bidi: plaintext;
-    text-align: start;
+    direction: rtl !important;
+    unicode-bidi: embed !important;
+    text-align: right !important;
   }
 
   /* فقرات ونصوص عربية */
