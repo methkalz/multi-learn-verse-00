@@ -269,13 +269,13 @@ const Grade10MiniProjects: React.FC = () => {
               {project.due_date && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  <span>موعد التسليم: {new Date(project.due_date).toLocaleDateString('ar')}</span>
+                  <span>موعد التسليم: {new Date(project.due_date).toLocaleDateString('en-GB')}</span>
                 </div>
               )}
 
               {/* Created Date */}
               <div className="text-xs text-muted-foreground pt-2 border-t">
-                تم الإنشاء: {new Date(project.created_at).toLocaleDateString('ar')}
+                تم الإنشاء: {new Date(project.created_at).toLocaleDateString('en-GB')}
               </div>
             </CardContent>
           </Card>

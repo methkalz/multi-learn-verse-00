@@ -336,7 +336,7 @@ const Grade10FileLibrary: React.FC<Grade10FileLibraryProps> = ({
                       
                       <div className="text-xs text-muted-foreground mb-3">
                         <div>الحجم: {formatFileSize(document.file_size)}</div>
-                        <div>تاريخ النشر: {new Date(document.published_at).toLocaleDateString('ar')}</div>
+                        <div>تاريخ النشر: {new Date(document.published_at).toLocaleDateString('en-GB')}</div>
                       </div>
                       
                       <div className="flex gap-2">
@@ -401,7 +401,7 @@ const Grade10FileLibrary: React.FC<Grade10FileLibraryProps> = ({
                         </div>
                         <div className="text-xs text-muted-foreground text-right">
                           <div>{formatFileSize(document.file_size)}</div>
-                          <div>{new Date(document.published_at).toLocaleDateString('ar')}</div>
+                          <div>{new Date(document.published_at).toLocaleDateString('en-GB')}</div>
                         </div>
                         <div className="flex gap-2">
                           <Button

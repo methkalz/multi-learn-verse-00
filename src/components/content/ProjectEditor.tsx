@@ -301,11 +301,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, isOpen, onClose 
                         )}
                         <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                           <Clock className="h-3 w-3" />
-                          <span>تم الإنشاء: {new Date(task.created_at).toLocaleDateString('ar')}</span>
+                          <span>تم الإنشاء: {new Date(task.created_at).toLocaleDateString('en-GB')}</span>
                           {task.completed_at && (
                             <>
                               <span>•</span>
-                              <span>تم الإكمال: {new Date(task.completed_at).toLocaleDateString('ar')}</span>
+                              <span>تم الإكمال: {new Date(task.completed_at).toLocaleDateString('en-GB')}</span>
                             </>
                           )}
                         </div>
@@ -374,7 +374,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, isOpen, onClose 
                         )}
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {new Date(comment.created_at).toLocaleString('ar')}
+                        {new Date(comment.created_at).toLocaleString('en-GB')}
                       </span>
                     </div>
                     <p className="text-sm">{comment.comment_text}</p>
@@ -439,7 +439,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, isOpen, onClose 
                           {file.file_size ? `${Math.round(file.file_size / 1024)} KB` : 'غير محدد'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(file.created_at).toLocaleDateString('ar')}
+                          {new Date(file.created_at).toLocaleDateString('en-GB')}
                         </p>
                       </div>
                     </div>

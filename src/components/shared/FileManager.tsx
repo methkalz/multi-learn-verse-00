@@ -261,7 +261,7 @@ const FileManager: React.FC<FileManagerProps> = ({
                       <p className="text-sm text-muted-foreground">
                         {isDocumentContent(file) && file.file_size && formatFileSize(file.file_size)}
                         {isDocumentContent(file) && file.file_size && ' • '}
-                        {new Date(file.created_at).toLocaleDateString('ar')}
+                        {new Date(file.created_at).toLocaleDateString('en-GB')}
                       </p>
                       {file.description && (
                         <p className="text-xs text-muted-foreground mt-1 truncate">

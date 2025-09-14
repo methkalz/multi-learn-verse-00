@@ -41,7 +41,7 @@ export const SecurityMonitor: FC<SecurityMonitorProps> = ({ className }) => {
       status: 'secure',
       score: 95,
       description: 'جميع الجداول محمية بسياسات RLS',
-      lastChecked: new Date().toLocaleString('ar-SA')
+      lastChecked: new Date().toLocaleString('en-GB')
     },
     {
       id: 'input-validation',
@@ -49,7 +49,7 @@ export const SecurityMonitor: FC<SecurityMonitorProps> = ({ className }) => {
       status: 'secure',
       score: 98,
       description: 'تطبيق Zod validation على جميع المدخلات',
-      lastChecked: new Date().toLocaleString('ar-SA')
+      lastChecked: new Date().toLocaleString('en-GB')
     },
     {
       id: 'rate-limiting',
@@ -57,7 +57,7 @@ export const SecurityMonitor: FC<SecurityMonitorProps> = ({ className }) => {
       status: 'secure',
       score: 92,
       description: 'حماية من الهجمات المكثفة',
-      lastChecked: new Date().toLocaleString('ar-SA')
+      lastChecked: new Date().toLocaleString('en-GB')
     },
     {
       id: 'audit-trail',
@@ -65,7 +65,7 @@ export const SecurityMonitor: FC<SecurityMonitorProps> = ({ className }) => {
       status: 'secure',
       score: 90,
       description: 'تتبع جميع العمليات المهمة',
-      lastChecked: new Date().toLocaleString('ar-SA')
+      lastChecked: new Date().toLocaleString('en-GB')
     },
     {
       id: 'data-encryption',
@@ -73,7 +73,7 @@ export const SecurityMonitor: FC<SecurityMonitorProps> = ({ className }) => {
       status: 'warning',
       score: 75,
       description: 'تشفير البيانات الحساسة مطبق جزئياً',
-      lastChecked: new Date().toLocaleString('ar-SA')
+      lastChecked: new Date().toLocaleString('en-GB')
     },
     {
       id: 'session-security',
@@ -81,7 +81,7 @@ export const SecurityMonitor: FC<SecurityMonitorProps> = ({ className }) => {
       status: 'secure',
       score: 88,
       description: 'إدارة آمنة للجلسات',
-      lastChecked: new Date().toLocaleString('ar-SA')
+      lastChecked: new Date().toLocaleString('en-GB')
     }
   ];
 

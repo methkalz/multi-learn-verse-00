@@ -92,7 +92,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
       </CardHeader>
       <CardContent>
         <div className="text-3xl font-bold text-gradient mb-2">
-          {value.toLocaleString('ar-SA')}
+          {value.toLocaleString('en-US')}
         </div>
         <p className="text-muted-foreground text-sm">{title}</p>
       </CardContent>

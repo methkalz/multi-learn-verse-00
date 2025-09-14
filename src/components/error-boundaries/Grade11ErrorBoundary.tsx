@@ -167,7 +167,7 @@ export class Grade11ErrorBoundary extends Component<Props, State> {
               <div className="text-center pt-2 border-t border-gray-200">
                 <p className="text-xs text-gray-500">
                   محاولة رقم: {this.state.retryCount + 1} | 
-                  {new Date().toLocaleDateString('ar-SA')} {new Date().toLocaleTimeString('ar-SA')}
+                  {new Date().toLocaleDateString('en-GB')} {new Date().toLocaleTimeString('en-GB')}
                 </p>
               </div>
             </CardContent>
