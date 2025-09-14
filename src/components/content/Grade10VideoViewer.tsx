@@ -98,11 +98,10 @@ const Grade10VideoViewer: React.FC<Grade10VideoViewerProps> = ({ videos, loading
     }
 
     if (video.source_type === 'google_drive') {
-      // Convert Google Drive preview link to embed link
-      const embedUrl = video.video_url.replace('/preview', '/embed?start=0');
+      // Use the video URL directly as it comes from the database
       return (
         <iframe
-          src={embedUrl}
+          src={video.video_url}
           className="w-full h-96 rounded-lg"
           allow="autoplay"
           allowFullScreen
