@@ -6,6 +6,7 @@ import AppHeader from '@/components/shared/AppHeader';
 import AppFooter from '@/components/shared/AppFooter';
 import Grade11Content from '@/components/content/Grade11Content';
 import Grade11ContentViewer from '@/components/content/Grade11ContentViewer';
+import Grade11SchoolAdminViewer from '@/components/content/Grade11SchoolAdminViewer';
 import GamesSection from '@/components/content/GamesSection';
 import { EducationalTermsManager } from '@/components/content/EducationalTermsManager';
 import { ContentGameLauncher } from '@/components/content/ContentGameLauncher';
@@ -33,8 +34,9 @@ const Grade11Management: React.FC = () => {
     });
   }, [userProfile]);
 
-  // تحديد ما إذا كان المستخدم سوبر آدمن فقط
+  // تحديد ما إذا كان المستخدم سوبر آدمن أو مدير مدرسة
   const canManageContent = userProfile?.role === 'superadmin';
+  const isSchoolAdmin = userProfile?.role === 'school_admin';
   
   console.log('✅ Grade11Management permissions check:', { canManageContent });
   
@@ -75,7 +77,13 @@ const Grade11Management: React.FC = () => {
             {/* محتوى التبويب الأول - المحتوى التعليمي */}
             <TabsContent value="content" className="mt-8">
               <div className="animate-fade-in">
-                {canManageContent ? <Grade11Content /> : <Grade11ContentViewer />}
+                {canManageContent ? (
+                  <Grade11Content />
+                ) : isSchoolAdmin ? (
+                  <Grade11SchoolAdminViewer />
+                ) : (
+                  <Grade11ContentViewer />
+                )}
               </div>
             </TabsContent>
             
