@@ -12,9 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
 import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
-import { useSmartPageBreak } from '@/hooks/useSmartPageBreak';
-import EnhancedDocumentEditor from '@/components/content/EnhancedDocumentEditor';
-import { SmartA4Container } from '@/components/content/SmartA4Container';
+import SimpleA4DocumentEditor from '@/components/content/SimpleA4DocumentEditor';
 import { 
   Save, 
   ArrowLeft, 
@@ -76,26 +74,6 @@ const Grade12ProjectEditor: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('editor');
 
-  // Smart page break system - line-based
-  const {
-    pages,
-    currentPageIndex,
-    setCurrentPageIndex,
-    addPage,
-    updatePageContent,
-    registerPageRef,
-    checkForOverflow,
-    totalPages,
-    A4_PAGE_HEIGHT
-  } = useSmartPageBreak({
-    initialContent: project?.project_content || '',
-    onContentChange: (newContent) => {
-      setContent(newContent);
-      // Update word count
-      const text = newContent.replace(/<[^>]*>/g, '').replace(/<!-- PAGE_BREAK -->/g, '');
-      setWordCount(text.split(/\s+/).filter(word => word.length > 0).length);
-    }
-  });
 
   // Load project data
   useEffect(() => {
@@ -393,36 +371,17 @@ const Grade12ProjectEditor: React.FC = () => {
 
           <TabsContent value="editor" className="space-y-4 h-full">
             <div className="flex flex-col h-full">
-              {/* Editor Toolbar - Fixed at top */}
-              <div className="bg-background border-b p-4 sticky top-0 z-10">
-                <EnhancedDocumentEditor
-                  content={content}
-                  onChange={setContent}
-                  readOnly={!canEdit}
-                  autoSave={true}
-                  onSave={handleManualSave}
-                  toolbarOnly={true}
-                  targetElementId="a4-content-editor"
-                />
-              </div>
-
-              {/* Smart A4 Pages Container - Natural overflow detection */}
-              <div className="flex-1 overflow-y-auto">
-                <SmartA4Container
-                  pages={pages}
-                  currentPageIndex={currentPageIndex}
-                  onContentChange={updatePageContent}
-                  onPageRefChange={registerPageRef}
-                  onOverflowCheck={checkForOverflow}
-                  A4_PAGE_HEIGHT={A4_PAGE_HEIGHT}
-                  readOnly={!canEdit}
-                />
-              </div>
-              
-              {/* Page Info */}
-              <div className="bg-background border-t p-2 text-center text-sm text-muted-foreground">
-                صفحة {currentPageIndex + 1} من {totalPages} • {wordCount} كلمة
-              </div>
+              <SimpleA4DocumentEditor
+                initialContent={content}
+                onContentChange={(newContent, wordCount, pageCount) => {
+                  setContent(newContent);
+                  setWordCount(wordCount);
+                }}
+                onSave={handleManualSave}
+                readOnly={!canEdit}
+                autoSave={true}
+                className="flex-1"
+              />
             </div>
           </TabsContent>
 
@@ -554,7 +513,7 @@ const Grade12ProjectEditor: React.FC = () => {
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalPages}</div>
+                  <div className="text-2xl font-bold">{Math.ceil(wordCount / 250) || 1}</div>
                 </CardContent>
               </Card>
               
