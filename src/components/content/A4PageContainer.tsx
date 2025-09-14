@@ -10,7 +10,7 @@ interface A4PageContainerProps {
   currentPageIndex: number;
   onContentChange: (pageId: string, content: string) => void;
   onPageRefChange: (pageId: string, element: HTMLElement | null) => void;
-  onManualHeightCheck?: (pageId: string) => void;
+  onAddPage: () => string | null;
   className?: string;
   readOnly?: boolean;
   A4_PAGE_HEIGHT: number;
@@ -21,7 +21,7 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
   currentPageIndex,
   onContentChange,
   onPageRefChange,
-  onManualHeightCheck,
+  onAddPage,
   className = '',
   readOnly = false,
   A4_PAGE_HEIGHT
@@ -41,43 +41,72 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
     }
   }, [currentPageIndex]);
 
+  // Simple event handler for page overflow - based on Stack Overflow solution
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      
+      // Only handle if target is contenteditable and in our pages
+      if (!target.hasAttribute('contenteditable')) return;
+      
+      const pageElement = target.closest('[data-page-id]') as HTMLElement;
+      if (!pageElement) return;
+      
+      const pageId = pageElement.getAttribute('data-page-id');
+      if (!pageId) return;
+      
+      // Find current page index
+      const pageIndex = pages.findIndex(p => p.id === pageId);
+      const isLastPage = pageIndex === pages.length - 1;
+      
+      if (!isLastPage) return;
+      
+      // Check if page height exceeds limit
+      const currentHeight = target.offsetHeight;
+      console.log(`Page ${pageIndex + 1}: height = ${currentHeight}px, limit = ${A4_PAGE_HEIGHT}px`);
+      
+      if (currentHeight >= A4_PAGE_HEIGHT) {
+        console.log('Page overflow detected, creating new page...');
+        
+        // Create new page
+        const newPageId = onAddPage();
+        
+        if (newPageId) {
+          // Focus on new page after creation
+          setTimeout(() => {
+            const newPageElement = document.querySelector(`[data-page-id="${newPageId}"] [contenteditable]`) as HTMLElement;
+            if (newPageElement) {
+              newPageElement.focus();
+              // Place cursor at beginning
+              const range = document.createRange();
+              const selection = window.getSelection();
+              range.setStart(newPageElement, 0);
+              range.collapse(true);
+              selection?.removeAllRanges();
+              selection?.addRange(range);
+              console.log('Focus moved to new page');
+            }
+          }, 100);
+        }
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('keypress', handleKeyPress);
+    
+    return () => {
+      document.removeEventListener('keypress', handleKeyPress);
+    };
+  }, [pages, onAddPage, A4_PAGE_HEIGHT]);
+
   const handleContentChange = (pageId: string, content: string) => {
     onContentChange(pageId, content);
-    // No automatic height checking here
   };
 
-  const handlePaste = (e: React.ClipboardEvent, pageId: string) => {
+  const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
     document.execCommand('insertText', false, text);
-    
-    // Check height after paste only if significant content added
-    if (text.length > 100 && onManualHeightCheck) {
-      setTimeout(() => {
-        onManualHeightCheck(pageId);
-      }, 300);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent, pageId: string) => {
-    // Don't check height on Enter - let user continue typing normally
-    // Only prevent typing if we're really at the bottom of the page
-    const target = e.currentTarget as HTMLElement;
-    const actualHeight = target.offsetHeight;
-    const maxHeight = A4_PAGE_HEIGHT - 80; // More conservative
-    
-    // Only prevent if we're REALLY close to the bottom and typing normal characters
-    if (actualHeight > maxHeight && 
-        e.key.length === 1 && 
-        !e.ctrlKey && 
-        !e.metaKey) {
-      
-      const pageIndex = pages.findIndex(p => p.id === pageId);
-      if (pageIndex === pages.length - 1 && onManualHeightCheck) {
-        // Create new page and move to it
-        onManualHeightCheck(pageId);
-      }
-    }
   };
 
   return (
@@ -96,11 +125,11 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
             ${index === currentPageIndex ? 'ring-2 ring-primary' : ''}
           `}
           style={{
-            width: '602px',      // A4 width after margins (159.2mm = 602px)
-            height: `${A4_PAGE_HEIGHT}px`, // A4 height after margins (246.2mm = 930px)
-            minHeight: `${A4_PAGE_HEIGHT}px`,
-            maxHeight: `${A4_PAGE_HEIGHT}px`,
-            overflow: 'hidden',  // Critical: hide overflow to prevent text disappearing below
+            width: '210mm',      // A4 width
+            height: `${A4_PAGE_HEIGHT + 50}px`, // A4 height + padding
+            minHeight: `${A4_PAGE_HEIGHT + 50}px`,
+            maxHeight: `${A4_PAGE_HEIGHT + 50}px`,
+            overflow: 'hidden',
           }}
         >
           {/* Page number indicator */}
@@ -113,16 +142,15 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
             contentEditable={!readOnly && index === pages.length - 1} // Only last page is editable
             suppressContentEditableWarning={true}
             onInput={(e) => handleContentChange(page.id, e.currentTarget.innerHTML)}
-            onPaste={(e) => handlePaste(e, page.id)}
-            onKeyDown={(e) => handleKeyDown(e, page.id)}
+            onPaste={handlePaste}
             className={`
-              w-full h-full outline-none p-10
+              w-full outline-none p-10
               ${readOnly || index < pages.length - 1 ? 'cursor-default bg-gray-50' : 'cursor-text'}
               ${index === pages.length - 1 ? 'focus:bg-white' : ''}
             `}
             style={{
-              minHeight: `${A4_PAGE_HEIGHT - 20}px`, // Account for page number
-              maxHeight: `${A4_PAGE_HEIGHT - 20}px`,
+              height: `${A4_PAGE_HEIGHT}px`,
+              maxHeight: `${A4_PAGE_HEIGHT}px`,
               wordWrap: 'break-word',
               hyphens: 'auto',
               direction: 'rtl', // RTL support for Arabic
@@ -130,7 +158,7 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
               fontSize: '16px',
               lineHeight: '1.8',
               fontFamily: '"Times New Roman", serif',
-              overflow: 'hidden', // Prevent text from going beyond page bounds
+              overflow: 'hidden',
               paddingTop: '50px', // Space for page number
             }}
             dangerouslySetInnerHTML={{ __html: page.content }}
@@ -139,15 +167,6 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
           {/* Visual indicator for page break */}
           {index < pages.length - 1 && (
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 to-primary/40" />
-          )}
-
-          {/* Near-end warning (show when close to page limit) */}
-          {!readOnly && index === pages.length - 1 && (
-            <div className="absolute bottom-4 left-4 right-4 text-center">
-              <div className="text-xs text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-200 inline-block">
-                📝 سيتم إنشاء صفحة جديدة تلقائياً عند الحاجة
-              </div>
-            </div>
           )}
         </div>
       ))}

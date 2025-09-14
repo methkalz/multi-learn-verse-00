@@ -14,34 +14,28 @@ export const useAutoPageBreak = ({
   onContentChange,
   initialContent = ''
 }: UseAutoPageBreakOptions = {}) => {
-  // A4 exact dimensions in pixels
-  const A4_PAGE_HEIGHT = 930; // 246.2mm = 930px
+  // A4 exact dimensions: 8.5 x 11 inches = 816px x 1056px (96 DPI)
+  // But we need to account for margins, so usable area is smaller
+  const A4_PAGE_HEIGHT = 950; // Usable height after margins
   
   const [pages, setPages] = useState<Page[]>([
     { id: 'page-1', content: initialContent }
   ]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   
-  // Simple refs without complex observers
+  // Simple refs without complex state management
   const pageRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const checkingRef = useRef(false);
 
   const addPage = useCallback(() => {
-    if (checkingRef.current) return null;
-    
-    checkingRef.current = true;
     const newPageId = `page-${Date.now()}`;
     
-    setPages(prev => [...prev, { id: newPageId, content: '' }]);
+    setPages(prev => {
+      const newPages = [...prev, { id: newPageId, content: '' }];
+      console.log('Added new page, total pages:', newPages.length);
+      return newPages;
+    });
+    
     setCurrentPageIndex(prev => prev + 1);
-    
-    console.log('New page created:', newPageId);
-    
-    // Reset flag after creation
-    setTimeout(() => {
-      checkingRef.current = false;
-    }, 1000);
-    
     return newPageId;
   }, []);
 
@@ -55,36 +49,6 @@ export const useAutoPageBreak = ({
       onContentChange(allContent);
     }
   }, [pages, onContentChange]);
-
-  // Simple height check - only called manually and with strict conditions
-  const checkPageHeight = useCallback((pageId: string) => {
-    if (checkingRef.current) return;
-    
-    const pageElement = pageRefs.current.get(pageId);
-    if (!pageElement) return;
-    
-    const contentArea = pageElement.querySelector('[contenteditable]') as HTMLElement;
-    if (!contentArea) return;
-    
-    const pageIndex = pages.findIndex(p => p.id === pageId);
-    const isLastPage = pageIndex === pages.length - 1;
-    
-    if (!isLastPage) return;
-    
-    // Get actual content height
-    const contentHeight = contentArea.offsetHeight;
-    const availableHeight = A4_PAGE_HEIGHT - 120; // Conservative margin for padding
-    
-    console.log(`Page ${pageIndex + 1}: content height = ${contentHeight}px, available = ${availableHeight}px`);
-    
-    // Only create new page if we're REALLY close to the bottom (90% full)
-    if (contentHeight > availableHeight * 0.9) {
-      console.log('Page is 90% full, creating new page');
-      addPage();
-    } else {
-      console.log('Page has space remaining, no new page needed');
-    }
-  }, [pages, addPage, A4_PAGE_HEIGHT]);
 
   const registerPageRef = useCallback((pageId: string, element: HTMLElement | null) => {
     if (element) {
@@ -102,12 +66,6 @@ export const useAutoPageBreak = ({
       pageRefs.current.delete(pageId);
     }
   }, [pages.length]);
-
-  // Manual check function - to be called from component
-  const manualCheckPageHeight = useCallback((pageId: string) => {
-    console.log('Manual height check requested for:', pageId);
-    checkPageHeight(pageId);
-  }, [checkPageHeight]);
 
   // Load initial content
   useEffect(() => {
@@ -129,7 +87,6 @@ export const useAutoPageBreak = ({
     removePage,
     updatePageContent,
     registerPageRef,
-    manualCheckPageHeight,
     totalPages: pages.length,
     A4_PAGE_HEIGHT
   };

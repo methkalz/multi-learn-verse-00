@@ -76,7 +76,7 @@ const Grade12ProjectEditor: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('editor');
 
-  // Auto page break system
+  // Auto page break system - simplified
   const {
     pages,
     currentPageIndex,
@@ -84,7 +84,6 @@ const Grade12ProjectEditor: React.FC = () => {
     addPage,
     updatePageContent,
     registerPageRef,
-    manualCheckPageHeight,
     totalPages,
     A4_PAGE_HEIGHT
   } = useAutoPageBreak({
@@ -413,7 +412,7 @@ const Grade12ProjectEditor: React.FC = () => {
                   currentPageIndex={currentPageIndex}
                   onContentChange={updatePageContent}
                   onPageRefChange={registerPageRef}
-                  onManualHeightCheck={manualCheckPageHeight}
+                  onAddPage={addPage}
                   A4_PAGE_HEIGHT={A4_PAGE_HEIGHT}
                   readOnly={!canEdit}
                 />
