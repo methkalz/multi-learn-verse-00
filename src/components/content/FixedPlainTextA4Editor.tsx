@@ -211,37 +211,19 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
     }
   }, [pages, checkPageOverflow, handlePageOverflow, getCombinedContent, calculateWordCount, onContentChange]);
 
-  // كشف موقع المؤشر والسطر الحالي
-  const getCurrentLinePosition = useCallback((pageElement: HTMLDivElement) => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return { lineNumber: 0, isLastLine: false };
-    
-    const range = selection.getRangeAt(0);
-    const textUpToCursor = range.startContainer.textContent?.substring(0, range.startOffset) || '';
-    const totalTextBeforeCursor = pageElement.textContent?.substring(0, 
-      pageElement.textContent.indexOf(range.startContainer.textContent || '') + textUpToCursor.length) || '';
-    
-    const linesBeforeCursor = totalTextBeforeCursor.split('\n').length;
-    const totalLines = pageElement.textContent?.split('\n').length || 1;
-    
-    return {
-      lineNumber: linesBeforeCursor,
-      isLastLine: linesBeforeCursor >= Math.min(LINES_PER_PAGE, totalLines),
-      totalLines
-    };
-  }, []);
-
   // معالجة الضغط على المفاتيح
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, pageIndex: number) => {
     const pageElement = pages[pageIndex]?.ref.current;
     if (!pageElement) return;
 
-    // معالجة مفتاح Enter بذكاء
+    // معالجة مفتاح Enter - نمنع إنشاء صفحة جديدة إلا عند الحاجة الحقيقية
     if (e.key === 'Enter') {
-      const { isLastLine, totalLines } = getCurrentLinePosition(pageElement);
+      // فقط نسمح بإنشاء صفحة جديدة إذا كان المحتوى سيفيض بعد Enter
+      const currentContent = pageElement.textContent || '';
+      const currentLines = currentContent.split('\n').length;
       
-      // إنشاء صفحة جديدة فقط إذا كان المؤشر في السطر الأخير أو تجاوز الحد المسموح
-      if (isLastLine || totalLines >= LINES_PER_PAGE) {
+      // لا ننشئ صفحة جديدة إلا إذا وصلنا للحد الأقصى من الأسطر فعلياً
+      if (currentLines >= LINES_PER_PAGE - 1) { // -1 لأننا سنضيف سطر جديد
         e.preventDefault();
         
         // إنشاء صفحة جديدة
@@ -252,30 +234,17 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
           return updated;
         });
         
-        // نقل التركيز للصفحة الجديدة مع سطر جديد
+        // نقل التركيز للصفحة الجديدة
         setTimeout(() => {
           if (newPage.ref.current) {
-            newPage.ref.current.textContent = '\n';
             newPage.ref.current.focus();
-            
-            // وضع المؤشر في بداية الصفحة الجديدة
-            const range = document.createRange();
-            const selection = window.getSelection();
-            const textNode = newPage.ref.current.firstChild;
-            if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-              range.setStart(textNode, 1);
-              range.collapse(true);
-              selection?.removeAllRanges();
-              selection?.addRange(range);
-            }
-            
             setCurrentPageIndex(pageIndex + 1);
           }
         }, 100);
         
         return;
       }
-      // إذا لم يكن في السطر الأخير، دع Enter يعمل عادياً لإنشاء سطر جديد
+      // في كل الحالات الأخرى، دع Enter يعمل عادياً
     }
     
     // التنقل بين الصفحات بـ Page Up/Down
@@ -294,7 +263,7 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
         setCurrentPageIndex(pageIndex - 1);
       }
     }
-  }, [pages, createNewPage, getCurrentLinePosition]);
+  }, [pages, createNewPage]);
 
   // إضافة صفحة جديدة
   const addNewPage = useCallback(() => {
