@@ -219,9 +219,13 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
 
   // معالجة الإدخال مع حفظ واستعادة موضع المؤشر
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>, pageIndex: number) => {
-    saveCursorPosition();
     const newContent = e.currentTarget.textContent || '';
-    handlePageContentChange(pageIndex, newContent);
+    
+    // تأخير قصير للسماح للـ Enter بإكمال عمله أولاً
+    setTimeout(() => {
+      saveCursorPosition();
+      handlePageContentChange(pageIndex, newContent);
+    }, 10);
   }, [handlePageContentChange, saveCursorPosition]);
 
   // معالجة اللصق مع حفظ واستعادة موضع المؤشر
@@ -248,8 +252,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, pageIndex: number) => {
     // السماح للـ Enter بالعمل بشكل طبيعي
     if (e.key === 'Enter') {
-      // حفظ موضع المؤشر قبل إدراج السطر الجديد
-      saveCursorPosition();
+      // لا نحفظ موضع المؤشر هنا - سنتركه لـ handleInput
       return; // السماح للسلوك الافتراضي
     }
     
