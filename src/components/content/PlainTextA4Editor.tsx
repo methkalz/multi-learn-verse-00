@@ -219,14 +219,10 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
 
   // معالجة الإدخال مع حفظ واستعادة موضع المؤشر
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>, pageIndex: number) => {
-    const newContent = e.currentTarget.textContent || '';
-    
-    // تأخير قصير للسماح للـ Enter بإكمال عمله أولاً
-    setTimeout(() => {
-      saveCursorPosition();
-      handlePageContentChange(pageIndex, newContent);
-    }, 10);
-  }, [handlePageContentChange, saveCursorPosition]);
+    // استخدام innerHTML للحفاظ على تنسيق HTML وسطور جديدة
+    const newContent = e.currentTarget.innerHTML || '';
+    handlePageContentChange(pageIndex, newContent);
+  }, [handlePageContentChange]);
 
   // معالجة اللصق مع حفظ واستعادة موضع المؤشر
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>, pageIndex: number) => {
@@ -449,7 +445,15 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
               />
               {/* Page Content */}
               <div
-                ref={el => pageRefs.current[index] = el}
+                ref={(el) => {
+                  if (el) {
+                    pageRefs.current[index] = el;
+                    // تعيين المحتوى فقط إذا كان مختلفاً لتجنب إعادة التصيير
+                    if (el.innerHTML !== page.content) {
+                      el.innerHTML = page.content;
+                    }
+                  }
+                }}
                 className="page-content w-full h-full outline-none text-foreground arabic-text-optimized"
                 style={{
                   minHeight: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
@@ -465,7 +469,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                   boxSizing: 'border-box',
                   outline: 'none',
                   border: 'none',
-                  whiteSpace: 'pre-wrap', // السماح بـ line breaks
+                  whiteSpace: 'pre-wrap',
                   overflowWrap: 'break-word'
                 }}
                 contentEditable={!readOnly}
@@ -474,7 +478,6 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                 onPaste={(e) => handlePaste(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onFocus={() => setCurrentPageIndex(index)}
-                dangerouslySetInnerHTML={{ __html: page.content }}
               />
               
               {/* Page Number */}
