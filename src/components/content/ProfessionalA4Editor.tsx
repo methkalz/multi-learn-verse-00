@@ -1,8 +1,8 @@
 import React from 'react';
-import PlainTextA4Editor, { PlainTextA4EditorRef } from './PlainTextA4Editor';
+import FixedPlainTextA4Editor, { FixedPlainTextA4EditorRef } from './FixedPlainTextA4Editor';
 
-// Re-export the new plain text A4 editor as the default A4 editor
-export interface ProfessionalA4EditorRef extends PlainTextA4EditorRef {}
+// استخدام المحرر الجديد المحسن كمحرر افتراضي
+export interface ProfessionalA4EditorRef extends FixedPlainTextA4EditorRef {}
 
 interface ProfessionalA4EditorProps {
   initialContent?: string;
@@ -15,7 +15,7 @@ interface ProfessionalA4EditorProps {
 }
 
 const ProfessionalA4Editor = React.forwardRef<ProfessionalA4EditorRef, ProfessionalA4EditorProps>((props, ref) => {
-  return <PlainTextA4Editor {...props} ref={ref} />;
+  return <FixedPlainTextA4Editor {...props} ref={ref} />;
 });
 
 ProfessionalA4Editor.displayName = 'ProfessionalA4Editor';
