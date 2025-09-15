@@ -94,10 +94,16 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
       .trim();
   }, [pages]);
 
-  // التحقق من الحاجة لتقسيم الصفحة بناءً على طول النص
+  // التحقق من الحاجة لتقسيم الصفحة بناءً على الارتفاع الفعلي
   const checkPageOverflow = useCallback((pageElement: HTMLDivElement) => {
+    // استخدام scrollHeight للكشف الدقيق عن الفيض
+    const hasScrollOverflow = pageElement.scrollHeight > pageElement.clientHeight;
+    
+    // احتياطي: التحقق من عدد الأحرف أيضاً
     const content = pageElement.textContent || '';
-    return content.length > CHARS_PER_PAGE;
+    const hasCharOverflow = content.length > CHARS_PER_PAGE;
+    
+    return hasScrollOverflow || hasCharOverflow;
   }, []);
 
   // نقل النص الزائد لصفحة جديدة
@@ -196,24 +202,18 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
     const pageElement = pages[pageIndex]?.ref.current;
     if (!pageElement) return;
 
-    console.log(`Input on page ${pageIndex}. Content length: ${pageElement.textContent?.length || 0}`);
+    console.log(`Input on page ${pageIndex}. Content length: ${pageElement.textContent?.length || 0}, scrollHeight: ${pageElement.scrollHeight}, clientHeight: ${pageElement.clientHeight}`);
 
     // تحديث فوري لعدد الكلمات
     const content = getCombinedContent();
     setWordCount(calculateWordCount(content));
     onContentChange?.(content);
 
-    // التحقق من تجاوز الصفحة مع تأخير قصير
-    if (contentChangeTimeoutRef.current) {
-      clearTimeout(contentChangeTimeoutRef.current);
+    // التحقق الفوري من تجاوز الصفحة
+    if (checkPageOverflow(pageElement)) {
+      console.log(`Page ${pageIndex} overflow detected - splitting now`);
+      handlePageOverflow(pageIndex);
     }
-
-    contentChangeTimeoutRef.current = setTimeout(() => {
-      if (checkPageOverflow(pageElement)) {
-        console.log(`Page ${pageIndex} needs to be split`);
-        handlePageOverflow(pageIndex);
-      }
-    }, 100); // تأخير أقل للاستجابة السريعة
   }, [pages, checkPageOverflow, handlePageOverflow, getCombinedContent, calculateWordCount, onContentChange]);
 
   // معالجة الضغط على المفاتيح
