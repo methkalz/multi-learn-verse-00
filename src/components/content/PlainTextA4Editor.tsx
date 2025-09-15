@@ -246,6 +246,13 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
 
   // معالجة الضغط على المفاتيح
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, pageIndex: number) => {
+    // السماح للـ Enter بالعمل بشكل طبيعي
+    if (e.key === 'Enter') {
+      // حفظ موضع المؤشر قبل إدراج السطر الجديد
+      saveCursorPosition();
+      return; // السماح للسلوك الافتراضي
+    }
+    
     // التنقل بين الصفحات بـ Page Up/Down
     if (e.key === 'PageDown' && pageIndex < pages.length - 1) {
       e.preventDefault();
@@ -262,7 +269,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
         setCurrentPageIndex(pageIndex - 1);
       }
     }
-  }, [pages.length]);
+  }, [pages.length, saveCursorPosition]);
 
   // إضافة صفحة جديدة
   const addNewPage = useCallback(() => {
@@ -454,7 +461,9 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                   maxWidth: '100%',
                   boxSizing: 'border-box',
                   outline: 'none',
-                  border: 'none'
+                  border: 'none',
+                  whiteSpace: 'pre-wrap', // السماح بـ line breaks
+                  overflowWrap: 'break-word'
                 }}
                 contentEditable={!readOnly}
                 suppressContentEditableWarning={true}
