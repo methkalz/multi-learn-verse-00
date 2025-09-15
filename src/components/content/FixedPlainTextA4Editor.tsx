@@ -211,40 +211,17 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
     }
   }, [pages, checkPageOverflow, handlePageOverflow, getCombinedContent, calculateWordCount, onContentChange]);
 
-  // التحقق من أن المؤشر في نهاية الصفحة
-  const isAtPageEnd = useCallback((pageElement: HTMLDivElement) => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return false;
-    
-    const range = selection.getRangeAt(0);
-    const content = pageElement.textContent || '';
-    
-    // حساب موضع المؤشر
-    const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(pageElement);
-    preCaretRange.setEnd(range.startContainer, range.startOffset);
-    const cursorOffset = preCaretRange.toString().length;
-    
-    // التحقق من المساحة المتبقية
-    const remainingSpace = A4_HEIGHT - PAGE_PADDING * 2 - pageElement.scrollHeight;
-    const isNearBottom = remainingSpace < LINE_HEIGHT * 2; // أقل من سطرين
-    const isAtEnd = cursorOffset >= content.length - 10; // قريب من نهاية المحتوى
-    
-    return isNearBottom && isAtEnd;
-  }, []);
-
   // معالجة الضغط على المفاتيح
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, pageIndex: number) => {
     const pageElement = pages[pageIndex]?.ref.current;
     if (!pageElement) return;
 
-    // معالجة مفتاح Enter في السطر الأخير
+    // معالجة مفتاح Enter فقط عند امتلاء الصفحة فعلياً
     if (e.key === 'Enter') {
-      // التحقق من أن المؤشر في نهاية الصفحة أو أن الصفحة ممتلئة
-      const isPageFull = pageElement.scrollHeight >= pageElement.clientHeight;
-      const atPageEnd = isAtPageEnd(pageElement);
+      // التحقق من أن الصفحة ممتلئة فعلياً (المحتوى تجاوز حدود الصفحة)
+      const isPageActuallyFull = pageElement.scrollHeight > pageElement.clientHeight;
       
-      if (isPageFull || atPageEnd) {
+      if (isPageActuallyFull) {
         e.preventDefault();
         
         // إنشاء صفحة جديدة
@@ -255,29 +232,17 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
           return updated;
         });
         
-        // نقل التركيز للصفحة الجديدة مع النص الجديد
+        // نقل التركيز للصفحة الجديدة
         setTimeout(() => {
           if (newPage.ref.current) {
             newPage.ref.current.focus();
-            newPage.ref.current.textContent = '\n';
-            
-            // وضع المؤشر في بداية الصفحة الجديدة
-            const range = document.createRange();
-            const selection = window.getSelection();
-            const textNode = newPage.ref.current.firstChild;
-            if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-              range.setStart(textNode, 1); // بعد السطر الجديد
-              range.collapse(true);
-              selection?.removeAllRanges();
-              selection?.addRange(range);
-            }
-            
             setCurrentPageIndex(pageIndex + 1);
           }
         }, 100);
         
         return;
       }
+      // إذا لم تكن الصفحة ممتلئة، دع Enter يعمل عادياً لإنشاء سطر جديد
     }
     
     // التنقل بين الصفحات بـ Page Up/Down
@@ -296,7 +261,7 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
         setCurrentPageIndex(pageIndex - 1);
       }
     }
-  }, [pages, isAtPageEnd, createNewPage]);
+  }, [pages, createNewPage]);
 
   // إضافة صفحة جديدة
   const addNewPage = useCallback(() => {
