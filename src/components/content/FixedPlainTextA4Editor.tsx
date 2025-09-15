@@ -94,16 +94,11 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
       .trim();
   }, [pages]);
 
-  // التحقق من الحاجة لتقسيم الصفحة بناءً على الارتفاع الفعلي
+  // التحقق من الحاجة لتقسيم الصفحة بناءً على الارتفاع الفعلي فقط
   const checkPageOverflow = useCallback((pageElement: HTMLDivElement) => {
-    // استخدام scrollHeight للكشف الدقيق عن الفيض
+    // الاعتماد الأساسي على scrollHeight للكشف الدقيق عن الفيض
     const hasScrollOverflow = pageElement.scrollHeight > pageElement.clientHeight;
-    
-    // احتياطي: التحقق من عدد الأحرف أيضاً
-    const content = pageElement.textContent || '';
-    const hasCharOverflow = content.length > CHARS_PER_PAGE;
-    
-    return hasScrollOverflow || hasCharOverflow;
+    return hasScrollOverflow;
   }, []);
 
   // نقل النص الزائد لصفحة جديدة
@@ -112,9 +107,9 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
     if (!pageElement) return;
 
     const content = pageElement.textContent || '';
-    if (content.length <= CHARS_PER_PAGE) return;
+    // لا نتحقق من عدد الأحرف - نعتمد فقط على الفيض البصري
 
-    console.log(`Page ${pageIndex} overflow detected. Content length: ${content.length}, Max: ${CHARS_PER_PAGE}`);
+    console.log(`Page ${pageIndex} overflow detected. Content length: ${content.length}, scrollHeight: ${pageElement.scrollHeight}, clientHeight: ${pageElement.clientHeight}`);
 
     // حفظ موضع المؤشر الحالي
     const selection = window.getSelection();
