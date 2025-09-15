@@ -40,10 +40,101 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
   const [wordCount, setWordCount] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  
+  // حفظ موضع المؤشر
+  const cursorPositionRef = useRef<{pageIndex: number, offset: number} | null>(null);
   const { toast } = useToast();
   
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const autoSaveTimerRef = useRef<NodeJS.Timeout>();
+
+  // دوال حفظ واستعادة موضع المؤشر
+  const saveCursorPosition = useCallback(() => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const pageElement = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+        ? range.commonAncestorContainer.parentElement?.closest('[data-page-index]')
+        : range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+        ? (range.commonAncestorContainer as Element).closest('[data-page-index]')
+        : null;
+      
+      if (pageElement) {
+        const pageIndex = parseInt(pageElement.getAttribute('data-page-index') || '0', 10);
+        const contentDiv = pageElement.querySelector('.page-content');
+        if (contentDiv) {
+          const textContent = contentDiv.textContent || '';
+          const preCaretRange = range.cloneRange();
+          preCaretRange.selectNodeContents(contentDiv);
+          preCaretRange.setEnd(range.startContainer, range.startOffset);
+          const offset = preCaretRange.toString().length;
+          cursorPositionRef.current = { pageIndex, offset };
+        }
+      }
+    }
+  }, []);
+
+  const restoreCursorPosition = useCallback(() => {
+    if (!cursorPositionRef.current) return;
+    
+    setTimeout(() => {
+      const { pageIndex, offset } = cursorPositionRef.current!;
+      const pageElement = document.querySelector(`[data-page-index="${pageIndex}"]`);
+      const contentDiv = pageElement?.querySelector('.page-content') as HTMLElement;
+      
+      if (contentDiv) {
+        contentDiv.focus();
+        const textContent = contentDiv.textContent || '';
+        const actualOffset = Math.min(offset, textContent.length);
+        
+        try {
+          const range = document.createRange();
+          const selection = window.getSelection();
+          let currentOffset = 0;
+          let found = false;
+          
+          const findTextNode = (node: Node): void => {
+            if (found) return;
+            
+            if (node.nodeType === Node.TEXT_NODE) {
+              const textLength = node.textContent?.length || 0;
+              if (currentOffset + textLength >= actualOffset) {
+                const offsetInNode = actualOffset - currentOffset;
+                range.setStart(node, offsetInNode);
+                range.collapse(true);
+                found = true;
+              } else {
+                currentOffset += textLength;
+              }
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              for (const child of Array.from(node.childNodes)) {
+                findTextNode(child);
+                if (found) break;
+              }
+            }
+          };
+          
+          findTextNode(contentDiv);
+          
+          if (found) {
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+          } else {
+            // fallback: وضع المؤشر في النهاية
+            range.selectNodeContents(contentDiv);
+            range.collapse(false);
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+          }
+        } catch (error) {
+          console.warn('Error restoring cursor position:', error);
+          contentDiv.focus();
+        }
+      }
+      
+      cursorPositionRef.current = null;
+    }, 0);
+  }, []);
 
   // A4 dimensions with Word-like margins
   const A4_WIDTH = 794; // 210mm
@@ -126,18 +217,32 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
     });
   }, [splitTextIntoPages]);
 
-  // معالجة الإدخال - مبسطة مثل RealPageContainer
+  // معالجة الإدخال مع حفظ واستعادة موضع المؤشر
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>, pageIndex: number) => {
-    const newContent = e.currentTarget.innerHTML;
+    saveCursorPosition();
+    const newContent = e.currentTarget.textContent || '';
     handlePageContentChange(pageIndex, newContent);
-  }, [handlePageContentChange]);
+  }, [handlePageContentChange, saveCursorPosition]);
 
-  // معالجة اللصق - مبسطة مثل RealPageContainer
+  // معالجة اللصق مع حفظ واستعادة موضع المؤشر
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>, pageIndex: number) => {
     e.preventDefault();
+    saveCursorPosition();
     const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
-  }, []);
+    
+    // إدراج النص في موضع المؤشر الحالي
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(text));
+      range.collapse(false);
+    }
+    
+    // تحديث المحتوى
+    const newContent = e.currentTarget.textContent || '';
+    handlePageContentChange(pageIndex, newContent);
+  }, [handlePageContentChange, saveCursorPosition]);
 
   // معالجة الضغط على المفاتيح
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, pageIndex: number) => {
@@ -209,6 +314,13 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
     setWordCount(calculateWordCount(content));
     onContentChange?.(content);
   }, [pages, getCombinedContent, calculateWordCount, onContentChange]);
+
+  // استعادة موضع المؤشر بعد تحديث الصفحات
+  useEffect(() => {
+    if (cursorPositionRef.current) {
+      restoreCursorPosition();
+    }
+  }, [pages, restoreCursorPosition]);
 
   // تحميل المحتوى الأولي
   useEffect(() => {
@@ -306,6 +418,7 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
           {pages.map((page, index) => (
             <Card 
               key={page.id}
+              data-page-index={index}
               className="page-card relative bg-background shadow-lg"
               style={{
                 width: `${A4_WIDTH}px`,
