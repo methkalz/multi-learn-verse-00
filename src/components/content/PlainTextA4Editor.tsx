@@ -217,12 +217,36 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
     });
   }, [splitTextIntoPages]);
 
+  // تحويل HTML إلى نص عادي للحفاظ على سطور جديدة
+  const htmlToPlainText = useCallback((html: string): string => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // تحويل العناصر إلى سطور جديدة
+    const brs = tempDiv.querySelectorAll('br');
+    brs.forEach(br => br.replaceWith('\n'));
+    
+    const divs = tempDiv.querySelectorAll('div');
+    divs.forEach((div, index) => {
+      if (index > 0) div.insertAdjacentText('beforebegin', '\n');
+      div.replaceWith(...Array.from(div.childNodes));
+    });
+    
+    return tempDiv.textContent || '';
+  }, []);
+
+  // تحويل النص العادي إلى HTML للعرض
+  const plainTextToHtml = useCallback((text: string): string => {
+    return text.replace(/\n/g, '<br>');
+  }, []);
+
   // معالجة الإدخال مع حفظ واستعادة موضع المؤشر
   const handleInput = useCallback((e: React.FormEvent<HTMLDivElement>, pageIndex: number) => {
-    // استخدام innerHTML للحفاظ على تنسيق HTML وسطور جديدة
-    const newContent = e.currentTarget.innerHTML || '';
-    handlePageContentChange(pageIndex, newContent);
-  }, [handlePageContentChange]);
+    // تحويل HTML إلى نص عادي قبل التقسيم
+    const htmlContent = e.currentTarget.innerHTML || '';
+    const plainTextContent = htmlToPlainText(htmlContent);
+    handlePageContentChange(pageIndex, plainTextContent);
+  }, [handlePageContentChange, htmlToPlainText]);
 
   // معالجة اللصق مع حفظ واستعادة موضع المؤشر
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>, pageIndex: number) => {
@@ -448,9 +472,10 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
                 ref={(el) => {
                   if (el) {
                     pageRefs.current[index] = el;
-                    // تعيين المحتوى فقط إذا كان مختلفاً لتجنب إعادة التصيير
-                    if (el.innerHTML !== page.content) {
-                      el.innerHTML = page.content;
+                    // تحويل النص العادي إلى HTML للعرض
+                    const htmlContent = plainTextToHtml(page.content);
+                    if (el.innerHTML !== htmlContent) {
+                      el.innerHTML = htmlContent;
                     }
                   }
                 }}
