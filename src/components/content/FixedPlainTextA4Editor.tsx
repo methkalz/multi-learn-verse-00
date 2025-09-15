@@ -94,11 +94,10 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
       .trim();
   }, [pages]);
 
-  // التحقق من الحاجة لتقسيم الصفحة
+  // التحقق من الحاجة لتقسيم الصفحة بناءً على طول النص
   const checkPageOverflow = useCallback((pageElement: HTMLDivElement) => {
-    const rect = pageElement.getBoundingClientRect();
-    const maxHeight = A4_HEIGHT - PAGE_PADDING * 2;
-    return rect.height > maxHeight;
+    const content = pageElement.textContent || '';
+    return content.length > CHARS_PER_PAGE;
   }, []);
 
   // نقل النص الزائد لصفحة جديدة
@@ -108,6 +107,21 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
 
     const content = pageElement.textContent || '';
     if (content.length <= CHARS_PER_PAGE) return;
+
+    console.log(`Page ${pageIndex} overflow detected. Content length: ${content.length}, Max: ${CHARS_PER_PAGE}`);
+
+    // حفظ موضع المؤشر الحالي
+    const selection = window.getSelection();
+    let cursorOffset = 0;
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      if (range.commonAncestorContainer === pageElement || pageElement.contains(range.commonAncestorContainer)) {
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(pageElement);
+        preCaretRange.setEnd(range.startContainer, range.startOffset);
+        cursorOffset = preCaretRange.toString().length;
+      }
+    }
 
     // تقسيم المحتوى
     let cutPoint = CHARS_PER_PAGE;
@@ -122,6 +136,8 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
 
     const pageContent = content.substring(0, cutPoint).trim();
     const overflowContent = content.substring(cutPoint).trim();
+
+    console.log(`Splitting at position ${cutPoint}. Page content: ${pageContent.length} chars, Overflow: ${overflowContent.length} chars`);
 
     // تحديث الصفحة الحالية
     pageElement.textContent = pageContent;
@@ -139,15 +155,37 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
       setTimeout(() => {
         if (newPage.ref.current) {
           newPage.ref.current.textContent = overflowContent;
-          newPage.ref.current.focus();
           
-          // وضع المؤشر في بداية الصفحة الجديدة
-          const range = document.createRange();
-          const selection = window.getSelection();
-          range.setStart(newPage.ref.current, 0);
-          range.collapse(true);
-          selection?.removeAllRanges();
-          selection?.addRange(range);
+          // استعادة موضع المؤشر
+          if (cursorOffset > cutPoint) {
+            // المؤشر كان في النص المنقول للصفحة الجديدة
+            const newCursorOffset = cursorOffset - cutPoint;
+            newPage.ref.current.focus();
+            
+            const range = document.createRange();
+            const selection = window.getSelection();
+            const textNode = newPage.ref.current.firstChild;
+            if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+              const actualOffset = Math.min(newCursorOffset, textNode.textContent?.length || 0);
+              range.setStart(textNode, actualOffset);
+              range.collapse(true);
+              selection?.removeAllRanges();
+              selection?.addRange(range);
+            }
+          } else {
+            // المؤشر يبقى في الصفحة الأصلية
+            pageElement.focus();
+            const range = document.createRange();
+            const selection = window.getSelection();
+            const textNode = pageElement.firstChild;
+            if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+              const actualOffset = Math.min(cursorOffset, textNode.textContent?.length || 0);
+              range.setStart(textNode, actualOffset);
+              range.collapse(true);
+              selection?.removeAllRanges();
+              selection?.addRange(range);
+            }
+          }
         }
       }, 100);
     }
@@ -158,21 +196,24 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
     const pageElement = pages[pageIndex]?.ref.current;
     if (!pageElement) return;
 
-    // تأخير قصير للتحقق من تجاوز الصفحة
+    console.log(`Input on page ${pageIndex}. Content length: ${pageElement.textContent?.length || 0}`);
+
+    // تحديث فوري لعدد الكلمات
+    const content = getCombinedContent();
+    setWordCount(calculateWordCount(content));
+    onContentChange?.(content);
+
+    // التحقق من تجاوز الصفحة مع تأخير قصير
     if (contentChangeTimeoutRef.current) {
       clearTimeout(contentChangeTimeoutRef.current);
     }
 
     contentChangeTimeoutRef.current = setTimeout(() => {
       if (checkPageOverflow(pageElement)) {
+        console.log(`Page ${pageIndex} needs to be split`);
         handlePageOverflow(pageIndex);
       }
-
-      // تحديث عدد الكلمات
-      const content = getCombinedContent();
-      setWordCount(calculateWordCount(content));
-      onContentChange?.(content);
-    }, 500);
+    }, 100); // تأخير أقل للاستجابة السريعة
   }, [pages, checkPageOverflow, handlePageOverflow, getCombinedContent, calculateWordCount, onContentChange]);
 
   // معالجة الضغط على المفاتيح
