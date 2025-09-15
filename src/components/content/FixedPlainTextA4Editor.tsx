@@ -211,17 +211,37 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
     }
   }, [pages, checkPageOverflow, handlePageOverflow, getCombinedContent, calculateWordCount, onContentChange]);
 
+  // كشف موقع المؤشر والسطر الحالي
+  const getCurrentLinePosition = useCallback((pageElement: HTMLDivElement) => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return { lineNumber: 0, isLastLine: false };
+    
+    const range = selection.getRangeAt(0);
+    const textUpToCursor = range.startContainer.textContent?.substring(0, range.startOffset) || '';
+    const totalTextBeforeCursor = pageElement.textContent?.substring(0, 
+      pageElement.textContent.indexOf(range.startContainer.textContent || '') + textUpToCursor.length) || '';
+    
+    const linesBeforeCursor = totalTextBeforeCursor.split('\n').length;
+    const totalLines = pageElement.textContent?.split('\n').length || 1;
+    
+    return {
+      lineNumber: linesBeforeCursor,
+      isLastLine: linesBeforeCursor >= Math.min(LINES_PER_PAGE, totalLines),
+      totalLines
+    };
+  }, []);
+
   // معالجة الضغط على المفاتيح
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, pageIndex: number) => {
     const pageElement = pages[pageIndex]?.ref.current;
     if (!pageElement) return;
 
-    // معالجة مفتاح Enter فقط عند امتلاء الصفحة فعلياً
+    // معالجة مفتاح Enter بذكاء
     if (e.key === 'Enter') {
-      // التحقق من أن الصفحة ممتلئة فعلياً (المحتوى تجاوز حدود الصفحة)
-      const isPageActuallyFull = pageElement.scrollHeight > pageElement.clientHeight;
+      const { isLastLine, totalLines } = getCurrentLinePosition(pageElement);
       
-      if (isPageActuallyFull) {
+      // إنشاء صفحة جديدة فقط إذا كان المؤشر في السطر الأخير أو تجاوز الحد المسموح
+      if (isLastLine || totalLines >= LINES_PER_PAGE) {
         e.preventDefault();
         
         // إنشاء صفحة جديدة
@@ -232,17 +252,30 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
           return updated;
         });
         
-        // نقل التركيز للصفحة الجديدة
+        // نقل التركيز للصفحة الجديدة مع سطر جديد
         setTimeout(() => {
           if (newPage.ref.current) {
+            newPage.ref.current.textContent = '\n';
             newPage.ref.current.focus();
+            
+            // وضع المؤشر في بداية الصفحة الجديدة
+            const range = document.createRange();
+            const selection = window.getSelection();
+            const textNode = newPage.ref.current.firstChild;
+            if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+              range.setStart(textNode, 1);
+              range.collapse(true);
+              selection?.removeAllRanges();
+              selection?.addRange(range);
+            }
+            
             setCurrentPageIndex(pageIndex + 1);
           }
         }, 100);
         
         return;
       }
-      // إذا لم تكن الصفحة ممتلئة، دع Enter يعمل عادياً لإنشاء سطر جديد
+      // إذا لم يكن في السطر الأخير، دع Enter يعمل عادياً لإنشاء سطر جديد
     }
     
     // التنقل بين الصفحات بـ Page Up/Down
@@ -261,7 +294,7 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
         setCurrentPageIndex(pageIndex - 1);
       }
     }
-  }, [pages, createNewPage]);
+  }, [pages, createNewPage, getCurrentLinePosition]);
 
   // إضافة صفحة جديدة
   const addNewPage = useCallback(() => {
@@ -428,8 +461,7 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
                 className="page-content w-full outline-none text-foreground arabic-text-optimized"
                 style={{
                   height: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
-                  maxHeight: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
-                  overflow: 'hidden',
+                  minHeight: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
                   lineHeight: '24px',
                   fontSize: '16px',
                   fontFamily: "'Arial', 'Tahoma', sans-serif",
@@ -443,7 +475,8 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
                   outline: 'none',
                   border: 'none',
                   whiteSpace: 'pre-wrap',
-                  overflowWrap: 'break-word'
+                  overflowWrap: 'break-word',
+                  wordWrap: 'break-word'
                 }}
                 contentEditable={!readOnly}
                 suppressContentEditableWarning={true}
