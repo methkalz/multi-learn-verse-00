@@ -373,9 +373,11 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
               className="page-card relative bg-background shadow-lg"
               style={{
                 width: `${A4_WIDTH}px`,
-                minHeight: `${A4_HEIGHT}px`,
+                height: `${A4_HEIGHT}px`,
+                maxHeight: `${A4_HEIGHT}px`,
                 padding: `${PAGE_PADDING}px`,
                 position: 'relative',
+                overflow: 'hidden',
               }}
             >
               {/* Single subtle margin indicator - only on focus */}
@@ -391,9 +393,11 @@ const FixedPlainTextA4Editor = React.forwardRef<FixedPlainTextA4EditorRef, Fixed
               {/* Page Content */}
               <div
                 ref={page.ref}
-                className="page-content w-full h-full outline-none text-foreground arabic-text-optimized"
+                className="page-content w-full outline-none text-foreground arabic-text-optimized"
                 style={{
-                  minHeight: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
+                  height: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
+                  maxHeight: `${A4_HEIGHT - PAGE_PADDING * 2}px`,
+                  overflow: 'hidden',
                   lineHeight: '24px',
                   fontSize: '16px',
                   fontFamily: "'Arial', 'Tahoma', sans-serif",
