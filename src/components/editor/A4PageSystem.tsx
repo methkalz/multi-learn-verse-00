@@ -360,7 +360,6 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
           
           /* تنسيق المحرر للصفحات المتعددة */
           .a4-editor-content {
-            width: ${scaledWidth - (scaledMargin * 2)}px;
             line-height: 1.6;
             direction: rtl;
             text-align: right;
@@ -374,8 +373,9 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
             overflow: hidden;
             position: relative;
             box-sizing: border-box;
-            max-height: ${(scaledHeight - (scaledMargin * 2)) * pages.length}px;
             page-break-inside: auto;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
           }
           
           .a4-editor-content .ProseMirror p {
@@ -384,6 +384,7 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
             orphans: 2;
             widows: 2;
             overflow: hidden;
+            word-wrap: break-word;
           }
           
           .a4-editor-content .ProseMirror h1,
@@ -397,23 +398,14 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
             orphans: 3;
             widows: 3;
             overflow: hidden;
+            word-wrap: break-word;
+            margin: 1em 0 0.5em 0;
           }
           
-          /* إضافة فواصل صفحات واضحة */
-          .a4-editor-content .ProseMirror::after {
-            content: '';
-            display: block;
-            height: ${scaledHeight - (scaledMargin * 2)}px;
-            page-break-after: always;
-            break-after: page;
-          }
-          
-          /* تقسيم المحتوى إلى صفحات منفصلة */
+          /* حدود الصفحات الصارمة */
           .a4-editor-content .ProseMirror {
-            columns: 1;
-            column-fill: balance;
-            height: ${(scaledHeight - (scaledMargin * 2)) * pages.length}px;
-            overflow-y: hidden;
+            max-height: none;
+            height: auto;
           }
           
           @media print {
