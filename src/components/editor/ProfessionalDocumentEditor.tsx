@@ -22,7 +22,7 @@ import FontFamily from '@tiptap/extension-font-family';
 import Typography from '@tiptap/extension-typography';
 import { cn } from '@/lib/utils';
 import { ProfessionalToolbar } from './ProfessionalToolbar';
-import { A4PageSystem } from './A4PageSystem';
+import { MultiPageEditor } from './MultiPageEditor';
 import { ExportEngine } from './ExportEngine';
 import { CollaborationSystem } from './CollaborationSystem';
 import { AutoSaveSystem } from './AutoSaveSystem';
@@ -157,7 +157,7 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
       editorElement.style.fontSize = '14px';
       editorElement.style.lineHeight = '1.6';
     },
-  });
+  }, [isA4Mode, initialContent, readOnly]); // إضافة dependencies
 
   // وظيفة الحفظ التلقائي
   const handleAutoSave = useCallback(async (content: any) => {
@@ -215,7 +215,27 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
     };
   }, []);
 
-  if (!editor) {
+  // وظيفة معالجة تغيير المحتوى في وضع A4
+  const handleA4ContentChange = useCallback((content: any, html: string, plainText: string) => {
+    // حساب إحصائيات النص
+    setWordCount(plainText.split(/\s+/).filter(word => word.length > 0).length);
+    setCharacterCount(plainText.length);
+    
+    // استدعاء callback التغيير
+    onContentChange?.(content, html, plainText);
+    
+    // إعداد الحفظ التلقائي
+    if (autoSave && documentId) {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        handleAutoSave(content);
+      }, 2000);
+    }
+  }, [onContentChange, autoSave, documentId]);
+
+  if (!editor && !isA4Mode) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -253,18 +273,13 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
         )}
         
         {isA4Mode ? (
-          <A4PageSystem
+          <MultiPageEditor
             ref={editorRef}
-            showPageBreaks={showPageBreaks}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
+            initialContent={initialContent}
+            onContentChange={handleA4ContentChange}
+            readOnly={readOnly}
             className="h-full"
-          >
-            <EditorContent 
-              editor={editor}
-              className="tiptap-editor h-full outline-none"
-            />
-          </A4PageSystem>
+          />
         ) : (
           <div 
             ref={editorRef}
