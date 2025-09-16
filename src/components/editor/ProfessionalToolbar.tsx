@@ -487,7 +487,7 @@ export const ProfessionalToolbar: React.FC<ProfessionalToolbarProps> = ({
         className="hidden"
       />
 
-      <style jsx global>{`
+      <style>{`
         .professional-toolbar {
           font-family: 'Cairo', 'Amiri', 'Noto Sans Arabic', Arial, sans-serif;
           direction: rtl;

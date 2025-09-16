@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
 import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
+import { ProfessionalDocumentEditor } from '@/components/editor/ProfessionalDocumentEditor';
 
 import { 
   Save, 
@@ -374,16 +375,24 @@ const Grade12ProjectEditor: React.FC = () => {
 
           <TabsContent value="editor" className="space-y-4 h-full">
             <div className="flex flex-col h-full">
-              <div className="border rounded-lg p-4 flex-1">
-                <Textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="اكتب محتوى مشروعك هنا..."
-                  readOnly={!canEdit}
-                  className="w-full h-full min-h-[400px] resize-none border-none shadow-none focus-visible:ring-0"
-                  style={{ direction: 'rtl', textAlign: 'right' }}
-                />
-              </div>
+              <ProfessionalDocumentEditor
+                initialContent={content ? JSON.parse(content) : null}
+                onContentChange={(newContent, html, plainText) => {
+                  setContent(JSON.stringify(newContent));
+                  // Update word count can be handled by the editor
+                }}
+                onSave={async (newContent) => {
+                  setContent(JSON.stringify(newContent));
+                  await handleManualSave();
+                }}
+                readOnly={!canEdit}
+                autoSave={true}
+                className="flex-1"
+                title={project?.title || "مشروع جديد"}
+                showToolbar={true}
+                showPageBreaks={true}
+                enableCollaboration={false}
+              />
             </div>
           </TabsContent>
 

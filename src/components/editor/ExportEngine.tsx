@@ -159,7 +159,7 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
         const paragraph = new Paragraph({
           children: runs.length > 0 ? runs : [new TextRun({ text: '' })],
           alignment: getAlignmentFromAttrs(node.attrs),
-          // rightToLeft: true,
+          
         });
         
         paragraphs.push(paragraph);
@@ -185,7 +185,6 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
           children: runs.length > 0 ? runs : [new TextRun({ text: '' })],
           heading: getHeadingLevel(node.attrs?.level || 1),
           alignment: getAlignmentFromAttrs(node.attrs),
-          rightToLeft: true,
         });
         
         paragraphs.push(heading);
@@ -207,7 +206,6 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
                           italics: textNode.marks?.some((mark: any) => mark.type === 'italic'),
                           size: 24,
                           font: "Arial",
-                          rightToLeft: true,
                         });
                         runs.push(textRun);
                       }
@@ -217,7 +215,6 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
                   const listParagraph = new Paragraph({
                     children: runs,
                     alignment: AlignmentType.RIGHT,
-                    rightToLeft: true,
                     indent: {
                       right: 720, // إزاحة للقائمة
                     }
@@ -248,7 +245,6 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
                           italics: textNode.marks?.some((mark: any) => mark.type === 'italic'),
                           size: 24,
                           font: "Arial",
-                          rightToLeft: true,
                         });
                         runs.push(textRun);
                       }
@@ -258,7 +254,6 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
                   const listParagraph = new Paragraph({
                     children: runs,
                     alignment: AlignmentType.RIGHT,
-                    rightToLeft: true,
                     indent: {
                       right: 720,
                     }
@@ -278,7 +273,7 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
   };
 
   // مساعدات للتحويل
-  const getAlignmentFromAttrs = (attrs: any): AlignmentType => {
+  const getAlignmentFromAttrs = (attrs: any) => {
     if (!attrs?.textAlign) return AlignmentType.RIGHT;
     
     switch (attrs.textAlign) {
@@ -290,7 +285,7 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
     }
   };
 
-  const getHeadingLevel = (level: number): HeadingLevel => {
+  const getHeadingLevel = (level: number) => {
     switch (level) {
       case 1: return HeadingLevel.HEADING_1;
       case 2: return HeadingLevel.HEADING_2;

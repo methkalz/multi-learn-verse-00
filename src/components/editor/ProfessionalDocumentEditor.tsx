@@ -24,8 +24,8 @@ import { cn } from '@/lib/utils';
 import { ProfessionalToolbar } from './ProfessionalToolbar';
 import { A4PageSystem } from './A4PageSystem';
 import { ExportEngine } from './ExportEngine';
-// import { CollaborationSystem } from './CollaborationSystem';
-// import { AutoSaveSystem } from './AutoSaveSystem';
+import { CollaborationSystem } from './CollaborationSystem';
+import { AutoSaveSystem } from './AutoSaveSystem';
 
 interface ProfessionalDocumentEditorProps {
   documentId?: string;
@@ -245,12 +245,12 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
 
       {/* منطقة المحرر */}
       <div className="flex-1 relative overflow-hidden">
-        {/* {enableCollaboration && documentId && (
+        {enableCollaboration && documentId && (
           <CollaborationSystem
             documentId={documentId}
             editor={editor}
           />
-        )} */}
+        )}
         
         {isA4Mode ? (
           <A4PageSystem
@@ -323,8 +323,16 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
         </div>
       </div>
 
-      {/* الأنماط المخصصة */}
-      <style jsx global>{`
+      {/* Auto Save System */}
+      {autoSave && documentId && (
+        <AutoSaveSystem
+          documentId={documentId}
+          editor={editor}
+          content={editor.getJSON()}
+          enabled={autoSave}
+        />
+      )}
+      <style>{`
         .professional-document-editor {
           --editor-font-family: 'Cairo', 'Amiri', 'Noto Sans Arabic', Arial, sans-serif;
         }
@@ -367,7 +375,6 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
           margin: 1em auto;
         }
         
-        /* أنماط الجداول */
         .ProseMirror table {
           border-collapse: collapse;
           table-layout: fixed;
@@ -404,7 +411,6 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
           pointer-events: none;
         }
         
-        /* تحسينات الطباعة */
         @media print {
           .professional-document-editor {
             height: auto !important;

@@ -118,7 +118,7 @@ export const useProfessionalDocuments = () => {
 
       if (fetchError) throw fetchError;
       
-      setCurrentDocument(data);
+      setCurrentDocument(data as ProfessionalDocument);
       
       // تسجيل نشاط المشاهدة
       await logActivity(documentId, 'view', {});
@@ -179,7 +179,7 @@ export const useProfessionalDocuments = () => {
 
       if (createError) throw createError;
       
-      setCurrentDocument(data);
+      setCurrentDocument(data as ProfessionalDocument);
       await fetchDocuments(); // تحديث القائمة
       
       toast({
@@ -231,7 +231,7 @@ export const useProfessionalDocuments = () => {
 
       if (saveError) throw saveError;
       
-      setCurrentDocument(data);
+      setCurrentDocument(data as ProfessionalDocument);
       
       // تسجيل نشاط الحفظ
       await logActivity(documentId, 'save', { auto_save: true });
@@ -304,7 +304,7 @@ export const useProfessionalDocuments = () => {
 
       if (fetchError) throw fetchError;
       
-      setComments(data || []);
+      setComments(data as DocumentComment[] || []);
     } catch (err: any) {
       console.error('خطأ في جلب التعليقات:', err.message);
     }
@@ -403,7 +403,7 @@ export const useProfessionalDocuments = () => {
 
       if (fetchError) throw fetchError;
       
-      setActivities(data || []);
+      setActivities(data as DocumentActivity[] || []);
     } catch (err: any) {
       console.error('خطأ في جلب النشاطات:', err.message);
     }

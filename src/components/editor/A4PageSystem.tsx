@@ -285,7 +285,7 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
         </div>
 
         {/* الأنماط المخصصة */}
-        <style jsx>{`
+        <style>{`
           .a4-document-container {
             font-family: 'Cairo', 'Amiri', 'Noto Sans Arabic', Arial, sans-serif;
           }
@@ -304,7 +304,6 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
               0 0 0 1px rgba(0, 0, 0, 0.05);
           }
           
-          /* تحسينات الطباعة */
           @media print {
             .a4-document-container {
               background: white !important;
