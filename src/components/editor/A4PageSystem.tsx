@@ -105,14 +105,15 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
         return;
       }
       
+      // حساب الارتفاع الفعلي للمحتوى
       const contentHeight = editorContent.scrollHeight;
       const availableHeight = scaledHeight - (scaledMargin * 2);
       
-      // حد أقصى للصفحات لمنع الحلقات المفرغة
+      // حساب عدد الصفحات المطلوبة مع هامش أمان
       const MAX_PAGES = 50;
       const requiredPages = Math.min(
         MAX_PAGES,
-        Math.max(1, Math.ceil(contentHeight / availableHeight))
+        Math.max(1, Math.ceil((contentHeight + 50) / availableHeight))
       );
       
       // تحديث فقط عند وجود تغيير حقيقي
@@ -360,19 +361,23 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
             line-height: 1.6;
             direction: rtl;
             text-align: right;
+            overflow: visible;
+            position: relative;
           }
           
           .a4-editor-content .ProseMirror {
             outline: none;
             min-height: 100%;
-            page-break-inside: avoid;
+            overflow: visible;
+            position: relative;
+            column-fill: auto;
           }
           
           .a4-editor-content .ProseMirror p {
             margin: 0 0 1em 0;
-            page-break-inside: avoid;
-            orphans: 3;
-            widows: 3;
+            break-inside: avoid;
+            orphans: 2;
+            widows: 2;
           }
           
           .a4-editor-content .ProseMirror h1,
@@ -381,10 +386,28 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
           .a4-editor-content .ProseMirror h4,
           .a4-editor-content .ProseMirror h5,
           .a4-editor-content .ProseMirror h6 {
-            page-break-after: avoid;
-            page-break-inside: avoid;
-            orphans: 4;
-            widows: 4;
+            break-after: avoid;
+            break-inside: avoid;
+            orphans: 3;
+            widows: 3;
+          }
+          
+          /* إضافة فواصل صفحات تلقائية */
+          .a4-editor-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+              transparent,
+              transparent ${scaledHeight - (scaledMargin * 2) - 4}px,
+              rgba(0, 0, 0, 0.1) ${scaledHeight - (scaledMargin * 2) - 4}px,
+              rgba(0, 0, 0, 0.1) ${scaledHeight - (scaledMargin * 2)}px
+            );
+            pointer-events: none;
+            z-index: -1;
           }
           
           @media print {
