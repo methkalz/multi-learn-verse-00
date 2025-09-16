@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
 import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
-import ProfessionalA4Editor from '@/components/content/ProfessionalA4Editor';
+
 import { 
   Save, 
   ArrowLeft, 
@@ -374,17 +374,16 @@ const Grade12ProjectEditor: React.FC = () => {
 
           <TabsContent value="editor" className="space-y-4 h-full">
             <div className="flex flex-col h-full">
-              <ProfessionalA4Editor
-                initialContent={content}
-                onContentChange={(newContent) => {
-                  setContent(newContent);
-                  // Word count will be handled internally by the new editor
-                }}
-                onSave={handleManualSave}
-                readOnly={!canEdit}
-                autoSave={true}
-                className="flex-1"
-              />
+              <div className="border rounded-lg p-4 flex-1">
+                <Textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="اكتب محتوى مشروعك هنا..."
+                  readOnly={!canEdit}
+                  className="w-full h-full min-h-[400px] resize-none border-none shadow-none focus-visible:ring-0"
+                  style={{ direction: 'rtl', textAlign: 'right' }}
+                />
+              </div>
             </div>
           </TabsContent>
 
