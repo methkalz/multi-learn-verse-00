@@ -434,6 +434,198 @@ export type Database = {
           },
         ]
       }
+      document_activities: {
+        Row: {
+          action_details: Json | null
+          activity_type: string
+          created_at: string
+          document_id: string
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action_details?: Json | null
+          activity_type: string
+          created_at?: string
+          document_id: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action_details?: Json | null
+          activity_type?: string
+          created_at?: string
+          document_id?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_activities_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "professional_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_comments: {
+        Row: {
+          author_id: string
+          comment_type: string
+          content: string
+          created_at: string
+          document_id: string
+          id: string
+          parent_comment_id: string | null
+          position_end: number | null
+          position_start: number | null
+          resolved_at: string | null
+          resolved_by: string | null
+          selected_text: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          comment_type?: string
+          content: string
+          created_at?: string
+          document_id: string
+          id?: string
+          parent_comment_id?: string | null
+          position_end?: number | null
+          position_start?: number | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          selected_text?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          comment_type?: string
+          content?: string
+          created_at?: string
+          document_id?: string
+          id?: string
+          parent_comment_id?: string | null
+          position_end?: number | null
+          position_start?: number | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          selected_text?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_comments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "professional_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "document_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_permissions: {
+        Row: {
+          document_id: string
+          expires_at: string | null
+          granted_at: string
+          granted_by: string
+          id: string
+          is_active: boolean | null
+          permission_type: string
+          user_id: string
+        }
+        Insert: {
+          document_id: string
+          expires_at?: string | null
+          granted_at?: string
+          granted_by: string
+          id?: string
+          is_active?: boolean | null
+          permission_type: string
+          user_id: string
+        }
+        Update: {
+          document_id?: string
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean | null
+          permission_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_permissions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "professional_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_versions: {
+        Row: {
+          change_summary: string | null
+          content: Json
+          created_at: string
+          created_by: string
+          document_id: string
+          html_content: string | null
+          id: string
+          metadata: Json | null
+          version_number: number
+        }
+        Insert: {
+          change_summary?: string | null
+          content: Json
+          created_at?: string
+          created_by: string
+          document_id: string
+          html_content?: string | null
+          id?: string
+          metadata?: Json | null
+          version_number: number
+        }
+        Update: {
+          change_summary?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string
+          document_id?: string
+          html_content?: string | null
+          id?: string
+          metadata?: Json | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "professional_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_logs: {
         Row: {
           created_at_utc: string
@@ -3424,6 +3616,72 @@ export type Database = {
           name?: string
           name_ar?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      professional_documents: {
+        Row: {
+          allow_comments: boolean | null
+          allow_suggestions: boolean | null
+          content: Json
+          created_at: string
+          html_content: string | null
+          id: string
+          last_saved_at: string | null
+          metadata: Json | null
+          owner_id: string
+          page_count: number | null
+          plain_text: string | null
+          school_id: string | null
+          settings: Json | null
+          status: string
+          title: string
+          updated_at: string
+          version_number: number | null
+          visibility: string
+          word_count: number | null
+        }
+        Insert: {
+          allow_comments?: boolean | null
+          allow_suggestions?: boolean | null
+          content?: Json
+          created_at?: string
+          html_content?: string | null
+          id?: string
+          last_saved_at?: string | null
+          metadata?: Json | null
+          owner_id: string
+          page_count?: number | null
+          plain_text?: string | null
+          school_id?: string | null
+          settings?: Json | null
+          status?: string
+          title: string
+          updated_at?: string
+          version_number?: number | null
+          visibility?: string
+          word_count?: number | null
+        }
+        Update: {
+          allow_comments?: boolean | null
+          allow_suggestions?: boolean | null
+          content?: Json
+          created_at?: string
+          html_content?: string | null
+          id?: string
+          last_saved_at?: string | null
+          metadata?: Json | null
+          owner_id?: string
+          page_count?: number | null
+          plain_text?: string | null
+          school_id?: string | null
+          settings?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+          version_number?: number | null
+          visibility?: string
+          word_count?: number | null
         }
         Relationships: []
       }
