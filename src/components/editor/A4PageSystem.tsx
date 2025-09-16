@@ -216,81 +216,83 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
               background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)'
             }}
           >
-            <div className="mx-auto space-y-4" style={{ width: scaledWidth + 40 }}>
-              {pages.map((pageNumber) => (
-                <div
-                  key={pageNumber}
-                  data-page={pageNumber}
-                  className={cn(
-                    "a4-page bg-white shadow-lg mx-auto relative overflow-hidden",
-                    "transition-all duration-300 hover:shadow-xl",
-                    isIntersecting[pageNumber] && "ring-2 ring-primary/20"
-                  )}
-                  style={{
-                    width: scaledWidth,
-                    height: scaledHeight,
-                    transform: `scale(${zoom})`,
-                    transformOrigin: 'top center'
-                  }}
-                >
-                  {/* الهوامش المرئية */}
-                  {showMargins && (
-                    <>
-                      {/* الهامش العلوي */}
-                      <div 
-                        className="absolute top-0 left-0 right-0 border-b border-dashed border-gray-300/50"
-                        style={{ height: scaledMargin }}
-                      />
-                      {/* الهامش السفلي */}
-                      <div 
-                        className="absolute bottom-0 left-0 right-0 border-t border-dashed border-gray-300/50"
-                        style={{ height: scaledMargin }}
-                      />
-                      {/* الهامش الأيمن */}
-                      <div 
-                        className="absolute top-0 right-0 bottom-0 border-l border-dashed border-gray-300/50"
-                        style={{ width: scaledMargin }}
-                      />
-                      {/* الهامش الأيسر */}
-                      <div 
-                        className="absolute top-0 left-0 bottom-0 border-r border-dashed border-gray-300/50"
-                        style={{ width: scaledMargin }}
-                      />
-                    </>
-                  )}
-
-                  {/* رقم الصفحة */}
-                  <div 
-                    className="absolute text-xs text-gray-500 select-none"
-                    style={{
-                      bottom: scaledMargin / 3,
-                      right: scaledMargin,
-                    }}
-                  >
-                    {pageNumber.toLocaleString('ar')}
-                  </div>
-
-                  {/* منطقة المحتوى */}
+            {/* المحرر الموحد الذي يمتد عبر جميع الصفحات */}
+            <div 
+              className="mx-auto relative"
+              style={{ width: scaledWidth + 40 }}
+            >
+              {/* الصفحات كخلفية */}
+              <div className="absolute inset-0 space-y-4 pointer-events-none">
+                {pages.map((pageNumber) => (
                   <div
-                    className="absolute overflow-hidden a4-page-content"
+                    key={pageNumber}
+                    data-page={pageNumber}
+                    className={cn(
+                      "a4-page bg-white shadow-lg mx-auto relative",
+                      "transition-all duration-300",
+                      isIntersecting[pageNumber] && "ring-2 ring-primary/20"
+                    )}
                     style={{
-                      top: scaledMargin,
-                      left: scaledMargin,
-                      right: scaledMargin,
-                      bottom: scaledMargin,
-                      width: scaledWidth - (scaledMargin * 2),
-                      height: scaledHeight - (scaledMargin * 2),
+                      width: scaledWidth,
+                      height: scaledHeight,
+                      transform: `scale(${zoom})`,
+                      transformOrigin: 'top center'
                     }}
                   >
-                    {pageNumber === 1 && children}
-                  </div>
+                    {/* الهوامش المرئية */}
+                    {showMargins && (
+                      <>
+                        <div 
+                          className="absolute top-0 left-0 right-0 border-b border-dashed border-gray-300/50"
+                          style={{ height: scaledMargin }}
+                        />
+                        <div 
+                          className="absolute bottom-0 left-0 right-0 border-t border-dashed border-gray-300/50"
+                          style={{ height: scaledMargin }}
+                        />
+                        <div 
+                          className="absolute top-0 right-0 bottom-0 border-l border-dashed border-gray-300/50"
+                          style={{ width: scaledMargin }}
+                        />
+                        <div 
+                          className="absolute top-0 left-0 bottom-0 border-r border-dashed border-gray-300/50"
+                          style={{ width: scaledMargin }}
+                        />
+                      </>
+                    )}
 
-                  {/* خط فاصل الصفحات */}
-                  {showPageBreaks && pageNumber < pages.length && (
-                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent" />
-                  )}
-                </div>
-              ))}
+                    {/* رقم الصفحة */}
+                    <div 
+                      className="absolute text-xs text-gray-500 select-none"
+                      style={{
+                        bottom: scaledMargin / 3,
+                        right: scaledMargin,
+                      }}
+                    >
+                      {pageNumber.toLocaleString('ar')}
+                    </div>
+
+                    {/* خط فاصل الصفحات */}
+                    {showPageBreaks && pageNumber < pages.length && (
+                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent" />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* المحرر الفعلي يمتد عبر جميع الصفحات */}
+              <div 
+                className="relative z-10 a4-editor-content"
+                style={{
+                  paddingTop: scaledMargin,
+                  paddingBottom: scaledMargin,
+                  paddingLeft: scaledMargin + 20,
+                  paddingRight: scaledMargin + 20,
+                  minHeight: scaledHeight * pages.length,
+                }}
+              >
+                {children}
+              </div>
             </div>
           </div>
         </div>
@@ -340,6 +342,39 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
               0 0 0 1px rgba(0, 0, 0, 0.05);
           }
           
+          /* تنسيق المحرر للصفحات المتعددة */
+          .a4-editor-content {
+            width: ${scaledWidth - (scaledMargin * 2)}px;
+            line-height: 1.6;
+            direction: rtl;
+            text-align: right;
+          }
+          
+          .a4-editor-content .ProseMirror {
+            outline: none;
+            min-height: 100%;
+            page-break-inside: avoid;
+          }
+          
+          .a4-editor-content .ProseMirror p {
+            margin: 0 0 1em 0;
+            page-break-inside: avoid;
+            orphans: 3;
+            widows: 3;
+          }
+          
+          .a4-editor-content .ProseMirror h1,
+          .a4-editor-content .ProseMirror h2,
+          .a4-editor-content .ProseMirror h3,
+          .a4-editor-content .ProseMirror h4,
+          .a4-editor-content .ProseMirror h5,
+          .a4-editor-content .ProseMirror h6 {
+            page-break-after: avoid;
+            page-break-inside: avoid;
+            orphans: 4;
+            widows: 4;
+          }
+          
           @media print {
             .a4-document-container {
               background: white !important;
@@ -350,10 +385,22 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
               box-shadow: none !important;
               margin: 0 !important;
               page-break-after: always;
+              width: 210mm !important;
+              height: 297mm !important;
             }
             
             .a4-page:last-child {
               page-break-after: avoid;
+            }
+            
+            .a4-editor-content {
+              width: auto !important;
+              padding: 25.4mm !important;
+            }
+            
+            .a4-editor-content .ProseMirror {
+              font-size: 12pt;
+              line-height: 1.5;
             }
           }
         `}</style>
