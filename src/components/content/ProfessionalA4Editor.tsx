@@ -1,8 +1,8 @@
 import React from 'react';
-import FixedPlainTextA4Editor, { FixedPlainTextA4EditorRef } from './FixedPlainTextA4Editor';
+import MultiPageTipTapEditor, { MultiPageTipTapEditorRef } from './MultiPageTipTapEditor';
 
-// استخدام المحرر الجديد المحسن كمحرر افتراضي
-export interface ProfessionalA4EditorRef extends FixedPlainTextA4EditorRef {}
+// استخدام محرر Tiptap المحسن كمحرر افتراضي
+export interface ProfessionalA4EditorRef extends MultiPageTipTapEditorRef {}
 
 interface ProfessionalA4EditorProps {
   initialContent?: string;
@@ -15,7 +15,7 @@ interface ProfessionalA4EditorProps {
 }
 
 const ProfessionalA4Editor = React.forwardRef<ProfessionalA4EditorRef, ProfessionalA4EditorProps>((props, ref) => {
-  return <FixedPlainTextA4Editor {...props} ref={ref} />;
+  return <MultiPageTipTapEditor {...props} ref={ref} />;
 });
 
 ProfessionalA4Editor.displayName = 'ProfessionalA4Editor';
