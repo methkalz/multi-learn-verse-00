@@ -93,6 +93,18 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
         return;
       }
       
+      // التحقق من وجود نص فعلي
+      const textContent = editorContent.textContent || (editorContent as HTMLElement).innerText || '';
+      const hasActualContent = textContent.trim().length > 0;
+      
+      // إذا لم يوجد نص فعلي، ابق على صفحة واحدة
+      if (!hasActualContent) {
+        if (pages.length !== 1) {
+          setPages([1]);
+        }
+        return;
+      }
+      
       const contentHeight = editorContent.scrollHeight;
       const availableHeight = scaledHeight - (scaledMargin * 2);
       
@@ -103,8 +115,8 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
         Math.max(1, Math.ceil(contentHeight / availableHeight))
       );
       
-      // تحديث فقط عند الحاجة وإذا كان هناك تغيير حقيقي
-      if (requiredPages !== pages.length && contentHeight > 0) {
+      // تحديث فقط عند وجود تغيير حقيقي
+      if (requiredPages !== pages.length) {
         setPages(Array.from({ length: requiredPages }, (_, i) => i + 1));
       }
     }, [scaledHeight, scaledMargin, pages.length]);
