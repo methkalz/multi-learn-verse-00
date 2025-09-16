@@ -293,7 +293,7 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
                 ))}
               </div>
 
-              {/* المحرر الفعلي يمتد عبر جميع الصفحات */}
+              {/* المحرر الفعلي مع pagination محدود */}
               <div 
                 className="relative z-10 a4-editor-content"
                 style={{
@@ -301,7 +301,10 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
                   paddingBottom: scaledMargin,
                   paddingLeft: scaledMargin + 20,
                   paddingRight: scaledMargin + 20,
-                  minHeight: scaledHeight * pages.length,
+                  width: scaledWidth - (scaledMargin * 2) - 40,
+                  maxHeight: (scaledHeight - (scaledMargin * 2)) * pages.length,
+                  overflowY: 'hidden',
+                  overflowX: 'hidden'
                 }}
               >
                 {children}
@@ -361,23 +364,26 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
             line-height: 1.6;
             direction: rtl;
             text-align: right;
-            overflow: visible;
+            overflow: hidden;
             position: relative;
+            box-sizing: border-box;
           }
           
           .a4-editor-content .ProseMirror {
             outline: none;
-            min-height: 100%;
-            overflow: visible;
+            overflow: hidden;
             position: relative;
-            column-fill: auto;
+            box-sizing: border-box;
+            max-height: ${(scaledHeight - (scaledMargin * 2)) * pages.length}px;
+            page-break-inside: auto;
           }
           
           .a4-editor-content .ProseMirror p {
             margin: 0 0 1em 0;
-            break-inside: avoid;
+            break-inside: avoid-page;
             orphans: 2;
             widows: 2;
+            overflow: hidden;
           }
           
           .a4-editor-content .ProseMirror h1,
@@ -386,28 +392,28 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
           .a4-editor-content .ProseMirror h4,
           .a4-editor-content .ProseMirror h5,
           .a4-editor-content .ProseMirror h6 {
-            break-after: avoid;
-            break-inside: avoid;
+            break-after: avoid-page;
+            break-inside: avoid-page;
             orphans: 3;
             widows: 3;
+            overflow: hidden;
           }
           
-          /* إضافة فواصل صفحات تلقائية */
-          .a4-editor-content::before {
+          /* إضافة فواصل صفحات واضحة */
+          .a4-editor-content .ProseMirror::after {
             content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-              transparent,
-              transparent ${scaledHeight - (scaledMargin * 2) - 4}px,
-              rgba(0, 0, 0, 0.1) ${scaledHeight - (scaledMargin * 2) - 4}px,
-              rgba(0, 0, 0, 0.1) ${scaledHeight - (scaledMargin * 2)}px
-            );
-            pointer-events: none;
-            z-index: -1;
+            display: block;
+            height: ${scaledHeight - (scaledMargin * 2)}px;
+            page-break-after: always;
+            break-after: page;
+          }
+          
+          /* تقسيم المحتوى إلى صفحات منفصلة */
+          .a4-editor-content .ProseMirror {
+            columns: 1;
+            column-fill: balance;
+            height: ${(scaledHeight - (scaledMargin * 2)) * pages.length}px;
+            overflow-y: hidden;
           }
           
           @media print {
