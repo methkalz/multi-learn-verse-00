@@ -76,27 +76,63 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
       return () => observer.disconnect();
     }, [pages.length, currentPage, onPageChange, isIntersecting]);
 
-    // حساب عدد الصفحات المطلوبة بناءً على المحتوى
+    // حساب عدد الصفحات المطلوبة بناءً على المحتوى الفعلي
     const updatePagesCount = useCallback(() => {
       if (!containerRef.current) return;
       
-      const contentHeight = containerRef.current.scrollHeight;
-      const availableHeight = scaledHeight - (scaledMargin * 2); // طرح الهوامش العلوية والسفلية
-      const requiredPages = Math.max(1, Math.ceil(contentHeight / availableHeight));
+      // البحث عن محتوى المحرر الفعلي
+      const editorContent = containerRef.current.querySelector('.ProseMirror') || 
+                           containerRef.current.querySelector('[contenteditable="true"]') ||
+                           containerRef.current.querySelector('.a4-page-content');
       
-      if (requiredPages !== pages.length) {
+      if (!editorContent) {
+        // إذا لم نجد محتوى، ابق على صفحة واحدة
+        if (pages.length !== 1) {
+          setPages([1]);
+        }
+        return;
+      }
+      
+      const contentHeight = editorContent.scrollHeight;
+      const availableHeight = scaledHeight - (scaledMargin * 2);
+      
+      // حد أقصى للصفحات لمنع الحلقات المفرغة
+      const MAX_PAGES = 50;
+      const requiredPages = Math.min(
+        MAX_PAGES,
+        Math.max(1, Math.ceil(contentHeight / availableHeight))
+      );
+      
+      // تحديث فقط عند الحاجة وإذا كان هناك تغيير حقيقي
+      if (requiredPages !== pages.length && contentHeight > 0) {
         setPages(Array.from({ length: requiredPages }, (_, i) => i + 1));
       }
     }, [scaledHeight, scaledMargin, pages.length]);
 
-    // تحديث عدد الصفحات عند تغيير المحتوى
+    // تحديث عدد الصفحات عند تغيير المحتوى مع debouncing
     useEffect(() => {
-      const resizeObserver = new ResizeObserver(updatePagesCount);
-      if (containerRef.current) {
-        resizeObserver.observe(containerRef.current);
+      let timeoutId: NodeJS.Timeout;
+      
+      const debouncedUpdate = () => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(updatePagesCount, 300);
+      };
+
+      const resizeObserver = new ResizeObserver(debouncedUpdate);
+      
+      // مراقبة المحرر بدلاً من الحاوية الكاملة
+      const targetElement = containerRef.current?.querySelector('.ProseMirror') || 
+                           containerRef.current?.querySelector('[contenteditable="true"]') ||
+                           containerRef.current;
+      
+      if (targetElement) {
+        resizeObserver.observe(targetElement);
       }
       
-      return () => resizeObserver.disconnect();
+      return () => {
+        clearTimeout(timeoutId);
+        resizeObserver.disconnect();
+      };
     }, [updatePagesCount]);
 
     // التمرير إلى صفحة معينة
@@ -236,7 +272,7 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
 
                   {/* منطقة المحتوى */}
                   <div
-                    className="absolute overflow-hidden"
+                    className="absolute overflow-hidden a4-page-content"
                     style={{
                       top: scaledMargin,
                       left: scaledMargin,
