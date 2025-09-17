@@ -41,6 +41,8 @@ import { TeacherDashboardStats } from '@/components/dashboard/TeacherDashboardSt
 import { toast } from '@/hooks/use-toast';
 import { useTeacherContentAccess } from '@/hooks/useTeacherContentAccess';
 import { ContentFilterBadge } from '@/components/teacher/ContentFilterBadge';
+import Grade12ProjectsWidget from '@/components/teacher/Grade12ProjectsWidget';
+import ProjectNotifications from '@/components/teacher/ProjectNotifications';
 
 interface TeacherClass {
   id: string;
@@ -510,18 +512,15 @@ const TeacherDashboard: React.FC = () => {
           onRefresh={() => fetchTeacherData(true)}
         />
 
-        {/* Grade 12 Projects Section - Coming Soon */}
-        <Card className="glass-card border-0 shadow-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              مشاريع الثاني عشر والإشعارات
-            </CardTitle>
-            <CardDescription>
-              سيتم عرض مشاريع الطلاب والإشعارات هنا قريباً
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        {/* Grade 12 Projects and Notifications */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Grade12ProjectsWidget />
+          </div>
+          <div className="lg:col-span-1">
+            <ProjectNotifications />
+          </div>
+        </div>
 
         {/* الإجراءات السريعة المحسنة */}
         <Card className="glass-card border-0 shadow-xl animate-fade-in-up">
