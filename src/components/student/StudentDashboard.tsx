@@ -32,6 +32,7 @@ import { StudentGradeContent } from './StudentGradeContent';
 import { StudentGameSection } from './StudentGameSection';
 import { StudentProfile } from './StudentProfile';
 import { StudentDailyChallenges } from './StudentDailyChallenges';
+import StudentNotifications from './StudentNotifications';
 import AppFooter from '@/components/shared/AppFooter';
 
 const StudentDashboard: React.FC = () => {
@@ -227,6 +228,9 @@ const StudentDashboard: React.FC = () => {
                     </Button>
                   </CardContent>
                 </Card>
+
+                {/* Student Notifications */}
+                <StudentNotifications />
 
                 {/* Assigned Grade Info */}
                 <Card>
