@@ -5,10 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
 import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
@@ -19,24 +16,17 @@ import BackButton from '@/components/shared/BackButton';
 
 import { 
   Save, 
-  ArrowLeft, 
   Clock, 
   FileText, 
   Users,
   CheckCircle,
   Calendar,
   Upload,
-  Image as ImageIcon,
   Download,
   Trophy,
-  Target,
-  Sparkles,
   MessageSquare,
   History,
   Info,
-  Plus,
-  Send,
-  RotateCcw,
   BarChart3,
   CheckSquare,
   MessageCircle,
@@ -45,25 +35,8 @@ import {
   User
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-
-// Types for comments and versions
-interface Comment {
-  id: string;
-  text: string;
-  author: string;
-  timestamp: string;
-  type: 'teacher' | 'student';
-}
-
-interface Version {
-  id: string;
-  content: string;
-  timestamp: string;
-  changes: string;
-}
 
 const Grade12ProjectEditor: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -79,15 +52,9 @@ const Grade12ProjectEditor: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<'editor' | 'tasks' | 'comments' | 'info'>('editor');
   const [newCommentsCount, setNewCommentsCount] = useState(0);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Comments and versions states
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [versions, setVersions] = useState<Version[]>([]);
-  const [newComment, setNewComment] = useState('');
 
   // Load project data
   useEffect(() => {
@@ -213,35 +180,42 @@ const Grade12ProjectEditor: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
-      <div className="container mx-auto p-4 max-w-7xl">
-        {/* Header */}
+      <div className="container mx-auto p-4 max-w-full">
+        {/* Header مع معلومات المشروع الأساسية */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <BackButton />
-            <div>
+            <div className="flex-1">
               <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                محرر المشاريع
-              </h1>
-              <p className="text-muted-foreground">
                 {project?.title || 'جاري التحميل...'}
-              </p>
+              </h1>
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>{user?.user_metadata?.full_name || 'الطالب'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>الموعد النهائي: {project.due_date ? format(new Date(project.due_date), 'dd/MM/yyyy', { locale: ar }) : 'غير محدد'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span>{wordCount} كلمة • {characterCount} حرف</span>
+                </div>
+                <Badge variant={
+                  project?.status === 'completed' ? 'default' :
+                  project?.status === 'submitted' ? 'secondary' :
+                  project?.status === 'in_progress' ? 'outline' : 'destructive'
+                }>
+                  {project?.status === 'completed' ? 'مكتمل' :
+                   project?.status === 'submitted' ? 'مُرسل' :
+                   project?.status === 'in_progress' ? 'قيد التنفيذ' : 'مسودة'}
+                </Badge>
+              </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {project && (
-              <>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
-                  <User className="h-4 w-4" />
-                  <span>{user?.user_metadata?.full_name || 'الطالب'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
-                  <Calendar className="h-4 w-4" />
-                  <span>الموعد النهائي: {project.due_date ? format(new Date(project.due_date), 'dd/MM/yyyy', { locale: ar }) : 'غير محدد'}</span>
-                </div>
-              </>
-            )}
-
             <Button
               variant={isPreviewMode ? "default" : "outline"}
               size="sm"
@@ -265,246 +239,219 @@ const Grade12ProjectEditor: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-2 mb-6 border-b">
-          <Button
-            variant={activeTab === 'editor' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveTab('editor')}
-            className="gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            محرر النص
-          </Button>
-          <Button
-            variant={activeTab === 'tasks' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveTab('tasks')}
-            className="gap-2"
-          >
-            <CheckSquare className="h-4 w-4" />
-            المهام والمتطلبات
-          </Button>
-          <Button
-            variant={activeTab === 'comments' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveTab('comments')}
-            className="gap-2 relative"
-          >
-            <MessageCircle className="h-4 w-4" />
-            التعليقات والملاحظات
-            {newCommentsCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {newCommentsCount}
-              </span>
-            )}
-          </Button>
-          <Button
-            variant={activeTab === 'info' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveTab('info')}
-            className="gap-2"
-          >
-            <Info className="h-4 w-4" />
-            معلومات المشروع
-          </Button>
-        </div>
+        {/* نظام التابات الرئيسي */}
+        <Tabs defaultValue="editor" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="editor" className="gap-2">
+              <FileText className="h-4 w-4" />
+              محرر النص
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="gap-2">
+              <CheckSquare className="h-4 w-4" />
+              المهام والمتطلبات
+            </TabsTrigger>
+            <TabsTrigger value="comments" className="gap-2 relative">
+              <MessageCircle className="h-4 w-4" />
+              التعليقات والملاحظات
+              {newCommentsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {newCommentsCount}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="info" className="gap-2">
+              <Info className="h-4 w-4" />
+              معلومات المشروع
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Main Editor/Content Section */}
-          <div className="xl:col-span-2 order-2 xl:order-1">
-            <Card className="h-full">
+          {/* محرر النص - كامل العرض */}
+          <TabsContent value="editor" className="w-full">
+            <Card className="w-full">
               <CardContent className="p-0">
-                <div className="h-[calc(100vh-300px)] min-h-[700px]">
-                  {activeTab === 'editor' && (
-                    <ProfessionalDocumentEditor
-                      documentId={projectId}
-                      initialContent={project?.project_content ? JSON.parse(project.project_content) : undefined}
-                      onContentChange={handleContentChange}
-                      onSave={handleEditorSave}
-                      className="h-full"
-                      showToolbar={true}
-                      showPageBreaks={false}
-                      enableCollaboration={false}
-                      autoSave={true}
-                      title={project?.title || "مشروع التخرج"}
-                      wordCount={wordCount}
-                      enableImagePasting={true}
-                      enableImageResizing={true}
-                    />
-                  )}
-                  
-                  {activeTab === 'tasks' && (
-                    <div className="p-6 h-full">
-                      <ProjectTasksManager 
-                        projectId={projectId!}
-                        isTeacher={isTeacher}
-                        isStudent={isStudent}
-                      />
-                    </div>
-                  )}
-                  
-                  {activeTab === 'comments' && (
-                    <div className="p-6 h-full overflow-y-auto">
-                      <ProjectCommentsSection 
-                        projectId={projectId!}
-                      />
-                    </div>
-                  )}
-                  
-                  {activeTab === 'info' && (
-                    <div className="p-6 h-full overflow-y-auto">
-                      <div className="space-y-6">
-                        <div>
-                          <Label className="text-base font-semibold">العنوان</Label>
-                          <p className="text-muted-foreground mt-2">{project.title}</p>
-                        </div>
-                        <div>
-                          <Label className="text-base font-semibold">الوصف</Label>
-                          <p className="text-muted-foreground mt-2">{project.description || 'لا يوجد وصف'}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label className="text-sm font-medium">عدد الكلمات</Label>
-                            <p className="text-2xl font-bold text-primary">{wordCount}</p>
-                          </div>
-                          <div>
-                            <Label className="text-sm font-medium">عدد الأحرف</Label>
-                            <p className="text-2xl font-bold text-primary">{characterCount}</p>
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-base font-semibold">تاريخ الإنشاء</Label>
-                          <p className="text-muted-foreground mt-2">
-                            {project.created_at ? format(new Date(project.created_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : 'غير متاح'}
-                          </p>
-                        </div>
-                        {project.due_date && (
-                          <div>
-                            <Label className="text-base font-semibold">تاريخ التسليم</Label>
-                            <p className="text-muted-foreground mt-2">
-                              {format(new Date(project.due_date), 'dd/MM/yyyy', { locale: ar })}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                <div className="h-[calc(100vh-250px)] min-h-[800px]">
+                  <ProfessionalDocumentEditor
+                    documentId={projectId}
+                    initialContent={project?.project_content ? JSON.parse(project.project_content) : undefined}
+                    onContentChange={handleContentChange}
+                    onSave={handleEditorSave}
+                    className="h-full"
+                    showToolbar={true}
+                    showPageBreaks={false}
+                    enableCollaboration={false}
+                    autoSave={true}
+                    title={project?.title || "مشروع التخرج"}
+                    wordCount={wordCount}
+                    enableImagePasting={true}
+                    enableImageResizing={true}
+                  />
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          {/* Sidebar */}
-          <div className="order-1 xl:order-2 space-y-6">
-            {/* Project Info */}
-            {project && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">معلومات المشروع</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">عنوان المشروع</label>
-                    <p className="text-sm">{project.title}</p>
-                  </div>
-                  
-                  {project.description && (
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">الوصف</label>
-                      <p className="text-sm text-muted-foreground">{project.description}</p>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">الحالة</label>
-                    <Badge variant={
-                      project.status === 'completed' ? 'default' :
-                      project.status === 'submitted' ? 'secondary' :
-                      project.status === 'in_progress' ? 'outline' : 'destructive'
-                    }>
-                      {project.status === 'completed' ? 'مكتمل' :
-                       project.status === 'submitted' ? 'مُرسل' :
-                       project.status === 'in_progress' ? 'قيد التنفيذ' : 'مسودة'}
-                    </Badge>
-                  </div>
-
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">عدد الكلمات:</span>
-                    <span className="font-medium">{wordCount}</span>
-                  </div>
-                  
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">عدد الأحرف:</span>
-                    <span className="font-medium">{characterCount}</span>
-                  </div>
-
-                  {project.created_at && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">تاريخ الإنشاء:</span>
-                      <span className="font-medium">
-                        {format(new Date(project.created_at), 'dd/MM/yyyy', { locale: ar })}
-                      </span>
-                    </div>
-                  )}
-
-                  {project.updated_at && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">آخر تحديث:</span>
-                      <span className="font-medium">
-                        {format(new Date(project.updated_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">الإجراءات السريعة</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start gap-2"
-                  onClick={() => setActiveTab('tasks')}
-                >
-                  <CheckSquare className="h-4 w-4" />
-                  عرض المهام
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start gap-2 relative"
-                  onClick={() => setActiveTab('comments')}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  التعليقات والملاحظات
-                  {newCommentsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {newCommentsCount}
-                    </span>
-                  )}
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start gap-2"
-                  onClick={() => setIsPreviewMode(!isPreviewMode)}
-                >
-                  <Eye className="h-4 w-4" />
-                  {isPreviewMode ? 'إخفاء المعاينة' : 'معاينة المشروع'}
-                </Button>
+          {/* المهام والمتطلبات */}
+          <TabsContent value="tasks" className="w-full">
+            <Card className="w-full">
+              <CardContent className="p-6">
+                <div className="h-[calc(100vh-250px)] min-h-[800px]">
+                  <ProjectTasksManager 
+                    projectId={projectId!}
+                    isTeacher={isTeacher}
+                    isStudent={isStudent}
+                  />
+                </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+
+          {/* التعليقات والملاحظات */}
+          <TabsContent value="comments" className="w-full">
+            <Card className="w-full">
+              <CardContent className="p-6">
+                <div className="h-[calc(100vh-250px)] min-h-[800px] overflow-y-auto">
+                  <ProjectCommentsSection 
+                    projectId={projectId!}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* معلومات المشروع */}
+          <TabsContent value="info" className="w-full">
+            <Card className="w-full">
+              <CardContent className="p-6">
+                <div className="h-[calc(100vh-250px)] min-h-[800px] overflow-y-auto">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {/* معلومات المشروع الأساسية */}
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                            <Info className="h-5 w-5" />
+                            معلومات المشروع
+                          </h3>
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-base font-semibold">العنوان</Label>
+                              <p className="text-muted-foreground mt-2 text-lg">{project.title}</p>
+                            </div>
+                            <div>
+                              <Label className="text-base font-semibold">الوصف</Label>
+                              <p className="text-muted-foreground mt-2">{project.description || 'لا يوجد وصف'}</p>
+                            </div>
+                            <div>
+                              <Label className="text-base font-semibold">تاريخ الإنشاء</Label>
+                              <p className="text-muted-foreground mt-2">
+                                {project.created_at ? format(new Date(project.created_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : 'غير متاح'}
+                              </p>
+                            </div>
+                            {project.due_date && (
+                              <div>
+                                <Label className="text-base font-semibold">تاريخ التسليم</Label>
+                                <p className="text-muted-foreground mt-2">
+                                  {format(new Date(project.due_date), 'dd/MM/yyyy', { locale: ar })}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* إحصائيات المشروع */}
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5" />
+                            إحصائيات المشروع
+                          </h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <Card>
+                              <CardContent className="p-4 text-center">
+                                <div className="text-3xl font-bold text-primary">{wordCount}</div>
+                                <Label className="text-sm text-muted-foreground">عدد الكلمات</Label>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4 text-center">
+                                <div className="text-3xl font-bold text-primary">{characterCount}</div>
+                                <Label className="text-sm text-muted-foreground">عدد الأحرف</Label>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          {lastSaved && (
+                            <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                              <div className="flex items-center gap-2 text-sm">
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                <span className="text-muted-foreground">آخر حفظ:</span>
+                                <span className="font-medium text-green-600">
+                                  {format(lastSaved, 'HH:mm:ss', { locale: ar })}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* حالة المشروع */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                              <Trophy className="h-5 w-5 text-yellow-500" />
+                              حالة المشروع
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-muted-foreground">نسبة الإنجاز</span>
+                                <span className="text-sm font-medium">85%</span>
+                              </div>
+                              <Progress value={85} className="h-2" />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 text-center">
+                              <div className="p-3 bg-primary/10 rounded-lg">
+                                <div className="text-2xl font-bold text-primary">12</div>
+                                <div className="text-xs text-muted-foreground">مهام مكتملة</div>
+                              </div>
+                              <div className="p-3 bg-warning/10 rounded-lg">
+                                <div className="text-2xl font-bold text-warning">3</div>
+                                <div className="text-xs text-muted-foreground">مهام متبقية</div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* إجراءات سريعة */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg">إجراءات سريعة</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                              <Download className="h-4 w-4" />
+                              تصدير كـ PDF
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                              <Upload className="h-4 w-4" />
+                              رفع ملف مرفق
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start gap-2" size="sm">
+                              <History className="h-4 w-4" />
+                              سجل التغييرات
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
