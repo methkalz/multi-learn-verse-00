@@ -12,6 +12,7 @@ import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
 import { ProfessionalDocumentEditor } from '@/components/editor/ProfessionalDocumentEditor';
 import ProjectTasksManager from '@/components/content/ProjectTasksManager';
 import { ProjectCommentsSection } from '@/components/content/ProjectCommentsSection';
+import Grade12DefaultTasks from '@/components/content/Grade12DefaultTasks';
 import BackButton from '@/components/shared/BackButton';
 
 import { 
@@ -292,17 +293,43 @@ const Grade12ProjectEditor: React.FC = () => {
 
           {/* المهام والمتطلبات */}
           <TabsContent value="tasks" className="w-full">
-            <Card className="w-full">
-              <CardContent className="p-6">
-                <div className="h-[calc(100vh-250px)] min-h-[800px]">
+            <div className="space-y-6">
+              {/* المهام الأساسية للمشروع */}
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckSquare className="h-5 w-5 text-primary" />
+                    المهام الأساسية للمشروع النهائي
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    مهام أساسية يجب إنجازها لإكمال المشروع النهائي بنجاح
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <Grade12DefaultTasks />
+                </CardContent>
+              </Card>
+
+              {/* المهام الإضافية من المعلم */}
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-secondary" />
+                    مهام إضافية من المعلم
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    مهام مخصصة أضافها المعلم لهذا المشروع
+                  </p>
+                </CardHeader>
+                <CardContent>
                   <ProjectTasksManager 
                     projectId={projectId!}
                     isTeacher={isTeacher}
                     isStudent={isStudent}
                   />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* التعليقات والملاحظات */}
