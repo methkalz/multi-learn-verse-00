@@ -304,7 +304,6 @@ const Grade12ProjectEditor: React.FC = () => {
                       onSave={handleEditorSave}
                       className="h-full rounded-lg"
                       showToolbar={true}
-                      showPageBreaks={false}
                       enableCollaboration={false}
                       autoSave={true}
                       title={project?.title || "مشروع التخرج"}

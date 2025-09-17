@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
 import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
-import EnhancedDocumentEditor from './EnhancedDocumentEditor';
+import { ProfessionalDocumentEditor } from '@/components/editor/ProfessionalDocumentEditor';
 import { 
   Save, 
   X, 
@@ -71,6 +71,8 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
   const { updateProject, saveRevision, addComment } = useGrade12Projects();
   const { phases, updateTaskCompletion, getOverallProgress } = useGrade12DefaultTasks();
   const [content, setContent] = useState(project?.project_content || '');
+  const [wordCount, setWordCount] = useState(0);
+  const [characterCount, setCharacterCount] = useState(0);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +82,31 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
   const [versions, setVersions] = useState<Version[]>([]);
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('editor');
+
+  // معالجة تغيير المحتوى من المحرر
+  const handleContentChange = (newContent: any, html: string, plainText: string) => {
+    setContent(JSON.stringify(newContent));
+    setWordCount(plainText.split(/\s+/).filter(word => word.length > 0).length);
+    setCharacterCount(plainText.length);
+  };
+
+  // حفظ المحرر
+  const handleEditorSave = async (newContent: any) => {
+    if (!project?.id) return;
+    
+    setIsAutoSaving(true);
+    try {
+      await updateProject(project.id, { 
+        project_content: JSON.stringify(newContent)
+      });
+      setLastSaved(new Date());
+      onSave?.();
+    } catch (error) {
+      console.error('خطأ في الحفظ:', error);
+    } finally {
+      setIsAutoSaving(false);
+    }
+  };
 
   // Auto-save functionality with versioning
   useEffect(() => {
@@ -450,9 +477,19 @@ const Grade12FinalProjectEditor: React.FC<Grade12FinalProjectEditorProps> = ({
 
               <TabsContent value="editor" className="flex-1 mt-4">
                 <div className="h-full">
-                  <EnhancedDocumentEditor
-                    content={content}
-                    onChange={setContent}
+                  <ProfessionalDocumentEditor
+                    documentId={project.id}
+                    initialContent={project?.project_content ? JSON.parse(project.project_content) : undefined}
+                    onContentChange={handleContentChange}
+                    onSave={handleEditorSave}
+                    className="h-full"
+                    showToolbar={true}
+                    enableCollaboration={false}
+                    autoSave={true}
+                    title={project?.title || "المشروع النهائي"}
+                    wordCount={wordCount}
+                    enableImagePasting={true}
+                    enableImageResizing={true}
                     readOnly={!canEdit}
                   />
                 </div>

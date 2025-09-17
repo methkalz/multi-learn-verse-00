@@ -34,6 +34,7 @@ import {
 import { toast } from 'sonner';
 import RichTextEditor from './RichTextEditor';
 import { logger } from '@/lib/logger';
+import { ProfessionalDocumentEditor } from '@/components/editor/ProfessionalDocumentEditor';
 
 interface Grade12ProjectEditorProps {
   project: any;
@@ -65,6 +66,8 @@ const Grade12ProjectEditor: React.FC<Grade12ProjectEditorProps> = ({
   } = useGrade12Projects();
 
   const [content, setContent] = useState(project.content || '');
+  const [wordCount, setWordCount] = useState(0);
+  const [characterCount, setCharacterCount] = useState(0);
   const [teacherFeedback, setTeacherFeedback] = useState(project.teacher_feedback || '');
   const [newComment, setNewComment] = useState('');
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -80,13 +83,38 @@ const Grade12ProjectEditor: React.FC<Grade12ProjectEditorProps> = ({
     }
   }, [project.id]);
 
+  // دالة لاستخراج النص من محتوى TipTap
+  const extractTextFromTiptapContent = (content: any): string => {
+    if (!content || !content.content) return '';
+    
+    let text = '';
+    const traverse = (node: any) => {
+      if (node.type === 'text') {
+        text += node.text;
+      }
+      if (node.content) {
+        node.content.forEach(traverse);
+      }
+    };
+    
+    content.content.forEach(traverse);
+    return text;
+  };
+
+  // معالجة تغيير المحتوى من المحرر
+  const handleContentChange = (newContent: any, html: string, plainText: string) => {
+    setContent(JSON.stringify(newContent));
+    setWordCount(plainText.split(/\s+/).filter(word => word.length > 0).length);
+    setCharacterCount(plainText.length);
+  };
+
   // Auto-save functionality
   useEffect(() => {
     if (!autoSaveEnabled || !content) return;
 
     const autoSaveTimer = setTimeout(async () => {
       try {
-        await updateProject(project.id, { content });
+        await updateProject(project.id, { project_content: content });
         await saveRevision(project.id, content, 'حفظ تلقائي');
       } catch (error) {
         logger.error('Auto-save failed', error as Error);
@@ -95,6 +123,22 @@ const Grade12ProjectEditor: React.FC<Grade12ProjectEditorProps> = ({
 
     return () => clearTimeout(autoSaveTimer);
   }, [content, autoSaveEnabled, project.id, updateProject, saveRevision]);
+
+  // حفظ المحرر
+  const handleEditorSave = async (newContent: any) => {
+    if (!project?.id) return;
+    
+    try {
+      await updateProject(project.id, { 
+        project_content: JSON.stringify(newContent)
+      });
+      await saveRevision(project.id, JSON.stringify(newContent), 'حفظ');
+      onSave();
+    } catch (error) {
+      logger.error('خطأ في الحفظ:', error as Error);
+      toast('خطأ في حفظ المشروع');
+    }
+  };
 
   // حساب التقدم
   const calculateProgress = (): number => {
@@ -300,14 +344,23 @@ const Grade12ProjectEditor: React.FC<Grade12ProjectEditorProps> = ({
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      placeholder="ابدأ في كتابة مشروعك النهائي..."
-                      readOnly={viewMode === 'teacher'}
-                      rows={20}
-                      className="min-h-[400px]"
-                    />
+                    <div className="h-[500px]">
+                      <ProfessionalDocumentEditor
+                        documentId={project.id}
+                        initialContent={project?.project_content ? JSON.parse(project.project_content) : undefined}
+                        onContentChange={handleContentChange}
+                        onSave={handleEditorSave}
+                        className="h-full"
+                        showToolbar={true}
+                        enableCollaboration={false}
+                        autoSave={autoSaveEnabled}
+                        title={project?.title || "مشروع التخرج"}
+                        wordCount={wordCount}
+                        enableImagePasting={true}
+                        enableImageResizing={true}
+                        readOnly={viewMode === 'teacher'}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -319,26 +372,36 @@ const Grade12ProjectEditor: React.FC<Grade12ProjectEditorProps> = ({
                   <CardHeader>
                     <CardTitle className="text-sm">معلومات المشروع</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3 text-sm">
-                    {project.due_date && (
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>التسليم: {format(new Date(project.due_date), 'dd MMM yyyy', { locale: ar })}</span>
-                      </div>
-                    )}
-                    
-                    {project.grade && (
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-muted-foreground" />
-                        <span>الدرجة: {project.grade}</span>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span>آخر تحديث: {format(new Date(project.updated_at), 'dd MMM yyyy', { locale: ar })}</span>
-                    </div>
-                  </CardContent>
+                   <CardContent className="space-y-3 text-sm">
+                     <div className="flex items-center gap-2">
+                       <FileText className="h-4 w-4 text-muted-foreground" />
+                       <span>الكلمات: {wordCount}</span>
+                     </div>
+                     
+                     <div className="flex items-center gap-2">
+                       <FileText className="h-4 w-4 text-muted-foreground" />
+                       <span>الأحرف: {characterCount}</span>
+                     </div>
+                     
+                     {project.due_date && (
+                       <div className="flex items-center gap-2">
+                         <Calendar className="h-4 w-4 text-muted-foreground" />
+                         <span>التسليم: {format(new Date(project.due_date), 'dd MMM yyyy', { locale: ar })}</span>
+                       </div>
+                     )}
+                     
+                     {project.grade && (
+                       <div className="flex items-center gap-2">
+                         <Target className="h-4 w-4 text-muted-foreground" />
+                         <span>الدرجة: {project.grade}</span>
+                       </div>
+                     )}
+                     
+                     <div className="flex items-center gap-2">
+                       <User className="h-4 w-4 text-muted-foreground" />
+                       <span>آخر تحديث: {format(new Date(project.updated_at), 'dd MMM yyyy', { locale: ar })}</span>
+                     </div>
+                   </CardContent>
                 </Card>
 
                 {/* Auto-save Toggle */}
