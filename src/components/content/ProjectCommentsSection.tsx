@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MessageCircle, Clock, Eye, EyeOff, Send, Loader2, Star, User } from 'lucide-react';
+import { MessageCircle, Clock, Eye, EyeOff, Send, Loader2, Star, User, FileText, Award, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useAuth } from '@/hooks/useAuth';
@@ -52,22 +52,22 @@ export const ProjectCommentsSection: React.FC<ProjectCommentsSectionProps> = ({
   const getCommentTypeIcon = (type: string) => {
     switch (type) {
       case 'feedback':
-        return <MessageCircle className="h-4 w-4" />;
+        return <FileText className="h-4 w-4" />;
       case 'grade':
-        return <Star className="h-4 w-4" />;
+        return <Award className="h-4 w-4" />;
       default:
-        return <MessageCircle className="h-4 w-4" />;
+        return <MessageSquare className="h-4 w-4" />;
     }
   };
 
   const getCommentTypeColor = (type: string) => {
     switch (type) {
       case 'feedback':
-        return 'bg-blue-500/10 text-blue-700 border-blue-200';
+        return 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-700 border-blue-200 shadow-sm';
       case 'grade': 
-        return 'bg-yellow-500/10 text-yellow-700 border-yellow-200';
+        return 'bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-amber-700 border-amber-200 shadow-sm';
       default:
-        return 'bg-gray-500/10 text-gray-700 border-gray-200';
+        return 'bg-gradient-to-r from-slate-500/10 to-gray-500/10 text-slate-700 border-slate-200 shadow-sm';
     }
   };
 
@@ -85,13 +85,15 @@ export const ProjectCommentsSection: React.FC<ProjectCommentsSectionProps> = ({
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'teacher':
+        return 'bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-700 border-purple-200 shadow-sm';
       case 'school_admin':
+        return 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-700 border-indigo-200 shadow-sm';
       case 'superadmin':
-        return 'bg-purple-500/10 text-purple-700 border-purple-200';
+        return 'bg-gradient-to-r from-pink-500/10 to-purple-500/10 text-pink-700 border-pink-200 shadow-sm';
       case 'student':
-        return 'bg-green-500/10 text-green-700 border-green-200';
+        return 'bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-700 border-emerald-200 shadow-sm';
       default:
-        return 'bg-gray-500/10 text-gray-700 border-gray-200';
+        return 'bg-gradient-to-r from-slate-500/10 to-gray-500/10 text-slate-700 border-slate-200 shadow-sm';
     }
   };
 
@@ -133,21 +135,27 @@ export const ProjectCommentsSection: React.FC<ProjectCommentsSectionProps> = ({
   }
 
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader className="pb-4">
+    <Card className={cn("w-full border-0 shadow-lg bg-gradient-to-br from-white to-slate-50/50", className)}>
+      <CardHeader className="pb-4 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-t-lg border-b border-border/50">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <MessageCircle className="h-5 w-5" />
-            التعليقات والملاحظات
-            {comments.length > 0 && (
-              <Badge variant="secondary" className="mr-2">
-                {comments.length}
-              </Badge>
-            )}
+          <CardTitle className="text-lg font-semibold flex items-center gap-3">
+            <div className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg">
+              <MessageCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                التعليقات والملاحظات
+              </span>
+              {comments.length > 0 && (
+                <Badge variant="secondary" className="mr-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-blue-200">
+                  {comments.length}
+                </Badge>
+              )}
+            </div>
           </CardTitle>
           {unreadCount > 0 && (
             <div className="flex items-center gap-2">
-              <Badge variant="destructive" className="flex items-center gap-1">
+              <Badge variant="destructive" className="flex items-center gap-1 bg-gradient-to-r from-red-500 to-pink-500 shadow-md animate-pulse">
                 <Eye className="h-3 w-3" />
                 {unreadCount} جديد
               </Badge>
@@ -155,7 +163,7 @@ export const ProjectCommentsSection: React.FC<ProjectCommentsSectionProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={markAllAsRead}
-                className="text-xs"
+                className="text-xs hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 border-blue-200 text-blue-700"
               >
                 تحديد الكل كمقروء
               </Button>
@@ -189,57 +197,81 @@ export const ProjectCommentsSection: React.FC<ProjectCommentsSectionProps> = ({
                   <div
                     key={comment.id}
                     className={cn(
-                      "relative p-4 rounded-lg border transition-all",
+                      "relative p-5 rounded-xl border transition-all duration-300 hover:shadow-md",
                       isOwn 
-                        ? "bg-primary/5 border-primary/20 mr-4" 
-                        : "bg-muted/30 border-muted ml-4",
-                      isUnread && "ring-2 ring-blue-500/20 bg-blue-50"
+                        ? "bg-gradient-to-br from-blue-50/50 to-indigo-50/50 border-blue-200/50 mr-4 shadow-sm" 
+                        : "bg-gradient-to-br from-slate-50/50 to-gray-50/50 border-slate-200/50 ml-4 shadow-sm",
+                      isUnread && "ring-2 ring-blue-400/30 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-lg animate-fade-in"
                     )}
                     onClick={() => isUnread && markAsRead(comment.id)}
                   >
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarImage src="" alt={comment.author?.full_name} />
-                        <AvatarFallback className="text-xs">
-                          {comment.author?.full_name 
-                            ? getInitials(comment.author.full_name)
-                            : <User className="h-4 w-4" />
-                          }
-                        </AvatarFallback>
-                      </Avatar>
+                    <div className="flex items-start gap-4">
+                      <div className="relative">
+                        <Avatar className={cn(
+                          "h-10 w-10 shrink-0 border-2 shadow-md",
+                          isOwn ? "border-blue-200" : "border-slate-200"
+                        )}>
+                          <AvatarImage src="" alt={comment.author?.full_name} />
+                          <AvatarFallback className={cn(
+                            "text-sm font-medium",
+                            comment.author?.role === 'teacher' ? "bg-gradient-to-br from-purple-500 to-indigo-500 text-white" :
+                            comment.author?.role === 'student' ? "bg-gradient-to-br from-emerald-500 to-green-500 text-white" :
+                            "bg-gradient-to-br from-slate-400 to-gray-400 text-white"
+                          )}>
+                            {comment.author?.full_name 
+                              ? getInitials(comment.author.full_name)
+                              : <User className="h-4 w-4" />
+                            }
+                          </AvatarFallback>
+                        </Avatar>
+                        {/* مؤشر الدور */}
+                        <div className={cn(
+                          "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm",
+                          comment.author?.role === 'teacher' ? "bg-purple-500" :
+                          comment.author?.role === 'student' ? "bg-emerald-500" :
+                          "bg-slate-400"
+                        )} />
+                      </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <span className="font-medium text-sm">
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
+                          <span className="font-semibold text-sm text-slate-800">
                             {comment.author?.full_name || 'مستخدم غير معروف'}
                           </span>
                           
                           <Badge 
                             variant="outline" 
-                            className={cn("text-xs", getRoleColor(comment.author?.role || 'student'))}
+                            className={cn("text-xs font-medium px-2 py-1", getRoleColor(comment.author?.role || 'student'))}
                           >
                             {getRoleLabel(comment.author?.role || 'student')}
                           </Badge>
                           
                           <Badge 
                             variant="outline"
-                            className={cn("text-xs", getCommentTypeColor(comment.comment_type))}
+                            className={cn("text-xs font-medium px-2 py-1 flex items-center gap-1", getCommentTypeColor(comment.comment_type))}
                           >
                             {getCommentTypeIcon(comment.comment_type)}
-                            <span className="mr-1">{getCommentTypeLabel(comment.comment_type)}</span>
+                            <span>{getCommentTypeLabel(comment.comment_type)}</span>
                           </Badge>
                           
                           {isUnread && (
-                            <Badge variant="destructive" className="text-xs">
+                            <Badge variant="destructive" className="text-xs bg-gradient-to-r from-red-500 to-pink-500 animate-pulse">
                               <EyeOff className="h-3 w-3 ml-1" />
                               جديد
                             </Badge>
                           )}
                         </div>
                         
-                        <p className="text-sm text-foreground leading-relaxed mb-2">
-                          {comment.comment}
-                        </p>
+                        <div className={cn(
+                          "p-3 rounded-lg mb-3",
+                          comment.comment_type === 'grade' ? "bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200" :
+                          comment.comment_type === 'feedback' ? "bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200" :
+                          "bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200"
+                        )}>
+                          <p className="text-sm text-slate-700 leading-relaxed">
+                            {comment.comment}
+                          </p>
+                        </div>
                         
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Clock className="h-3 w-3" />
@@ -263,48 +295,67 @@ export const ProjectCommentsSection: React.FC<ProjectCommentsSectionProps> = ({
 
         {/* نموذج إضافة تعليق جديد */}
         {user && (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex gap-2">
-              <Select value={commentType} onValueChange={setCommentType}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="comment">تعليق</SelectItem>
-                  <SelectItem value="feedback">ملاحظة</SelectItem>
-                  <SelectItem value="grade">تقييم</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <Textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="اكتب تعليقك هنا..."
-              className="min-h-20 resize-none"
-              disabled={isSubmitting}
-            />
-            
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">
-                {newComment.length}/500 حرف
-              </span>
+          <div className="bg-gradient-to-r from-slate-50/50 to-gray-50/50 rounded-xl p-5 border border-slate-200/50">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex items-center gap-3 mb-4">
+                <Avatar className="h-8 w-8 border-2 border-blue-200 shadow-sm">
+                  <AvatarImage src="" alt={user.email} />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-medium text-xs">
+                    {user.email ? getInitials(user.email) : <User className="h-4 w-4" />}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <Select value={commentType} onValueChange={setCommentType}>
+                    <SelectTrigger className="w-40 border-slate-300 bg-white shadow-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="comment" className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        تعليق
+                      </SelectItem>
+                      <SelectItem value="feedback" className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        ملاحظة
+                      </SelectItem>
+                      <SelectItem value="grade" className="flex items-center gap-2">
+                        <Award className="h-4 w-4" />
+                        تقييم
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               
-              <Button 
-                type="submit" 
-                disabled={!newComment.trim() || isSubmitting}
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-                {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
-              </Button>
-            </div>
-          </form>
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="اكتب تعليقك هنا..."
+                className="min-h-24 resize-none border-slate-300 bg-white shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                disabled={isSubmitting}
+              />
+              
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">
+                  {newComment.length}/500 حرف
+                </span>
+                
+                <Button 
+                  type="submit" 
+                  disabled={!newComment.trim() || isSubmitting}
+                  size="sm"
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-md"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+                </Button>
+              </div>
+            </form>
+          </div>
         )}
         
         {!user && (

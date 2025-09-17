@@ -12,6 +12,7 @@ import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
 import { ProfessionalDocumentEditor } from '@/components/editor/ProfessionalDocumentEditor';
 import ProjectTasksManager from '@/components/content/ProjectTasksManager';
 import { ProjectCommentsSection } from '@/components/content/ProjectCommentsSection';
+import { ProjectTabs, EnhancedTabContent } from '@/components/content/EnhancedProjectTabs';
 import Grade12DefaultTasks from '@/components/content/Grade12DefaultTasks';
 import BackButton from '@/components/shared/BackButton';
 
