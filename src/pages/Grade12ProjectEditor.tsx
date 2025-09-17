@@ -190,10 +190,10 @@ const Grade12ProjectEditor: React.FC = () => {
           </div>
         </div>
 
-        {/* التخطيط الجديد - المحرر 60% والتابس 40% */}
-        <div className="grid grid-cols-5 gap-6 h-[calc(100vh-200px)]">
-          {/* المحرر - 60% من الشاشة */}
-          <div className="col-span-3">
+        {/* التخطيط الجديد - المحرر 70% والتابس 30% */}
+        <div className="grid grid-cols-10 gap-4 h-[calc(100vh-200px)]">
+          {/* المحرر - 70% من الشاشة */}
+          <div className="col-span-7">
             <Card className="h-full border-0 shadow-sm bg-white">
               <CardHeader className="border-b border-slate-100 pb-3 px-6 py-4">
                 <CardTitle className="text-lg font-medium text-slate-800 flex items-center gap-2">
@@ -221,37 +221,37 @@ const Grade12ProjectEditor: React.FC = () => {
             </Card>
           </div>
 
-          {/* التابس - 40% من الشاشة */}
-          <div className="col-span-2">
+          {/* التابس - 30% من الشاشة */}
+          <div className="col-span-3">
             <Card className="h-full border-0 shadow-sm bg-white">
               <Tabs defaultValue="tasks" className="h-full flex flex-col">
-                {/* قائمة التابس البسيطة */}
-                <div className="border-b border-slate-100 px-6 py-3">
-                  <TabsList className="grid w-full grid-cols-3 bg-slate-50 p-1 rounded-lg h-10">
+                {/* قائمة التابس المدمجة */}
+                <div className="border-b border-slate-100 px-4 py-2">
+                  <TabsList className="grid w-full grid-cols-3 bg-slate-50/50 p-0.5 rounded-md h-8">
                     <TabsTrigger 
                       value="tasks" 
-                      className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+                      className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-sm px-2"
                     >
-                      <CheckSquare className="h-4 w-4 mr-2" />
+                      <CheckSquare className="h-3 w-3 mr-1" />
                       المهام
                     </TabsTrigger>
                     <TabsTrigger 
                       value="comments" 
-                      className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md relative"
+                      className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-sm px-2 relative"
                     >
-                      <MessageCircle className="h-4 w-4 mr-2" />
+                      <MessageCircle className="h-3 w-3 mr-1" />
                       التعليقات
                       {newCommentsCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px]">
+                        <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] rounded-full h-3 w-3 flex items-center justify-center">
                           {newCommentsCount}
                         </span>
                       )}
                     </TabsTrigger>
                     <TabsTrigger 
                       value="info" 
-                      className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+                      className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-sm px-2"
                     >
-                      <Info className="h-4 w-4 mr-2" />
+                      <Info className="h-3 w-3 mr-1" />
                       معلومات
                     </TabsTrigger>
                   </TabsList>
@@ -261,21 +261,21 @@ const Grade12ProjectEditor: React.FC = () => {
                 <div className="flex-1 overflow-hidden">
                   {/* تاب المهام */}
                   <TabsContent value="tasks" className="h-full p-0 m-0">
-                    <div className="h-full overflow-y-auto p-6 space-y-6">
+                    <div className="h-full overflow-y-auto p-3 space-y-4">
                       {/* المهام الأساسية */}
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                          <CheckSquare className="h-4 w-4 text-green-600" />
-                          <h3 className="font-medium text-slate-800">المهام الأساسية</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-1.5 pb-1.5 border-b border-slate-100">
+                          <CheckSquare className="h-3.5 w-3.5 text-green-600" />
+                          <h3 className="text-sm font-medium text-slate-800">المهام الأساسية</h3>
                         </div>
                         <Grade12DefaultTasks />
                       </div>
 
                       {/* المهام الإضافية */}
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                          <Users className="h-4 w-4 text-purple-600" />
-                          <h3 className="font-medium text-slate-800">مهام المعلم</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-1.5 pb-1.5 border-b border-slate-100">
+                          <Users className="h-3.5 w-3.5 text-purple-600" />
+                          <h3 className="text-sm font-medium text-slate-800">مهام المعلم</h3>
                         </div>
                         <ProjectTasksManager 
                           projectId={projectId!}
@@ -288,68 +288,71 @@ const Grade12ProjectEditor: React.FC = () => {
 
                   {/* تاب التعليقات */}
                   <TabsContent value="comments" className="h-full p-0 m-0">
-                    <div className="h-full overflow-y-auto p-6">
+                    <div className="h-full overflow-y-auto p-3">
                       <ProjectCommentsSection projectId={projectId!} />
                     </div>
                   </TabsContent>
 
                   {/* تاب المعلومات */}
                   <TabsContent value="info" className="h-full p-0 m-0">
-                    <div className="h-full overflow-y-auto p-6 space-y-4">
-                      <div className="space-y-6">
-                        <div className="text-center py-8">
-                          <Info className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-                          <h3 className="font-medium text-slate-800 mb-2">معلومات المشروع</h3>
-                          <p className="text-sm text-slate-600">تفاصيل وإحصائيات المشروع</p>
+                    <div className="h-full overflow-y-auto p-3 space-y-3">
+                      <div className="space-y-3">
+                        <div className="text-center py-4">
+                          <Info className="h-8 w-8 mx-auto mb-2 text-slate-400" />
+                          <h3 className="text-sm font-medium text-slate-800 mb-1">معلومات المشروع</h3>
+                          <p className="text-xs text-slate-600">تفاصيل وإحصائيات</p>
                         </div>
                         
-                        <div className="space-y-4">
-                          <div className="p-4 bg-slate-50 rounded-lg">
-                            <div className="text-sm text-slate-600 mb-1">عنوان المشروع</div>
-                            <div className="font-medium text-slate-800">{project?.title || 'غير محدد'}</div>
+                        <div className="space-y-2">
+                          <div className="p-3 bg-slate-50/80 rounded-lg">
+                            <div className="text-xs text-slate-600 mb-1">العنوان</div>
+                            <div className="text-sm font-medium text-slate-800 truncate">{project?.title || 'غير محدد'}</div>
                           </div>
                           
-                          <div className="p-4 bg-slate-50 rounded-lg">
-                            <div className="text-sm text-slate-600 mb-2">الحالة</div>
-                            <Badge variant={
-                              project?.status === 'completed' ? 'default' :
-                              project?.status === 'submitted' ? 'secondary' :
-                              project?.status === 'in_progress' ? 'outline' : 'destructive'
-                            }>
+                          <div className="p-3 bg-slate-50/80 rounded-lg">
+                            <div className="text-xs text-slate-600 mb-1.5">الحالة</div>
+                            <Badge 
+                              variant={
+                                project?.status === 'completed' ? 'default' :
+                                project?.status === 'submitted' ? 'secondary' :
+                                project?.status === 'in_progress' ? 'outline' : 'destructive'
+                              }
+                              className="text-xs h-5"
+                            >
                               {project?.status === 'completed' ? 'مكتمل' :
                                project?.status === 'submitted' ? 'مُرسل' :
                                project?.status === 'in_progress' ? 'قيد التنفيذ' : 'مسودة'}
                             </Badge>
                           </div>
                           
-                          <div className="p-4 bg-slate-50 rounded-lg">
-                            <div className="text-sm text-slate-600 mb-1">إحصائيات النص</div>
-                            <div className="text-sm text-slate-800">
+                          <div className="p-3 bg-slate-50/80 rounded-lg">
+                            <div className="text-xs text-slate-600 mb-1">الإحصائيات</div>
+                            <div className="text-xs text-slate-800">
                               {wordCount} كلمة • {characterCount} حرف
                             </div>
                           </div>
                           
                           {lastSaved && (
-                            <div className="p-4 bg-slate-50 rounded-lg">
-                              <div className="text-sm text-slate-600 mb-1">آخر حفظ</div>
-                              <div className="text-sm text-slate-800">{lastSaved}</div>
+                            <div className="p-3 bg-slate-50/80 rounded-lg">
+                              <div className="text-xs text-slate-600 mb-1">آخر حفظ</div>
+                              <div className="text-xs text-slate-800 truncate">{lastSaved}</div>
                             </div>
                           )}
                           
                           {project?.due_date && (
-                            <div className="p-4 bg-slate-50 rounded-lg">
-                              <div className="text-sm text-slate-600 mb-1">الموعد النهائي</div>
-                              <div className="text-sm text-slate-800">
+                            <div className="p-3 bg-slate-50/80 rounded-lg">
+                              <div className="text-xs text-slate-600 mb-1">الموعد النهائي</div>
+                              <div className="text-xs text-slate-800">
                                 {format(new Date(project.due_date), 'dd/MM/yyyy', { locale: ar })}
                               </div>
                             </div>
                           )}
                           
                           {project?.progress_percentage !== undefined && (
-                            <div className="p-4 bg-slate-50 rounded-lg">
-                              <div className="text-sm text-slate-600 mb-2">نسبة الإكمال</div>
-                              <Progress value={project.progress_percentage} className="h-2 mb-2" />
-                              <div className="text-sm text-slate-800">{project.progress_percentage}% مكتمل</div>
+                            <div className="p-3 bg-slate-50/80 rounded-lg">
+                              <div className="text-xs text-slate-600 mb-1.5">نسبة الإكمال</div>
+                              <Progress value={project.progress_percentage} className="h-1.5 mb-1.5" />
+                              <div className="text-xs text-slate-800">{project.progress_percentage}% مكتمل</div>
                             </div>
                           )}
                         </div>
