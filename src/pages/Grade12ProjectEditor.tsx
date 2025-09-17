@@ -13,6 +13,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
 import { useGrade12DefaultTasks } from '@/hooks/useGrade12DefaultTasks';
 import { ProfessionalDocumentEditor } from '@/components/editor/ProfessionalDocumentEditor';
+import ProjectTasksManager from '@/components/content/ProjectTasksManager';
+import { ProjectCommentsSection } from '@/components/content/ProjectCommentsSection';
+import BackButton from '@/components/shared/BackButton';
 
 import { 
   Save, 
@@ -34,11 +37,17 @@ import {
   Plus,
   Send,
   RotateCcw,
-  BarChart3
+  BarChart3,
+  CheckSquare,
+  MessageCircle,
+  Eye,
+  EyeOff,
+  User
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import ProjectTasksManager from '@/components/content/ProjectTasksManager';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 // Types for comments and versions
 interface Comment {
@@ -59,7 +68,7 @@ interface Version {
 const Grade12ProjectEditor: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
   const { projects, updateProject, saveRevision, addComment } = useGrade12Projects();
   const { phases, updateTaskCompletion, getOverallProgress } = useGrade12DefaultTasks();
   
@@ -69,13 +78,16 @@ const Grade12ProjectEditor: React.FC = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [wordCount, setWordCount] = useState(0);
+  const [characterCount, setCharacterCount] = useState(0);
+  const [activeTab, setActiveTab] = useState<'editor' | 'tasks' | 'comments' | 'info'>('editor');
+  const [newCommentsCount, setNewCommentsCount] = useState(0);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Comments and versions states
   const [comments, setComments] = useState<Comment[]>([]);
   const [versions, setVersions] = useState<Version[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [activeTab, setActiveTab] = useState('editor');
-
 
   // Load project data
   useEffect(() => {
@@ -84,6 +96,18 @@ const Grade12ProjectEditor: React.FC = () => {
       if (foundProject) {
         setProject(foundProject);
         setContent(foundProject.project_content || '');
+        // حساب عدد الكلمات الأولي
+        if (foundProject.project_content) {
+          try {
+            const parsed = JSON.parse(foundProject.project_content);
+            const text = extractTextFromTiptapContent(parsed);
+            setWordCount(text.split(/\s+/).filter(word => word.length > 0).length);
+            setCharacterCount(text.length);
+          } catch {
+            setWordCount(0);
+            setCharacterCount(0);
+          }
+        }
       } else {
         toast({
           title: "خطأ",
@@ -95,179 +119,81 @@ const Grade12ProjectEditor: React.FC = () => {
     }
   }, [projectId, projects, navigate]);
 
-  // Auto-save functionality with versioning
-  useEffect(() => {
-    if (!project?.id || content === project?.project_content) return;
-
-    const autoSaveTimer = setTimeout(async () => {
-      setIsAutoSaving(true);
-      try {
-        await updateProject(project.id, { project_content: content });
-        
-        // Save auto version history (max 5 versions)
-        const newVersion: Version = {
-          id: `auto_${Date.now()}`,
-          content,
-          timestamp: new Date().toISOString(),
-          changes: `تحديث تلقائي - ${new Date().toLocaleTimeString('en-US')}`
-        };
-        setVersions(prev => {
-          const filtered = prev.filter(v => !v.id.startsWith('auto_'));
-          return [newVersion, ...filtered].slice(0, 5);
-        });
-        
-        setLastSaved(new Date());
-        // Only show autosave toast occasionally to avoid spam
-        if (Math.random() < 0.3) { // Show 30% of the time
-          toast({
-            title: "تم الحفظ التلقائي",
-            description: "تم حفظ التغييرات تلقائياً",
-          });
-        }
-      } catch (error) {
-        console.error('Error auto-saving:', error);
-      } finally {
-        setIsAutoSaving(false);
+  // دالة لاستخراج النص من محتوى TipTap
+  const extractTextFromTiptapContent = (content: any): string => {
+    if (!content || !content.content) return '';
+    
+    let text = '';
+    const traverse = (node: any) => {
+      if (node.type === 'text') {
+        text += node.text;
       }
-    }, 300000); // 5 minutes = 300000ms
-
-    return () => clearTimeout(autoSaveTimer);
-  }, [content, project?.id, project?.project_content, updateProject]);
-
-  // Load comments when project changes
-  useEffect(() => {
-    if (project?.id) {
-      loadComments();
-      loadVersionHistory();
-    }
-  }, [project?.id]);
-
-  const loadComments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('grade10_project_comments')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            role
-          )
-        `)
-        .eq('project_id', project?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedComments = data?.map(comment => ({
-        id: comment.id,
-        text: comment.comment_text,
-        author: (comment.profiles as any)?.full_name || 'مستخدم مجهول',
-        timestamp: comment.created_at,
-        type: (comment.profiles as any)?.role === 'teacher' ? 'teacher' : 'student' as 'teacher' | 'student'
-      })) || [];
-
-      setComments(formattedComments);
-    } catch (error) {
-      console.error('Error loading comments:', error);
-    }
+      if (node.content) {
+        node.content.forEach(traverse);
+      }
+    };
+    
+    content.content.forEach(traverse);
+    return text;
   };
 
-  const loadVersionHistory = () => {
-    // In real app, this would load from database
-    // For now, just initialize empty
-    setVersions([]);
+  // معالجة تغيير المحتوى من المحرر
+  const handleContentChange = (newContent: any, html: string, plainText: string) => {
+    setContent(JSON.stringify(newContent));
+    setWordCount(plainText.split(/\s+/).filter(word => word.length > 0).length);
+    setCharacterCount(plainText.length);
   };
 
-  const handleManualSave = async () => {
+  // حفظ المحرر
+  const handleEditorSave = async (newContent: any) => {
     if (!project?.id) return;
-
+    
+    setIsSaving(true);
     try {
-      setIsAutoSaving(true);
-      await updateProject(project.id, { project_content: content });
-      
-      // Save manual version history (max 3 versions)
-      const newVersion: Version = {
-        id: `manual_${Date.now()}`,
-        content,
-        timestamp: new Date().toISOString(),
-        changes: `حفظ يدوي - ${new Date().toLocaleTimeString('en-US')}`
-      };
-      setVersions(prev => {
-        const filtered = prev.filter(v => !v.id.startsWith('manual_'));
-        return [newVersion, ...filtered].slice(0, 3);
+      await updateProject(project.id, { 
+        project_content: JSON.stringify(newContent)
       });
-      
       setLastSaved(new Date());
       toast({
         title: "تم الحفظ",
         description: "تم حفظ المشروع بنجاح",
       });
     } catch (error) {
-      console.error('Error saving project:', error);
+      console.error('خطأ في الحفظ:', error);
       toast({
-        title: "خطأ في الحفظ",
-        description: "حدث خطأ أثناء حفظ المشروع",
+        title: "خطأ",
+        description: "فشل في حفظ المشروع",
         variant: "destructive",
       });
     } finally {
-      setIsAutoSaving(false);
+      setIsSaving(false);
     }
   };
 
-  const handleAddComment = async () => {
-    if (!newComment.trim() || !project?.id || !userProfile?.user_id) return;
-
+  // حفظ يدوي
+  const handleSave = async () => {
+    if (!project?.id) return;
+    
+    setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('grade10_project_comments')
-        .insert({
-          project_id: project.id,
-          user_id: userProfile.user_id,
-          comment_text: newComment.trim()
-        });
-
-      if (error) throw error;
-
-      setNewComment('');
-      loadComments(); // Refresh comments
+      await updateProject(project.id, { 
+        project_content: content
+      });
+      setLastSaved(new Date());
       toast({
-        title: "تم إضافة التعليق",
-        description: "تم إضافة تعليقك بنجاح",
+        title: "تم الحفظ",
+        description: "تم حفظ المشروع بنجاح",
       });
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.error('خطأ في الحفظ:', error);
       toast({
         title: "خطأ",
-        description: "حدث خطأ أثناء إضافة التعليق",
+        description: "فشل في حفظ المشروع",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
-  };
-
-  const restoreVersion = (version: Version) => {
-    setContent(version.content);
-    toast({
-      title: "تم استرجاع النسخة",
-      description: `تم استرجاع المحتوى من ${new Date(version.timestamp).toLocaleString('ar')}`,
-    });
-  };
-
-  const calculateProgress = (content: string): number => {
-    if (!content) return 0;
-    
-    const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;
-    const hasImages = content.includes('<img') || content.includes('[صورة]');
-    const hasTables = content.includes('<table') || content.includes('|');
-    
-    let score = 0;
-    if (wordCount > 100) score += 40;
-    else if (wordCount > 50) score += 20;
-    else if (wordCount > 20) score += 10;
-    
-    if (hasImages) score += 30;
-    if (hasTables) score += 30;
-    
-    return Math.min(score, 100);
   };
 
   if (!project) {
@@ -285,462 +211,301 @@ const Grade12ProjectEditor: React.FC = () => {
   const isTeacher = userProfile?.role === 'teacher' || userProfile?.role === 'superadmin';
   const canEdit = isStudent || isTeacher;
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'in_progress': return 'bg-yellow-500';
-      default: return 'bg-gray-400';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed': return 'مكتمل';
-      case 'in_progress': return 'قيد التنفيذ';
-      default: return 'لم يبدأ';
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Top Navigation Bar */}
-      <div className="border-b bg-card shadow-sm flex-shrink-0">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                العودة
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold">{project.title}</h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge className={getStatusColor(project.status)}>
-                    {getStatusText(project.status)}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    تقدم: {calculateProgress(content)}%
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {lastSaved && (
-                <span className="text-sm text-muted-foreground">
-                  آخر حفظ: {lastSaved.toLocaleTimeString('ar')}
-                </span>
-              )}
-              {isAutoSaving && (
-                <span className="text-sm text-primary">جاري الحفظ...</span>
-              )}
-              <Button onClick={handleManualSave} disabled={isAutoSaving}>
-                <Save className="h-4 w-4 mr-2" />
-                حفظ
-              </Button>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+      <div className="container mx-auto p-4 max-w-7xl">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <BackButton />
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                محرر المشاريع
+              </h1>
+              <p className="text-muted-foreground">
+                {project?.title || 'جاري التحميل...'}
+              </p>
             </div>
           </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {project && (
+              <>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
+                  <User className="h-4 w-4" />
+                  <span>{user?.user_metadata?.full_name || 'الطالب'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
+                  <Calendar className="h-4 w-4" />
+                  <span>الموعد النهائي: {project.due_date ? format(new Date(project.due_date), 'dd/MM/yyyy', { locale: ar }) : 'غير محدد'}</span>
+                </div>
+              </>
+            )}
+
+            <Button
+              variant={isPreviewMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsPreviewMode(!isPreviewMode)}
+              className="gap-2"
+            >
+              {isPreviewMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {isPreviewMode ? 'إخفاء المعاينة' : 'معاينة'}
+            </Button>
+
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleSave}
+              disabled={!project || isSaving}
+              className="gap-2"
+            >
+              <Save className="h-4 w-4" />
+              {isSaving ? 'جاري الحفظ...' : 'حفظ'}
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Main Content - Full Height */}
-      <div className="flex-1 container mx-auto p-4 overflow-hidden">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <TabsList className="grid w-full grid-cols-6 flex-shrink-0" dir="rtl">
-            <TabsTrigger value="editor" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              المحرر
-            </TabsTrigger>
-            <TabsTrigger value="tasks" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              المهام
-            </TabsTrigger>
-            <TabsTrigger value="comments" className="flex items-center gap-2 relative">
-              <MessageSquare className="h-4 w-4" />
-              التعليقات
-              {comments.length > 0 && (
-                <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                  {comments.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              السجل
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              الإحصائيات
-            </TabsTrigger>
-            <TabsTrigger value="info" className="flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              المعلومات
-            </TabsTrigger>
-          </TabsList>
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap items-center gap-2 mb-6 border-b">
+          <Button
+            variant={activeTab === 'editor' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('editor')}
+            className="gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            محرر النص
+          </Button>
+          <Button
+            variant={activeTab === 'tasks' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('tasks')}
+            className="gap-2"
+          >
+            <CheckSquare className="h-4 w-4" />
+            المهام والمتطلبات
+          </Button>
+          <Button
+            variant={activeTab === 'comments' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('comments')}
+            className="gap-2 relative"
+          >
+            <MessageCircle className="h-4 w-4" />
+            التعليقات والملاحظات
+            {newCommentsCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {newCommentsCount}
+              </span>
+            )}
+          </Button>
+          <Button
+            variant={activeTab === 'info' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('info')}
+            className="gap-2"
+          >
+            <Info className="h-4 w-4" />
+            معلومات المشروع
+          </Button>
+        </div>
 
-          <TabsContent value="editor" className="flex-1 mt-4">
-            <div className="h-full">
-              <ProfessionalDocumentEditor
-                documentId={project.id}
-                initialContent={content ? JSON.parse(content) : null}
-                onContentChange={(newContent, html, plainText) => {
-                  setContent(JSON.stringify(newContent));
-                  setWordCount(plainText?.split(/\s+/).filter(word => word.length > 0).length || 0);
-                }}
-                onSave={async (newContent) => {
-                  setContent(JSON.stringify(newContent));
-                  await handleManualSave();
-                }}
-                readOnly={!canEdit}
-                autoSave={true}
-                className="h-full"
-                title={project?.title || "مشروع جديد"}
-                showToolbar={true}
-                showPageBreaks={false}
-                enableCollaboration={false}
-                enableImagePasting={true}
-                enableImageResizing={true}
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="tasks" className="flex-1 mt-4">
-            <ProjectTasksManager 
-              projectId={project.id}
-              isTeacher={isTeacher}
-              isStudent={isStudent}
-            />
-          </TabsContent>
-
-          <TabsContent value="comments" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>التعليقات والملاحظات</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Add comment form */}
-                  {canEdit && (
-                    <div className="flex gap-2">
-                      <Textarea
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="أضف تعليقاً..."
-                        className="flex-1"
-                        rows={3}
+        {/* Main Content */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Main Editor/Content Section */}
+          <div className="xl:col-span-2 order-2 xl:order-1">
+            <Card className="h-full">
+              <CardContent className="p-0">
+                <div className="h-[calc(100vh-300px)] min-h-[700px]">
+                  {activeTab === 'editor' && (
+                    <ProfessionalDocumentEditor
+                      documentId={projectId}
+                      initialContent={project?.project_content ? JSON.parse(project.project_content) : undefined}
+                      onContentChange={handleContentChange}
+                      onSave={handleEditorSave}
+                      className="h-full"
+                      showToolbar={true}
+                      showPageBreaks={false}
+                      enableCollaboration={false}
+                      autoSave={true}
+                      title={project?.title || "مشروع التخرج"}
+                      wordCount={wordCount}
+                      enableImagePasting={true}
+                      enableImageResizing={true}
+                    />
+                  )}
+                  
+                  {activeTab === 'tasks' && (
+                    <div className="p-6 h-full">
+                      <ProjectTasksManager 
+                        projectId={projectId!}
+                        isTeacher={isTeacher}
+                        isStudent={isStudent}
                       />
-                      <Button 
-                        onClick={handleAddComment}
-                        disabled={!newComment.trim()}
-                        className="self-end"
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
                     </div>
                   )}
                   
-                  {/* Comments list */}
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-3">
-                      {comments.map((comment) => (
-                        <div key={comment.id} className="border rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium">{comment.author}</span>
-                            <div className="flex items-center gap-2">
-                              <Badge variant={comment.type === 'teacher' ? 'default' : 'secondary'}>
-                                {comment.type === 'teacher' ? 'معلم' : 'طالب'}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(comment.timestamp).toLocaleString('ar')}
-                              </span>
-                            </div>
-                          </div>
-                          <p className="text-sm">{comment.text}</p>
-                        </div>
-                      ))}
-                      {comments.length === 0 && (
-                        <p className="text-center text-muted-foreground py-8">
-                          لا توجد تعليقات بعد
-                        </p>
-                      )}
+                  {activeTab === 'comments' && (
+                    <div className="p-6 h-full overflow-y-auto">
+                      <ProjectCommentsSection 
+                        projectId={projectId!}
+                      />
                     </div>
-                  </ScrollArea>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="history" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>سجل النسخ</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-3">
-                    {versions.map((version) => (
-                      <div key={version.id} className="border rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium">{version.changes}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(version.timestamp).toLocaleString('ar')}
-                            </span>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => restoreVersion(version)}
-                            >
-                              <RotateCcw className="h-3 w-3 mr-1" />
-                              استرجاع
-                            </Button>
+                  )}
+                  
+                  {activeTab === 'info' && (
+                    <div className="p-6 h-full overflow-y-auto">
+                      <div className="space-y-6">
+                        <div>
+                          <Label className="text-base font-semibold">العنوان</Label>
+                          <p className="text-muted-foreground mt-2">{project.title}</p>
+                        </div>
+                        <div>
+                          <Label className="text-base font-semibold">الوصف</Label>
+                          <p className="text-muted-foreground mt-2">{project.description || 'لا يوجد وصف'}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium">عدد الكلمات</Label>
+                            <p className="text-2xl font-bold text-primary">{wordCount}</p>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium">عدد الأحرف</Label>
+                            <p className="text-2xl font-bold text-primary">{characterCount}</p>
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {version.content.substring(0, 100)}...
-                        </p>
+                        <div>
+                          <Label className="text-base font-semibold">تاريخ الإنشاء</Label>
+                          <p className="text-muted-foreground mt-2">
+                            {project.created_at ? format(new Date(project.created_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : 'غير متاح'}
+                          </p>
+                        </div>
+                        {project.due_date && (
+                          <div>
+                            <Label className="text-base font-semibold">تاريخ التسليم</Label>
+                            <p className="text-muted-foreground mt-2">
+                              {format(new Date(project.due_date), 'dd/MM/yyyy', { locale: ar })}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                    {versions.length === 0 && (
-                      <p className="text-center text-muted-foreground py-8">
-                        لا توجد نسخ محفوظة بعد
-                      </p>
-                    )}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="mt-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">عدد الكلمات</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{wordCount}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">عدد الأحرف</CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{content.length}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">عدد الصفحات</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{Math.ceil(wordCount / 250) || 1}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">التعليقات</CardTitle>
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{comments.length}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">التقدم</CardTitle>
-                  <Trophy className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{calculateProgress(content)}%</div>
-                  <Progress value={calculateProgress(content)} className="mt-2" />
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="info" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>معلومات المشروع</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <Label>العنوان</Label>
-                    <p className="text-sm text-muted-foreground mt-1">{project.title}</p>
-                  </div>
-                  <div>
-                    <Label>الوصف</Label>
-                    <p className="text-sm text-muted-foreground mt-1">{project.description || 'لا يوجد وصف'}</p>
-                  </div>
-                  <div>
-                    <Label>تاريخ الإنشاء</Label>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {new Date(project.created_at).toLocaleDateString('ar')}
-                    </p>
-                  </div>
-                  {project.due_date && (
-                    <div>
-                      <Label>تاريخ التسليم</Label>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {new Date(project.due_date).toLocaleDateString('ar')}
-                      </p>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
 
-      {/* Project Editor Specific Styles */}
-      <style>{`
-        .project-editor-container {
-          /* Isolate editor styles from global CSS */
-          isolation: isolate;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          background: #f0f0f0;
-          min-height: calc(100vh - 120px);
-          padding: 2rem 1rem;
-        }
-        
-        .a4-page {
-          width: 21cm;
-          min-height: 29.7cm;
-          max-height: 29.7cm;
-          background: white;
-          margin: 0 auto 2cm auto;
-          padding: 2.5cm;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-          border: 1px solid #ddd;
-          overflow: hidden;
-          position: relative;
-          page-break-after: always;
-        }
-        
-        .project-editor-container .document-editor {
-          font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          text-align: right;
-          line-height: 1.6;
-          border: none;
-          outline: none;
-          background: transparent;
-          width: 100%;
-          height: 100%;
-          overflow: visible;
-        }
-        
-        .project-editor-container .document-editor:focus {
-          outline: none;
-        }
-        
-        .project-editor-container .document-editor p {
-          margin: 0 0 1em 0;
-          direction: auto;
-        }
-        
-        .project-editor-container .document-editor h1,
-        .project-editor-container .document-editor h2,
-        .project-editor-container .document-editor h3 {
-          margin: 1.5em 0 0.5em 0;
-          direction: auto;
-        }
-        
-        .project-editor-container .document-editor table {
-          border-collapse: collapse;
-          width: 100%;
-          margin: 20px 0;
-          border-radius: 8px;
-          border: 1px solid #e2e8f0;
-          overflow: hidden;
-        }
-        
-        .project-editor-container .document-editor table td,
-        .project-editor-container .document-editor table th {
-          padding: 12px;
-          border: 1px solid #ddd;
-          text-align: inherit;
-          direction: auto;
-        }
-        
-        .project-editor-container .document-editor table th {
-          background-color: #f8f9fa;
-          font-weight: bold;
-        }
-        
-        .project-editor-container .document-editor img {
-          max-width: 100%;
-          height: auto;
-          border-radius: 8px;
-          margin: 10px 0;
-          display: block;
-        }
-        
-        .project-editor-container .document-editor ul,
-        .project-editor-container .document-editor ol {
-          margin: 1em 0;
-          padding-right: 2em;
-          direction: auto;
-        }
-        
-        .project-editor-container .document-editor li {
-          margin: 0.5em 0;
-          direction: auto;
-        }
-        
-        .page-indicator {
-          position: fixed;
-          bottom: 2rem;
-          right: 2rem;
-          background: rgba(0,0,0,0.8);
-          color: white;
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
-          font-size: 0.875rem;
-          z-index: 1000;
-        }
-        
-        /* Print styles */
-        @media print {
-          .project-editor-container {
-            background: white;
-            padding: 0;
-          }
-          
-          .a4-page {
-            margin: 0;
-            box-shadow: none;
-            border: none;
-            page-break-after: always;
-          }
-          
-          .page-indicator {
-            display: none;
-          }
-        }
-        
-        /* Auto page break functionality */
-        .auto-page-break {
-          page-break-before: always;
-        }
-      `}</style>
+          {/* Sidebar */}
+          <div className="order-1 xl:order-2 space-y-6">
+            {/* Project Info */}
+            {project && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">معلومات المشروع</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">عنوان المشروع</label>
+                    <p className="text-sm">{project.title}</p>
+                  </div>
+                  
+                  {project.description && (
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">الوصف</label>
+                      <p className="text-sm text-muted-foreground">{project.description}</p>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">الحالة</label>
+                    <Badge variant={
+                      project.status === 'completed' ? 'default' :
+                      project.status === 'submitted' ? 'secondary' :
+                      project.status === 'in_progress' ? 'outline' : 'destructive'
+                    }>
+                      {project.status === 'completed' ? 'مكتمل' :
+                       project.status === 'submitted' ? 'مُرسل' :
+                       project.status === 'in_progress' ? 'قيد التنفيذ' : 'مسودة'}
+                    </Badge>
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">عدد الكلمات:</span>
+                    <span className="font-medium">{wordCount}</span>
+                  </div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">عدد الأحرف:</span>
+                    <span className="font-medium">{characterCount}</span>
+                  </div>
+
+                  {project.created_at && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">تاريخ الإنشاء:</span>
+                      <span className="font-medium">
+                        {format(new Date(project.created_at), 'dd/MM/yyyy', { locale: ar })}
+                      </span>
+                    </div>
+                  )}
+
+                  {project.updated_at && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">آخر تحديث:</span>
+                      <span className="font-medium">
+                        {format(new Date(project.updated_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                      </span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">الإجراءات السريعة</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start gap-2"
+                  onClick={() => setActiveTab('tasks')}
+                >
+                  <CheckSquare className="h-4 w-4" />
+                  عرض المهام
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start gap-2 relative"
+                  onClick={() => setActiveTab('comments')}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  التعليقات والملاحظات
+                  {newCommentsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {newCommentsCount}
+                    </span>
+                  )}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start gap-2"
+                  onClick={() => setIsPreviewMode(!isPreviewMode)}
+                >
+                  <Eye className="h-4 w-4" />
+                  {isPreviewMode ? 'إخفاء المعاينة' : 'معاينة المشروع'}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
