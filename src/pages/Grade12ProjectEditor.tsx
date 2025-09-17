@@ -289,29 +289,31 @@ const Grade12ProjectEditor: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* محرر النص - كامل العرض */}
+          {/* محرر النص - مساحة مناسبة */}
           <TabsContent value="editor" className="w-full animate-fade-in">
-            <Card className="w-full shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
-              <CardContent className="p-0">
-                <div className="h-[calc(100vh-280px)] min-h-[700px]">
-                  <ProfessionalDocumentEditor
-                    documentId={projectId}
-                    initialContent={project?.project_content ? JSON.parse(project.project_content) : undefined}
-                    onContentChange={handleContentChange}
-                    onSave={handleEditorSave}
-                    className="h-full rounded-lg"
-                    showToolbar={true}
-                    showPageBreaks={false}
-                    enableCollaboration={false}
-                    autoSave={true}
-                    title={project?.title || "مشروع التخرج"}
-                    wordCount={wordCount}
-                    enableImagePasting={true}
-                    enableImageResizing={true}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mx-auto max-w-5xl">
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
+                <CardContent className="p-0">
+                  <div className="h-[calc(100vh-280px)] min-h-[700px]">
+                    <ProfessionalDocumentEditor
+                      documentId={projectId}
+                      initialContent={project?.project_content ? JSON.parse(project.project_content) : undefined}
+                      onContentChange={handleContentChange}
+                      onSave={handleEditorSave}
+                      className="h-full rounded-lg"
+                      showToolbar={true}
+                      showPageBreaks={false}
+                      enableCollaboration={false}
+                      autoSave={true}
+                      title={project?.title || "مشروع التخرج"}
+                      wordCount={wordCount}
+                      enableImagePasting={true}
+                      enableImageResizing={true}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* المهام والمتطلبات */}
