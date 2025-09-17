@@ -96,7 +96,13 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
     commentType: 'comment' | 'feedback' | 'grade' = 'comment'
   ) => {
     if (!user || !projectId || !commentText.trim()) {
-      console.log('addComment: Missing required data', { user: !!user, projectId, commentText: !!commentText });
+      console.log('❌ addComment: Missing required data', { 
+        hasUser: !!user, 
+        userId: user?.id,
+        projectId, 
+        hasCommentText: !!commentText,
+        commentLength: commentText?.length 
+      });
       return false;
     }
 
@@ -104,14 +110,48 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
       setIsSubmitting(true);
       setError(null);
 
-      console.log('Attempting to add comment:', {
+      // طباعة معلومات تفصيلية للتشخيص
+      console.log('🔄 Starting comment addition process...');
+      console.log('📊 Current user data:', {
+        userId: user.id,
+        userEmail: user.email,
+        hasUserProfile: !!user,
+        authRole: 'authenticated'
+      });
+
+      // التحقق من الجلسة الحالية
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      console.log('🔐 Current session:', {
+        hasSession: !!session.session,
+        sessionUserId: session.session?.user?.id,
+        sessionError: sessionError?.message
+      });
+
+      // التحقق من المستخدم الحالي
+      const { data: currentUser, error: userError } = await supabase.auth.getUser();
+      console.log('👤 Current user:', {
+        hasUser: !!currentUser.user,
+        currentUserId: currentUser.user?.id,
+        userError: userError?.message
+      });
+
+      console.log('📋 Project and comment data:', {
+        projectId: projectId,
+        commentText: commentText.trim(),
+        commentType: commentType,
+        commentLength: commentText.trim().length
+      });
+
+      console.log('📝 Data to insert:', {
         project_id: projectId,
         created_by: user.id,
         comment: commentText.trim(),
         comment_type: commentType,
-        user_role: user
+        is_read: false
       });
 
+      // محاولة إدراج التعليق مع معالجة تفصيلية للأخطاء
+      console.log('🚀 Attempting database insert...');
       const { data, error: insertError } = await supabase
         .from('grade12_project_comments')
         .insert({
@@ -125,14 +165,28 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
         .single();
 
       if (insertError) {
-        console.error('Error adding comment:', insertError);
-        console.error('Error details:', {
+        console.error('❌ Insert error details:', {
           message: insertError.message,
           details: insertError.details,
           hint: insertError.hint,
-          code: insertError.code
+          code: insertError.code,
+          fullError: insertError
         });
-        setError('فشل في إضافة التعليق');
+        
+        // معالجة أخطاء RLS المحددة
+        if (insertError.code === '42501' || insertError.message?.includes('policy')) {
+          console.error('🔒 RLS Policy Error detected');
+          setError('لا يمكنك إضافة تعليق على هذا المشروع. تأكد من صلاحياتك.');
+        } else if (insertError.code === '23505') {
+          console.error('🔄 Duplicate entry error');
+          setError('التعليق موجود بالفعل');
+        } else if (insertError.message?.includes('authentication')) {
+          console.error('🔐 Authentication error');
+          setError('خطأ في المصادقة. يرجى تسجيل الدخول مرة أخرى.');
+        } else {
+          setError(`فشل في إضافة التعليق: ${insertError.message}`);
+        }
+        
         toast({
           title: "خطأ",
           description: `فشل في إضافة التعليق: ${insertError.message}`,
@@ -141,14 +195,21 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
         return false;
       }
 
-      console.log('Comment added successfully:', data);
+      console.log('✅ Comment inserted successfully:', data);
 
       // جلب معلومات المؤلف
-      const { data: authorData } = await supabase
+      console.log('📲 Fetching author data...');
+      const { data: authorData, error: authorError } = await supabase
         .from('profiles')
         .select('user_id, full_name, role')
         .eq('user_id', user.id)
         .single();
+
+      if (authorError) {
+        console.error('⚠️ Author fetch error (non-critical):', authorError);
+      } else {
+        console.log('👤 Author data fetched:', authorData);
+      }
 
       // إضافة التعليق الجديد للقائمة محلياً
       if (data) {
@@ -160,6 +221,8 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
             role: authorData.role || 'student'
           } : undefined
         };
+        
+        console.log('📝 Adding comment to local state:', newComment);
         setComments(prev => [...prev, newComment]);
       }
 
@@ -168,9 +231,17 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
         description: "تم إضافة التعليق بنجاح",
       });
 
+      console.log('🎉 Comment addition process completed successfully');
       return true;
-    } catch (err) {
-      console.error('Error in addComment:', err);
+      
+    } catch (err: any) {
+      console.error('❌ Complete error object:', {
+        error: err,
+        message: err?.message,
+        stack: err?.stack,
+        name: err?.name
+      });
+      
       setError('حدث خطأ في إضافة التعليق');
       toast({
         title: "خطأ",
