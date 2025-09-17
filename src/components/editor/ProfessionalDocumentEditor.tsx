@@ -134,40 +134,10 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
     Typography.configure({
       openDoubleQuote: '"',
       closeDoubleQuote: '"',
-      openSingleQuote: ''',
-      closeSingleQuote: ''',
+      openSingleQuote: "'",
+      closeSingleQuote: "'",
     }),
   ];
-
-  // معالجة الحفظ التلقائي
-  const handleAutoSave = useCallback(async () => {
-    if (!editor || readOnly || !onSave) return;
-    
-    setIsSaving(true);
-    try {
-      await onSave(editor.getJSON());
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [editor, readOnly, onSave]);
-
-  // معالجة الحفظ اليدوي
-  const handleManualSave = useCallback(async () => {
-    if (!editor || readOnly || !onSave) return;
-    
-    setIsSaving(true);
-    try {
-      await onSave(editor.getJSON());
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error('Manual save failed:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [editor, readOnly, onSave]);
 
   // إعداد المحرر
   const editor = useEditor({
@@ -200,6 +170,36 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
       editor.commands.setFontFamily('Cairo, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif');
     },
   });
+
+  // معالجة الحفظ التلقائي
+  const handleAutoSave = useCallback(async () => {
+    if (!editor || readOnly || !onSave) return;
+    
+    setIsSaving(true);
+    try {
+      await onSave(editor.getJSON());
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [editor, readOnly, onSave]);
+
+  // معالجة الحفظ اليدوي
+  const handleManualSave = useCallback(async () => {
+    if (!editor || readOnly || !onSave) return;
+    
+    setIsSaving(true);
+    try {
+      await onSave(editor.getJSON());
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error('Manual save failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [editor, readOnly, onSave]);
 
   // معالجة لصق الصور من الحافظة
   useEffect(() => {
@@ -353,9 +353,8 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
           title={title}
           wordCount={currentWordCount}
           characterCount={characterCount}
-          pageCount={isA4Mode ? pageCount : undefined}
           onSave={handleManualSave}
-          onToggleA4={() => setIsA4Mode(!isA4Mode)}
+          onToggleA4Mode={() => setIsA4Mode(!isA4Mode)}
           isSaving={isSaving}
           lastSaved={lastSaved}
         />
@@ -364,7 +363,9 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
       {/* منطقة المحرر */}
       <div className="flex-1 overflow-hidden">
         {isA4Mode ? (
-          <A4PageSystem editor={editor} className="h-full" />
+          <A4PageSystem className="h-full">
+            <EditorContent editor={editor} />
+          </A4PageSystem>
         ) : (
           <div 
             className={cn(
