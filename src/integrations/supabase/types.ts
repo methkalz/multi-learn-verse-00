@@ -465,15 +465,7 @@ export type Database = {
           user_agent?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "document_activities_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "professional_documents"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       document_comments: {
         Row: {
@@ -526,13 +518,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "document_comments_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "professional_documents"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "document_comments_parent_comment_id_fkey"
             columns: ["parent_comment_id"]
             isOneToOne: false
@@ -572,15 +557,7 @@ export type Database = {
           permission_type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "document_permissions_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "professional_documents"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       document_versions: {
         Row: {
@@ -616,15 +593,7 @@ export type Database = {
           metadata?: Json | null
           version_number?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "document_versions_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "professional_documents"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       email_logs: {
         Row: {
@@ -3621,69 +3590,68 @@ export type Database = {
       }
       professional_documents: {
         Row: {
-          allow_comments: boolean | null
-          allow_suggestions: boolean | null
+          allow_comments: boolean
+          allow_suggestions: boolean
           content: Json
           created_at: string
           html_content: string | null
           id: string
-          last_saved_at: string | null
-          metadata: Json | null
+          last_saved_at: string
           owner_id: string
           page_count: number | null
           plain_text: string | null
           school_id: string | null
-          settings: Json | null
-          status: string
           title: string
           updated_at: string
-          version_number: number | null
+          version_number: number
           visibility: string
           word_count: number | null
         }
         Insert: {
-          allow_comments?: boolean | null
-          allow_suggestions?: boolean | null
+          allow_comments?: boolean
+          allow_suggestions?: boolean
           content?: Json
           created_at?: string
           html_content?: string | null
           id?: string
-          last_saved_at?: string | null
-          metadata?: Json | null
+          last_saved_at?: string
           owner_id: string
           page_count?: number | null
           plain_text?: string | null
           school_id?: string | null
-          settings?: Json | null
-          status?: string
           title: string
           updated_at?: string
-          version_number?: number | null
+          version_number?: number
           visibility?: string
           word_count?: number | null
         }
         Update: {
-          allow_comments?: boolean | null
-          allow_suggestions?: boolean | null
+          allow_comments?: boolean
+          allow_suggestions?: boolean
           content?: Json
           created_at?: string
           html_content?: string | null
           id?: string
-          last_saved_at?: string | null
-          metadata?: Json | null
+          last_saved_at?: string
           owner_id?: string
           page_count?: number | null
           plain_text?: string | null
           school_id?: string | null
-          settings?: Json | null
-          status?: string
           title?: string
           updated_at?: string
-          version_number?: number | null
+          version_number?: number
           visibility?: string
           word_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_professional_documents_school"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -4549,6 +4517,18 @@ export type Database = {
       get_available_grade_levels: {
         Args: { school_uuid: string }
         Returns: string[]
+      }
+      get_current_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_current_user_role_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_current_user_school_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_exam_question_for_student: {
         Args: { question_id: string }
