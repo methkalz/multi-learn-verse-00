@@ -95,11 +95,22 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
     commentText: string, 
     commentType: 'comment' | 'feedback' | 'grade' = 'comment'
   ) => {
-    if (!user || !projectId || !commentText.trim()) return false;
+    if (!user || !projectId || !commentText.trim()) {
+      console.log('addComment: Missing required data', { user: !!user, projectId, commentText: !!commentText });
+      return false;
+    }
 
     try {
       setIsSubmitting(true);
       setError(null);
+
+      console.log('Attempting to add comment:', {
+        project_id: projectId,
+        created_by: user.id,
+        comment: commentText.trim(),
+        comment_type: commentType,
+        user_role: user
+      });
 
       const { data, error: insertError } = await supabase
         .from('grade12_project_comments')
@@ -115,14 +126,22 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
 
       if (insertError) {
         console.error('Error adding comment:', insertError);
+        console.error('Error details:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code
+        });
         setError('فشل في إضافة التعليق');
         toast({
           title: "خطأ",
-          description: "فشل في إضافة التعليق. حاول مرة أخرى.",
+          description: `فشل في إضافة التعليق: ${insertError.message}`,
           variant: "destructive",
         });
         return false;
       }
+
+      console.log('Comment added successfully:', data);
 
       // جلب معلومات المؤلف
       const { data: authorData } = await supabase
