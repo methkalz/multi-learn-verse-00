@@ -48,7 +48,7 @@ const ProjectNotifications: React.FC = () => {
   };
 
   const handleViewProject = (projectId: string) => {
-    navigate(`/grade12-project-editor/${projectId}`);
+    navigate(`/grade12-project-editor/${projectId}?tab=comments`);
   };
 
   const handleQuickReply = async () => {

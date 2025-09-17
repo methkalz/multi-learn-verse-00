@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 const StudentNotifications: React.FC = () => {
+  const navigate = useNavigate();
   const { 
     notifications, 
     unreadCount, 
@@ -23,6 +25,18 @@ const StudentNotifications: React.FC = () => {
     markAsRead, 
     markAllAsRead 
   } = useStudentNotifications();
+
+  const handleNotificationClick = async (notification: any) => {
+    // تحديد الإشعار كمقروء
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+    
+    // الانتقال إلى المشروع مع فتح تاب التعليقات
+    if (notification.project_id) {
+      navigate(`/grade12-project-editor/${notification.project_id}?tab=comments`);
+    }
+  };
 
   if (loading) {
     return (
@@ -111,7 +125,7 @@ const StudentNotifications: React.FC = () => {
                       ? 'bg-white border-gray-200' 
                       : getNotificationColor(notification.notification_type)
                   }`}
-                  onClick={() => !notification.is_read && markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-1">

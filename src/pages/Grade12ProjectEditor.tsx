@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +42,7 @@ import { ar } from 'date-fns/locale';
 const Grade12ProjectEditor: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, userProfile } = useAuth();
   const { projects, updateProject, saveRevision, addComment } = useGrade12Projects();
   const { phases, updateTaskCompletion, getOverallProgress } = useGrade12DefaultTasks();
@@ -56,6 +57,7 @@ const Grade12ProjectEditor: React.FC = () => {
   const [newCommentsCount, setNewCommentsCount] = useState(0);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'editor');
 
   // Load project data
   useEffect(() => {
@@ -248,7 +250,7 @@ const Grade12ProjectEditor: React.FC = () => {
         </Card>
 
         {/* نظام التابات الرئيسي */}
-        <Tabs defaultValue="editor" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-8 h-12 p-1 bg-muted/50 backdrop-blur-sm border shadow-sm">
             <TabsTrigger 
               value="editor" 
