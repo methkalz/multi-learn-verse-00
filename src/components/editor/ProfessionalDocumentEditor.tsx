@@ -23,9 +23,12 @@ import Typography from '@tiptap/extension-typography';
 import { cn } from '@/lib/utils';
 import { ProfessionalToolbar } from './ProfessionalToolbar';
 import { A4PageSystem } from './A4PageSystem';
+import { EnhancedA4PageSystem } from './EnhancedA4PageSystem';
+import { PrintPreview } from './PrintPreview';
 import { ExportEngine } from './ExportEngine';
 import { CollaborationSystem } from './CollaborationSystem';
 import { AutoSaveSystem } from './AutoSaveSystem';
+import { ViewMode } from './ViewModeToggle';
 
 interface ProfessionalDocumentEditorProps {
   documentId?: string;
@@ -60,7 +63,8 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
   enableImagePasting = true,
   enableImageResizing = true,
 }) => {
-  const [isA4Mode, setIsA4Mode] = useState(showPageBreaks);
+  const [viewMode, setViewMode] = useState<ViewMode>('continuous');
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [pageCount, setPageCount] = useState(1);
   const [currentWordCount, setCurrentWordCount] = useState(wordCount);
   const [characterCount, setCharacterCount] = useState(0);
@@ -305,24 +309,40 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
     };
   }, [editor, enableImageResizing]);
 
-  // حساب معلومات الصفحة
-  const updatePageInfo = useCallback(() => {
-    if (!editor || !isA4Mode) return;
-    
-    const content = editor.view.dom;
-    const contentHeight = content.scrollHeight;
-    const pageHeight = 842; // تقريبي لصفحة A4
-    const pages = Math.ceil(contentHeight / pageHeight);
-    setPageCount(pages);
-  }, [editor, isA4Mode]);
+  // معالجة تغيير نمط العرض
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    if (mode === 'print-preview') {
+      setShowPrintPreview(true);
+    } else {
+      setViewMode(mode);
+      setShowPrintPreview(false);
+    }
+  }, []);
+
+  // معالجة فتح معاينة الطباعة
+  const handlePrintPreview = useCallback(() => {
+    setShowPrintPreview(true);
+  }, []);
+
+  // معالجة إغلاق معاينة الطباعة
+  const handleClosePrintPreview = useCallback(() => {
+    setShowPrintPreview(false);
+  }, []);
 
   // تحديث معلومات الصفحة كل 2 ثانية
   useEffect(() => {
-    if (!isA4Mode) return;
+    if (viewMode !== 'page-breaks') return;
     
-    const interval = setInterval(updatePageInfo, 2000);
+    const interval = setInterval(() => {
+      if (!editor) return;
+      const content = editor.view.dom;
+      const contentHeight = content.scrollHeight;
+      const pageHeight = 842; // تقريبي لصفحة A4
+      const pages = Math.ceil(contentHeight / pageHeight);
+      setPageCount(pages);
+    }, 2000);
     return () => clearInterval(interval);
-  }, [updatePageInfo, isA4Mode]);
+  }, [editor, viewMode]);
 
   // تنظيف timeout عند إلغاء التحميل
   useEffect(() => {
@@ -354,18 +374,24 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
           wordCount={currentWordCount}
           characterCount={characterCount}
           onSave={handleManualSave}
-          onToggleA4Mode={() => setIsA4Mode(!isA4Mode)}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          onPrintPreview={handlePrintPreview}
           isSaving={isSaving}
           lastSaved={lastSaved}
+          totalPages={pageCount}
         />
       )}
 
       {/* منطقة المحرر */}
       <div className="flex-1 overflow-hidden">
-        {isA4Mode ? (
-          <A4PageSystem className="h-full">
+        {viewMode === 'page-breaks' ? (
+          <EnhancedA4PageSystem 
+            className="h-full"
+            onPageCountChange={setPageCount}
+          >
             <EditorContent editor={editor} />
-          </A4PageSystem>
+          </EnhancedA4PageSystem>
         ) : (
           <div 
             className={cn(
@@ -407,7 +433,11 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
           <div className="flex items-center gap-4">
             <span>الكلمات: {currentWordCount}</span>
             <span>الأحرف: {characterCount}</span>
-            {isA4Mode && <span>الصفحات: {pageCount}</span>}
+            {viewMode === 'page-breaks' && <span>الصفحات: {pageCount}</span>}
+            <span className="text-primary">النمط: {
+              viewMode === 'continuous' ? 'تحرير مستمر' :
+              viewMode === 'page-breaks' ? 'معاينة صفحات' : 'معاينة طباعة'
+            }</span>
             {enableImagePasting && (
               <span className="text-primary">اضغط Ctrl+V للصق الصور</span>
             )}
@@ -437,6 +467,14 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
       )}
       
       <ExportEngine editor={editor} title={title} />
+
+      {/* معاينة الطباعة */}
+      <PrintPreview
+        editor={editor}
+        title={title}
+        isOpen={showPrintPreview}
+        onClose={handleClosePrintPreview}
+      />
     </div>
   );
 };

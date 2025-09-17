@@ -34,25 +34,23 @@ export const ExportEngine: React.FC<ExportEngineProps> = ({
       const html = editor.getHTML();
       const cleanTitle = title.replace(/[^\w\s-]/g, '').trim();
       
-      const { data, error } = await supabase.functions.invoke('export-to-pdf', {
+      const { data, error } = await supabase.functions.invoke('enhanced-pdf-export', {
         body: {
           html,
           title: cleanTitle,
           options: {
-            format: 'A4',
-            margin: {
-              top: '2.54cm',
-              right: '2.54cm', 
-              bottom: '2.54cm',
-              left: '2.54cm'
-            },
-            printBackground: true,
-            preferCSSPageSize: true,
+            pageSize: 'A4',
+            margin: '2.54cm',
+            fontSize: '12pt',
+            fontFamily: 'Cairo, Arial, sans-serif',
+            direction: 'rtl',
+            includeStyles: true
           }
         }
       });
 
       if (error) throw error;
+      if (!data.success) throw new Error(data.message || 'فشل في إنشاء PDF');
 
       // تحويل base64 إلى blob وتحميل الملف
       const pdfBlob = new Blob([Uint8Array.from(atob(data.pdf), c => c.charCodeAt(0))], {

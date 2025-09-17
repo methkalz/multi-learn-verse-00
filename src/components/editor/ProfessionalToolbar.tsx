@@ -42,6 +42,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { ViewModeToggle, ViewMode } from './ViewModeToggle';
 
 interface ProfessionalToolbarProps {
   editor: Editor;
@@ -50,8 +51,9 @@ interface ProfessionalToolbarProps {
   lastSaved?: Date | null;
   documentId?: string;
   title?: string;
-  isA4Mode?: boolean;
-  onToggleA4Mode?: (enabled: boolean) => void;
+  viewMode?: ViewMode;
+  onViewModeChange?: (mode: ViewMode) => void;
+  onPrintPreview?: () => void;
   wordCount?: number;
   characterCount?: number;
   currentPage?: number;
@@ -65,8 +67,9 @@ export const ProfessionalToolbar: React.FC<ProfessionalToolbarProps> = ({
   lastSaved,
   documentId,
   title = "مستند جديد",
-  isA4Mode = true,
-  onToggleA4Mode,
+  viewMode = 'continuous',
+  onViewModeChange,
+  onPrintPreview,
   wordCount = 0,
   characterCount = 0,
   currentPage = 1,
@@ -247,12 +250,20 @@ export const ProfessionalToolbar: React.FC<ProfessionalToolbarProps> = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={handlePrint}
+            onClick={onPrintPreview}
             className="gap-1"
           >
             <Printer className="h-4 w-4" />
-            طباعة
+            معاينة طباعة
           </Button>
+
+          <Separator orientation="vertical" className="h-6" />
+
+          {/* تبديل أنماط العرض */}
+          <ViewModeToggle
+            currentMode={viewMode}
+            onModeChange={onViewModeChange || (() => {})}
+          />
         </div>
       </div>
 
@@ -463,19 +474,6 @@ export const ProfessionalToolbar: React.FC<ProfessionalToolbarProps> = ({
             <Table className="h-4 w-4" />
           </Button>
         </div>
-
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {/* عرض A4 */}
-        <Button
-          variant={isA4Mode ? 'default' : 'ghost'}
-          size="sm"
-          onClick={() => onToggleA4Mode?.(!isA4Mode)}
-          className="gap-1"
-        >
-          <Eye className="h-4 w-4" />
-          A4
-        </Button>
       </div>
 
       {/* Input مخفي لرفع الصور */}
