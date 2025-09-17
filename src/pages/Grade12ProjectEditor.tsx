@@ -316,9 +316,9 @@ const Grade12ProjectEditor: React.FC = () => {
 
           {/* المهام والمتطلبات */}
           <TabsContent value="tasks" className="w-full animate-fade-in">
-            <div className="space-y-6">
+            <div className="mx-auto max-w-6xl space-y-6">
               {/* المهام الأساسية للمشروع */}
-              <Card className="w-full shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-lg">
                     <div className="p-2 rounded-lg bg-primary/10">
@@ -336,7 +336,7 @@ const Grade12ProjectEditor: React.FC = () => {
               </Card>
 
               {/* المهام الإضافية من المعلم */}
-              <Card className="w-full shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-lg">
                     <div className="p-2 rounded-lg bg-secondary/10">
@@ -361,24 +361,26 @@ const Grade12ProjectEditor: React.FC = () => {
 
           {/* التعليقات والملاحظات */}
           <TabsContent value="comments" className="w-full animate-fade-in">
-            <Card className="w-full shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <div className="h-[calc(100vh-280px)] min-h-[700px] overflow-y-auto">
-                  <ProjectCommentsSection 
-                    projectId={projectId!}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mx-auto max-w-4xl">
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="h-[calc(100vh-280px)] min-h-[700px] overflow-y-auto">
+                    <ProjectCommentsSection 
+                      projectId={projectId!}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* معلومات المشروع */}
           <TabsContent value="info" className="w-full animate-fade-in">
-            <Card className="w-full shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="h-[calc(100vh-280px)] min-h-[700px] overflow-y-auto">
-                  <div className="max-w-5xl mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-10">
+            <div className="mx-auto max-w-5xl">
+              <Card className="shadow-lg border-0 bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
+                <CardContent className="p-8">
+                  <div className="h-[calc(100vh-280px)] min-h-[700px] overflow-y-auto">
+                    <div className="grid lg:grid-cols-2 gap-8">
                       {/* معلومات المشروع الأساسية */}
                       <div className="space-y-8">
                         <div className="p-6 rounded-xl bg-gradient-to-r from-muted/30 to-muted/10 border border-border/50">
@@ -458,9 +460,9 @@ const Grade12ProjectEditor: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -129,8 +129,8 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
   // رندر المهام بشكل هرمي
   const renderTasks = (taskList: any[], level: number = 0) => {
     return taskList.map((task) => (
-      <div key={task.id} className={`space-y-2 ${level > 0 ? 'mr-6 border-r border-border pr-4' : ''}`}>
-        <div className="flex items-start gap-3 p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors">
+      <div key={task.id} className={`space-y-2 ${level > 0 ? 'mr-4 border-r border-border pr-3' : ''}`}>
+        <div className="flex items-start gap-3 p-3 border rounded-lg bg-card hover:bg-accent/5 transition-colors">
           <div className="mt-1">
             {task.is_completed ? (
               <CheckCircle 
@@ -226,9 +226,9 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
         </CardContent>
       </Card>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex-1 grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* قائمة المهام */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-3">
           <Card className="h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -238,11 +238,11 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[500px]">
-                <div className="space-y-4">
+                <div className="space-y-3 pr-2">
                   {tasks.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <Target className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                      <p className="text-lg mb-2">لا توجد مهام حتى الآن</p>
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Target className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                      <p className="text-base mb-2">لا توجد مهام حتى الآن</p>
                       <p className="text-sm">
                         {isTeacher ? 'قم بإضافة مهام للطالب' : 'انتظر حتى يضيف المعلم المهام'}
                       </p>
@@ -258,11 +258,11 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
 
         {/* نموذج إضافة مهمة جديدة - للمعلم فقط */}
         {isTeacher && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">إضافة مهمة جديدة</CardTitle>
+          <Card className="h-fit">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">إضافة مهمة جديدة</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <div>
                 <Label htmlFor="task-title">عنوان المهمة *</Label>
                 <Input
@@ -319,11 +319,11 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
 
         {/* معلومات للطالب */}
         {isStudent && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">إرشادات</CardTitle>
+          <Card className="h-fit">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">إرشادات</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <CardContent className="space-y-2 text-xs text-muted-foreground">
               <p>• انقر على الدائرة لوضع علامة على المهمة كمكتملة</p>
               <p>• يمكنك إلغاء وضع علامة مكتملة بالنقر مرة أخرى</p>
               <p>• تقدمك يظهر في الشريط العلوي</p>
