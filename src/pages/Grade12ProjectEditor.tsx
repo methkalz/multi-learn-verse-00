@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import ProjectTasksManager from '@/components/content/ProjectTasksManager';
 
 // Types for comments and versions
 interface Comment {
@@ -301,10 +302,10 @@ const Grade12ProjectEditor: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Top Navigation Bar */}
-      <div className="border-b bg-card shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="border-b bg-card shadow-sm flex-shrink-0">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
@@ -347,17 +348,26 @@ const Grade12ProjectEditor: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5" dir="rtl">
+      {/* Main Content - Full Height */}
+      <div className="flex-1 container mx-auto p-4 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+          <TabsList className="grid w-full grid-cols-6 flex-shrink-0" dir="rtl">
             <TabsTrigger value="editor" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               المحرر
             </TabsTrigger>
-            <TabsTrigger value="comments" className="flex items-center gap-2">
+            <TabsTrigger value="tasks" className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              المهام
+            </TabsTrigger>
+            <TabsTrigger value="comments" className="flex items-center gap-2 relative">
               <MessageSquare className="h-4 w-4" />
-              التعليقات ({comments.length})
+              التعليقات
+              {comments.length > 0 && (
+                <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                  {comments.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <History className="h-4 w-4" />
@@ -373,13 +383,14 @@ const Grade12ProjectEditor: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="editor" className="space-y-4 h-full">
-            <div className="flex flex-col h-full">
+          <TabsContent value="editor" className="flex-1 mt-4">
+            <div className="h-full">
               <ProfessionalDocumentEditor
+                documentId={project.id}
                 initialContent={content ? JSON.parse(content) : null}
                 onContentChange={(newContent, html, plainText) => {
                   setContent(JSON.stringify(newContent));
-                  // Update word count can be handled by the editor
+                  setWordCount(plainText?.split(/\s+/).filter(word => word.length > 0).length || 0);
                 }}
                 onSave={async (newContent) => {
                   setContent(JSON.stringify(newContent));
@@ -387,13 +398,23 @@ const Grade12ProjectEditor: React.FC = () => {
                 }}
                 readOnly={!canEdit}
                 autoSave={true}
-                className="flex-1"
+                className="h-full"
                 title={project?.title || "مشروع جديد"}
                 showToolbar={true}
-                showPageBreaks={true}
+                showPageBreaks={false}
                 enableCollaboration={false}
+                enableImagePasting={true}
+                enableImageResizing={true}
               />
             </div>
+          </TabsContent>
+
+          <TabsContent value="tasks" className="flex-1 mt-4">
+            <ProjectTasksManager 
+              projectId={project.id}
+              isTeacher={isTeacher}
+              isStudent={isStudent}
+            />
           </TabsContent>
 
           <TabsContent value="comments" className="mt-6">

@@ -39,6 +39,9 @@ interface ProfessionalDocumentEditorProps {
   enableCollaboration?: boolean;
   autoSave?: boolean;
   title?: string;
+  wordCount?: number;
+  enableImagePasting?: boolean;
+  enableImageResizing?: boolean;
 }
 
 export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProps> = ({
@@ -49,164 +52,279 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
   readOnly = false,
   className,
   showToolbar = true,
-  showPageBreaks = true,
-  enableCollaboration = true,
+  showPageBreaks = false,
+  enableCollaboration = false,
   autoSave = true,
-  title = "مستند جديد"
+  title = "مستند جديد",
+  wordCount = 0,
+  enableImagePasting = true,
+  enableImageResizing = true,
 }) => {
-  const [isA4Mode, setIsA4Mode] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [wordCount, setWordCount] = useState(0);
+  const [isA4Mode, setIsA4Mode] = useState(showPageBreaks);
+  const [pageCount, setPageCount] = useState(1);
+  const [currentWordCount, setCurrentWordCount] = useState(wordCount);
   const [characterCount, setCharacterCount] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  
-  const editorRef = useRef<HTMLDivElement>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
-  
+
+  // إضافة معالجة الصور المحسنة
+  const ImageExtension = Image.configure({
+    HTMLAttributes: {
+      class: 'prosemirror-image',
+    },
+    allowBase64: true,
+    inline: false,
+  });
+
+  // إضافة extensions محسنة مع دعم الصور
+  const extensions = [
+    StarterKit.configure({
+      document: false,
+      paragraph: false,
+      heading: false,
+      bold: false,
+      italic: false,
+      bulletList: false,
+      orderedList: false,
+      listItem: false,
+    }),
+    Document,
+    Paragraph.configure({
+      HTMLAttributes: {
+        dir: 'rtl',
+      },
+    }),
+    Heading.configure({
+      levels: [1, 2, 3, 4, 5, 6],
+      HTMLAttributes: {
+        dir: 'rtl',
+      },
+    }),
+    Bold,
+    Italic,
+    Underline,
+    TextStyle,
+    Color,
+    FontFamily.configure({
+      types: ['textStyle'],
+    }),
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+      alignments: ['left', 'center', 'right', 'justify'],
+    }),
+    BulletList.configure({
+      HTMLAttributes: {
+        dir: 'rtl',
+      },
+    }),
+    OrderedList.configure({
+      HTMLAttributes: {
+        dir: 'rtl',
+      },
+    }),
+    ListItem,
+    ImageExtension,
+    Table.configure({
+      resizable: true,
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
+    Typography.configure({
+      openDoubleQuote: '"',
+      closeDoubleQuote: '"',
+      openSingleQuote: ''',
+      closeSingleQuote: ''',
+    }),
+  ];
+
+  // معالجة الحفظ التلقائي
+  const handleAutoSave = useCallback(async () => {
+    if (!editor || readOnly || !onSave) return;
+    
+    setIsSaving(true);
+    try {
+      await onSave(editor.getJSON());
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [editor, readOnly, onSave]);
+
+  // معالجة الحفظ اليدوي
+  const handleManualSave = useCallback(async () => {
+    if (!editor || readOnly || !onSave) return;
+    
+    setIsSaving(true);
+    try {
+      await onSave(editor.getJSON());
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error('Manual save failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [editor, readOnly, onSave]);
+
+  // إعداد المحرر
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        document: false,
-        paragraph: false,
-        heading: false,
-        bold: false,
-        italic: false,
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
-      }),
-      Document,
-      Paragraph.configure({
-        HTMLAttributes: {
-          class: 'tiptap-paragraph',
-        },
-      }),
-      Heading.configure({
-        levels: [1, 2, 3, 4, 5, 6],
-        HTMLAttributes: {
-          class: 'tiptap-heading',
-        },
-      }),
-      Bold,
-      Italic,
-      Underline,
-      TextStyle,
-      Color,
-      FontFamily.configure({
-        types: ['textStyle'],
-      }),
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-        alignments: ['left', 'center', 'right', 'justify'],
-      }),
-      ListItem,
-      BulletList.configure({
-        HTMLAttributes: {
-          class: 'tiptap-bullet-list',
-        },
-      }),
-      OrderedList.configure({
-        HTMLAttributes: {
-          class: 'tiptap-ordered-list',
-        },
-      }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'tiptap-image',
-        },
-      }),
-      Table.configure({
-        resizable: true,
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      Typography,
-    ],
+    extensions,
     content: initialContent,
     editable: !readOnly,
+    enableInputRules: true,
+    enablePasteRules: true,
     onUpdate: ({ editor }) => {
-      const content = editor.getJSON();
+      const json = editor.getJSON();
       const html = editor.getHTML();
-      const plainText = editor.getText();
+      const text = editor.getText();
       
-      // حساب إحصائيات النص
-      setWordCount(plainText.split(/\s+/).filter(word => word.length > 0).length);
-      setCharacterCount(plainText.length);
+      setCurrentWordCount(text.split(/\s+/).filter(word => word.length > 0).length);
+      setCharacterCount(text.length);
       
-      // استدعاء callback التغيير
-      onContentChange?.(content, html, plainText);
+      onContentChange?.(json, html, text);
       
       // إعداد الحفظ التلقائي
-      if (autoSave && documentId) {
+      if (autoSave && !readOnly) {
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current);
         }
-        autoSaveTimeoutRef.current = setTimeout(() => {
-          handleAutoSave(content);
-        }, 2000); // حفظ تلقائي كل ثانيتين
+        autoSaveTimeoutRef.current = setTimeout(handleAutoSave, 3000);
       }
     },
     onCreate: ({ editor }) => {
-      // تطبيق إعدادات RTL والخطوط العربية
-      const editorElement = editor.view.dom as HTMLElement;
-      editorElement.style.direction = 'rtl';
-      editorElement.style.fontFamily = '"Cairo", "Amiri", "Noto Sans Arabic", Arial, sans-serif';
-      editorElement.style.fontSize = '14px';
-      editorElement.style.lineHeight = '1.6';
+      // تطبيق التوجه العربي والخط الافتراضي
+      editor.commands.focus();
+      editor.commands.setFontFamily('Cairo, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif');
     },
   });
 
-  // وظيفة الحفظ التلقائي
-  const handleAutoSave = useCallback(async (content: any) => {
-    if (!onSave || isSaving) return;
-    
-    setIsSaving(true);
-    try {
-      await onSave(content);
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error('خطأ في الحفظ التلقائي:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [onSave, isSaving]);
-
-  // وظيفة الحفظ اليدوي
-  const handleManualSave = useCallback(async () => {
-    if (!editor || !onSave || isSaving) return;
-    
-    const content = editor.getJSON();
-    setIsSaving(true);
-    
-    try {
-      await onSave(content);
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error('خطأ في الحفظ:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [editor, onSave, isSaving]);
-
-  // إدارة صفحات A4
-  const updatePageInfo = useCallback(() => {
-    if (!editorRef.current || !isA4Mode) return;
-    
-    const editorHeight = editorRef.current.scrollHeight;
-    const a4Height = 1056; // ارتفاع A4 بالبكسل (297mm في 72 DPI)
-    const calculatedPages = Math.ceil(editorHeight / a4Height);
-    setTotalPages(Math.max(1, calculatedPages));
-  }, [isA4Mode]);
-
+  // معالجة لصق الصور من الحافظة
   useEffect(() => {
-    const interval = setInterval(updatePageInfo, 1000);
-    return () => clearInterval(interval);
-  }, [updatePageInfo]);
+    if (!editor || !enableImagePasting) return;
 
-  // تنظيف timeout عند إلغاء المكون
+    const handlePaste = async (event: ClipboardEvent) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        
+        if (item.type.indexOf('image') !== -1) {
+          event.preventDefault();
+          const file = item.getAsFile();
+          
+          if (file) {
+            try {
+              // تحويل الصورة إلى base64
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const src = e.target?.result as string;
+                editor.commands.setImage({ 
+                  src,
+                  alt: 'صورة مُلصقة',
+                  title: 'صورة مُلصقة من الحافظة'
+                });
+              };
+              reader.readAsDataURL(file);
+            } catch (error) {
+              console.error('Error pasting image:', error);
+            }
+          }
+          break;
+        }
+      }
+    };
+
+    const editorElement = editor.view.dom;
+    editorElement.addEventListener('paste', handlePaste);
+
+    return () => {
+      editorElement.removeEventListener('paste', handlePaste);
+    };
+  }, [editor, enableImagePasting]);
+
+  // معالجة تغيير حجم الصور
+  useEffect(() => {
+    if (!editor || !enableImageResizing) return;
+
+    const handleImageResize = () => {
+      const images = editor.view.dom.querySelectorAll('img');
+      
+      images.forEach((img) => {
+        if (img.classList.contains('resize-handled')) return;
+        
+        img.classList.add('resize-handled');
+        img.style.cursor = 'nw-resize';
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        
+        let isResizing = false;
+        
+        img.addEventListener('mousedown', (e) => {
+          if (e.target !== img) return;
+          isResizing = true;
+          e.preventDefault();
+          
+          const startX = e.clientX;
+          const startWidth = img.offsetWidth;
+          
+          const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing) return;
+            
+            const newWidth = startWidth + (e.clientX - startX);
+            const maxWidth = img.parentElement?.offsetWidth || 800;
+            const finalWidth = Math.min(Math.max(newWidth, 100), maxWidth);
+            
+            img.style.width = `${finalWidth}px`;
+          };
+          
+          const handleMouseUp = () => {
+            isResizing = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+          
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        });
+      });
+    };
+
+    // تشغيل معالج تغيير الحجم عند التحديث
+    const observer = new MutationObserver(handleImageResize);
+    observer.observe(editor.view.dom, { childList: true, subtree: true });
+    
+    // تشغيل المعالج للصور الموجودة
+    handleImageResize();
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [editor, enableImageResizing]);
+
+  // حساب معلومات الصفحة
+  const updatePageInfo = useCallback(() => {
+    if (!editor || !isA4Mode) return;
+    
+    const content = editor.view.dom;
+    const contentHeight = content.scrollHeight;
+    const pageHeight = 842; // تقريبي لصفحة A4
+    const pages = Math.ceil(contentHeight / pageHeight);
+    setPageCount(pages);
+  }, [editor, isA4Mode]);
+
+  // تحديث معلومات الصفحة كل 2 ثانية
+  useEffect(() => {
+    if (!isA4Mode) return;
+    
+    const interval = setInterval(updatePageInfo, 2000);
+    return () => clearInterval(interval);
+  }, [updatePageInfo, isA4Mode]);
+
+  // تنظيف timeout عند إلغاء التحميل
   useEffect(() => {
     return () => {
       if (autoSaveTimeoutRef.current) {
@@ -218,212 +336,142 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
   if (!editor) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-sm text-muted-foreground">جاري تحميل المحرر...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("professional-document-editor flex flex-col h-full", className)}>
+    <div className={cn("flex flex-col h-full bg-background", className)}>
       {/* شريط الأدوات */}
       {showToolbar && (
         <ProfessionalToolbar
           editor={editor}
+          title={title}
+          wordCount={currentWordCount}
+          characterCount={characterCount}
+          pageCount={isA4Mode ? pageCount : undefined}
           onSave={handleManualSave}
+          onToggleA4={() => setIsA4Mode(!isA4Mode)}
           isSaving={isSaving}
           lastSaved={lastSaved}
-          documentId={documentId}
-          title={title}
-          isA4Mode={isA4Mode}
-          onToggleA4Mode={setIsA4Mode}
-          wordCount={wordCount}
-          characterCount={characterCount}
-          currentPage={currentPage}
-          totalPages={totalPages}
         />
       )}
 
       {/* منطقة المحرر */}
-      <div className="flex-1 relative overflow-hidden">
-        {enableCollaboration && documentId && (
-          <CollaborationSystem
-            documentId={documentId}
-            editor={editor}
-          />
-        )}
-        
+      <div className="flex-1 overflow-hidden">
         {isA4Mode ? (
-          <A4PageSystem
-            ref={editorRef}
-            showPageBreaks={showPageBreaks}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-            className="h-full"
-          >
-            <EditorContent 
-              editor={editor}
-              className="tiptap-editor h-full outline-none"
-            />
-          </A4PageSystem>
+          <A4PageSystem editor={editor} className="h-full" />
         ) : (
           <div 
-            ref={editorRef}
-            className="h-full p-6 overflow-y-auto bg-background"
+            className={cn(
+              "h-full overflow-y-auto",
+              "prose prose-lg max-w-none",
+              "prose-headings:font-bold prose-headings:text-foreground",
+              "prose-p:text-foreground prose-p:leading-relaxed",
+              "prose-strong:text-foreground prose-strong:font-semibold",
+              "prose-em:text-foreground",
+              "prose-ul:text-foreground prose-ol:text-foreground",
+              "prose-li:text-foreground prose-li:marker:text-muted-foreground",
+              "prose-blockquote:text-muted-foreground prose-blockquote:border-border",
+              "prose-code:text-foreground prose-code:bg-muted",
+              "prose-pre:bg-muted prose-pre:text-foreground",
+              "prose-hr:border-border",
+              "prose-table:text-foreground",
+              "prose-th:border-border prose-td:border-border",
+              "[&_.prosemirror-image]:max-w-full [&_.prosemirror-image]:h-auto [&_.prosemirror-image]:cursor-nw-resize",
+              "[&_.prosemirror-image]:border-2 [&_.prosemirror-image]:border-transparent",
+              "[&_.prosemirror-image:hover]:border-primary/50",
+              "[&_.prosemirror-image]:transition-all [&_.prosemirror-image]:duration-200",
+              "focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
+              "[&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[calc(100vh-200px)]",
+              "[&_.ProseMirror]:p-8",
+              "[&_.ProseMirror]:leading-7",
+              "[&_.ProseMirror]:font-[Cairo]",
+              "[&_.ProseMirror]:text-base",
+              "[&_.ProseMirror]:dir-rtl"
+            )}
           >
-            <EditorContent 
-              editor={editor}
-              className="tiptap-editor min-h-full outline-none prose prose-lg max-w-none"
-            />
+            <EditorContent editor={editor} />
           </div>
         )}
       </div>
 
       {/* شريط الحالة */}
-      <div className="border-t bg-muted/30 px-4 py-2 flex items-center justify-between text-sm text-muted-foreground">
-        <div className="flex items-center gap-4">
-          <span>الكلمات: {wordCount.toLocaleString('ar')}</span>
-          <span>الأحرف: {characterCount.toLocaleString('ar')}</span>
-          {isA4Mode && (
-            <>
-              <span>الصفحة: {currentPage.toLocaleString('ar')}</span>
-              <span>من: {totalPages.toLocaleString('ar')}</span>
-            </>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-4">
-          {autoSave && (
-            <div className="flex items-center gap-1">
-              {isSaving ? (
-                <>
-                  <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
-                  <span>جاري الحفظ...</span>
-                </>
-              ) : lastSaved ? (
-                <>
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <span>آخر حفظ: {lastSaved.toLocaleTimeString('ar')}</span>
-                </>
-              ) : (
-                <>
-                  <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                  <span>غير محفوظ</span>
-                </>
-              )}
-            </div>
-          )}
-          
-          {documentId && (
-            <ExportEngine
-              editor={editor}
-              documentId={documentId}
-              title={title}
-            />
-          )}
+      <div className="flex-shrink-0 border-t bg-muted/30 px-4 py-2">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <span>الكلمات: {currentWordCount}</span>
+            <span>الأحرف: {characterCount}</span>
+            {isA4Mode && <span>الصفحات: {pageCount}</span>}
+            {enableImagePasting && (
+              <span className="text-primary">اضغط Ctrl+V للصق الصور</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {isSaving && <span className="text-primary">جاري الحفظ...</span>}
+            {lastSaved && (
+              <span>آخر حفظ: {lastSaved.toLocaleTimeString('ar')}</span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Auto Save System */}
-      {autoSave && documentId && (
+      {/* أنظمة إضافية */}
+      {enableCollaboration && documentId && (
+        <CollaborationSystem documentId={documentId} editor={editor} />
+      )}
+      
+      {autoSave && documentId && onSave && (
         <AutoSaveSystem
           documentId={documentId}
           editor={editor}
           content={editor.getJSON()}
-          enabled={autoSave}
+          onSave={onSave}
+          enabled={!readOnly}
         />
       )}
-      <style>{`
-        .professional-document-editor {
-          --editor-font-family: 'Cairo', 'Amiri', 'Noto Sans Arabic', Arial, sans-serif;
-        }
-        
-        .tiptap-editor {
-          direction: rtl;
-          font-family: var(--editor-font-family);
-        }
-        
-        .tiptap-paragraph {
-          margin: 0 0 1em 0;
-          line-height: 1.6;
-        }
-        
-        .tiptap-heading {
-          font-weight: bold;
-          margin: 1.5em 0 0.5em 0;
-          line-height: 1.3;
-        }
-        
-        .tiptap-heading:first-child {
-          margin-top: 0;
-        }
-        
-        .tiptap-bullet-list,
-        .tiptap-ordered-list {
-          margin: 1em 0;
-          padding-right: 1.5em;
-        }
-        
-        .tiptap-bullet-list li,
-        .tiptap-ordered-list li {
-          margin: 0.25em 0;
-        }
-        
-        .tiptap-image {
-          max-width: 100%;
-          height: auto;
-          display: block;
-          margin: 1em auto;
-        }
-        
-        .ProseMirror table {
-          border-collapse: collapse;
-          table-layout: fixed;
-          width: 100%;
-          margin: 1em 0;
-          overflow: hidden;
-        }
-        
-        .ProseMirror td,
-        .ProseMirror th {
-          min-width: 1em;
-          border: 1px solid #ced4da;
-          padding: 8px 12px;
-          vertical-align: top;
-          box-sizing: border-box;
-          position: relative;
-          text-align: right;
-        }
-        
-        .ProseMirror th {
-          font-weight: bold;
-          background-color: #f8f9fa;
-        }
-        
-        .ProseMirror .selectedCell:after {
-          z-index: 2;
-          position: absolute;
-          content: "";
-          left: 0;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          background: rgba(200, 200, 255, 0.4);
-          pointer-events: none;
-        }
-        
-        @media print {
-          .professional-document-editor {
-            height: auto !important;
-          }
-          
-          .tiptap-editor {
-            font-size: 12pt !important;
-            line-height: 1.5 !important;
-          }
-        }
-      `}</style>
+      
+      <ExportEngine editor={editor} title={title} />
     </div>
   );
 };
 
-export default ProfessionalDocumentEditor;
+// أنماط CSS إضافية للمحرر
+const styles = `
+  .prosemirror-image {
+    display: block;
+    margin: 1rem auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .prosemirror-image:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+  }
+  
+  .prosemirror-image.ProseMirror-selectednode {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  @media print {
+    .prosemirror-image {
+      max-width: 100% !important;
+      height: auto !important;
+      page-break-inside: avoid;
+    }
+  }
+`;
+
+// إدراج الأنماط في الصفحة
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
+}
