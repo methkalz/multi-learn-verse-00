@@ -4212,6 +4212,67 @@ export type Database = {
         }
         Relationships: []
       }
+      student_notifications: {
+        Row: {
+          comment_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          notification_type: string
+          project_id: string | null
+          student_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          notification_type?: string
+          project_id?: string | null
+          student_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          notification_type?: string
+          project_id?: string | null
+          student_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "grade12_project_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "grade12_final_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_projects_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_progress: {
         Row: {
           completed_at: string | null
