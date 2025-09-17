@@ -46,75 +46,26 @@ export const useTeacherProjects = () => {
       setLoading(true);
       setError(null);
 
-      // جلب المشاريع مع معلومات الطلاب وعدد التعليقات
+      // استخدام الـ view المحسّن لجلب المشاريع
       const { data: projectsData, error: projectsError } = await supabase
-        .from('grade12_final_projects')
-        .select(`
-          id,
-          title,
-          description,
-          status,
-          grade,
-          updated_at,
-          created_at,
-          student_id,
-          school_id
-        `)
+        .from('teacher_projects_view')
+        .select('*')
         .eq('school_id', userProfile.school_id)
         .order('updated_at', { ascending: false })
         .limit(10);
 
       if (projectsError) throw projectsError;
 
-      // حساب عدد التعليقات لكل مشروع
-      const projectsWithComments = await Promise.all(
-        (projectsData || []).map(async (project) => {
-          // جلب عدد التعليقات الكلي
-          const { count: totalComments } = await supabase
-            .from('grade12_project_comments')
-            .select('*', { count: 'exact' })
-            .eq('project_id', project.id);
+      // تحويل البيانات إلى التنسيق المطلوب
+      const formattedProjects = (projectsData || []).map(project => ({
+        ...project,
+        student_name: project.student_name || 'اسم غير محدد',
+        unread_comments_count: project.unread_comments_count || 0,
+        total_comments_count: project.total_comments_count || 0,
+        completion_percentage: project.completion_percentage || 0
+      }));
 
-          // جلب عدد التعليقات غير المقروءة من الطلاب
-          const { count: unreadComments } = await supabase
-            .from('grade12_project_comments')
-            .select('*', { count: 'exact' })
-            .eq('project_id', project.id)
-            .eq('is_read', false)
-            .neq('created_by', userProfile.user_id); // تعليقات من الطلاب فقط
-
-          // حساب نسبة الإنجاز من المهام
-          const { count: totalTasks } = await supabase
-            .from('grade12_project_tasks')
-            .select('*', { count: 'exact' })
-            .eq('project_id', project.id);
-
-          const { count: completedTasks } = await supabase
-            .from('grade12_project_tasks')
-            .select('*', { count: 'exact' })
-            .eq('project_id', project.id)
-            .eq('is_completed', true);
-
-          const completion_percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
-          // جلب اسم الطالب
-          const { data: studentProfile } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('user_id', project.student_id)
-            .single();
-
-          return {
-            ...project,
-            student_name: studentProfile?.full_name || 'اسم غير محدد',
-            unread_comments_count: unreadComments || 0,
-            total_comments_count: totalComments || 0,
-            completion_percentage
-          };
-        })
-      );
-
-      setProjects(projectsWithComments);
+      setProjects(formattedProjects);
     } catch (error: any) {
       console.error('Error fetching teacher projects:', error);
       setError(error.message);

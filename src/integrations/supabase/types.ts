@@ -2902,6 +2902,13 @@ export type Database = {
             referencedRelation: "grade12_final_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "grade12_project_comments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_projects_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       grade12_project_revisions: {
@@ -2935,6 +2942,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "grade12_final_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grade12_project_revisions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_projects_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2998,6 +3012,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "grade12_final_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grade12_project_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_projects_view"
             referencedColumns: ["id"]
           },
         ]
@@ -4452,6 +4473,13 @@ export type Database = {
             referencedRelation: "grade12_final_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "teacher_notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_projects_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_audio_settings: {
@@ -4550,6 +4578,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      teacher_projects_view: {
+        Row: {
+          completion_percentage: number | null
+          created_at: string | null
+          description: string | null
+          grade: number | null
+          id: string | null
+          school_id: string | null
+          status: string | null
+          student_id: string | null
+          student_name: string | null
+          title: string | null
+          total_comments_count: number | null
+          unread_comments_count: number | null
+          updated_at: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
