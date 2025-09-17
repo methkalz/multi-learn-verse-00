@@ -58,10 +58,7 @@ export const useTeacherProjects = () => {
           updated_at,
           created_at,
           student_id,
-          school_id,
-          profiles!grade12_final_projects_student_id_fkey (
-            full_name
-          )
+          school_id
         `)
         .eq('school_id', userProfile.school_id)
         .order('updated_at', { ascending: false })
