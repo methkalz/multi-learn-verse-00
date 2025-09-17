@@ -2873,6 +2873,7 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          is_read: boolean | null
           project_id: string
         }
         Insert: {
@@ -2881,6 +2882,7 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          is_read?: boolean | null
           project_id: string
         }
         Update: {
@@ -2889,6 +2891,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          is_read?: boolean | null
           project_id?: string
         }
         Relationships: [
@@ -4396,6 +4399,60 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      teacher_notifications: {
+        Row: {
+          comment_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string | null
+          notification_type: string
+          project_id: string
+          teacher_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string | null
+          notification_type?: string
+          project_id: string
+          teacher_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string | null
+          notification_type?: string
+          project_id?: string
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "grade12_project_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "grade12_final_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_audio_settings: {
         Row: {

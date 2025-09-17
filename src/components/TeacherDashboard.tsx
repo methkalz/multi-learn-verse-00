@@ -510,6 +510,19 @@ const TeacherDashboard: React.FC = () => {
           onRefresh={() => fetchTeacherData(true)}
         />
 
+        {/* Grade 12 Projects Section - Coming Soon */}
+        <Card className="glass-card border-0 shadow-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              مشاريع الثاني عشر والإشعارات
+            </CardTitle>
+            <CardDescription>
+              سيتم عرض مشاريع الطلاب والإشعارات هنا قريباً
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
         {/* الإجراءات السريعة المحسنة */}
         <Card className="glass-card border-0 shadow-xl animate-fade-in-up">
           <CardHeader className="pb-4">
