@@ -268,8 +268,8 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
     if (!isTeacher || defaultTasks.length === 0) return null;
 
     const organizedByPhase = defaultTasks.reduce((acc, task) => {
-      if (!acc[task.phase]) acc[task.phase] = [];
-      acc[task.phase].push(task);
+      if (!acc[task.phase_title]) acc[task.phase_title] = [];
+      acc[task.phase_title].push(task);
       return acc;
     }, {} as any);
 
@@ -321,10 +321,10 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
                           <p className={`text-sm font-medium ${
                             isCompleted ? 'text-green-700' : 'text-foreground'
                           }`}>
-                            {task.title}
+                            {task.task_title}
                           </p>
-                          {task.description && (
-                            <p className="text-xs text-muted-foreground mt-1">{task.description}</p>
+                          {task.task_description && (
+                            <p className="text-xs text-muted-foreground mt-1">{task.task_description}</p>
                           )}
                           {progress?.completed_at && (
                             <p className="text-xs text-green-600 mt-1">
