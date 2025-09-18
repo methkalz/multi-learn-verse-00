@@ -71,22 +71,46 @@ export const useGrade12Projects = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
+      logger.debug('Starting to fetch Grade 12 projects', { userRole: userProfile?.role });
+      
+      // First try to fetch projects without JOIN to test basic query
+      const { data: basicData, error: basicError } = await supabase
+        .from('grade12_final_projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (basicError) {
+        logger.error('Basic query failed', basicError);
+        throw basicError;
+      }
+
+      logger.debug('Basic projects fetched successfully', { count: basicData?.length || 0 });
+
+      // If basic query works, try with JOIN
       const { data, error } = await supabase
         .from('grade12_final_projects')
         .select(`
           *,
-          student_profile:profiles!grade12_final_projects_student_id_fkey(
+          student_profile:profiles(
             full_name,
             email
           )
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        logger.error('JOIN query failed, falling back to basic data', error);
+        // Fall back to basic data if JOIN fails
+        setProjects(basicData || []);
+        return;
+      }
+      
+      logger.debug('Projects with student info fetched successfully', { count: data?.length || 0 });
       setProjects(data || []);
     } catch (error) {
       logger.error('Error fetching projects', error as Error);
-      toast.error('خطأ في جلب المشاريع');
+      toast.error('خطأ في جلب المشاريع: ' + (error as any)?.message);
+      setProjects([]);
     } finally {
       setLoading(false);
     }
