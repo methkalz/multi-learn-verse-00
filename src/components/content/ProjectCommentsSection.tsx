@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UniversalAvatar } from '@/components/shared/UniversalAvatar';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -198,15 +198,12 @@ export const ProjectCommentsSection: React.FC<ProjectCommentsSectionProps> = ({
                     onClick={() => isUnread && markAsRead(comment.id)}
                   >
                     <div className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarImage src="" alt={comment.author?.full_name} />
-                        <AvatarFallback className="text-xs">
-                          {comment.author?.full_name 
-                            ? getInitials(comment.author.full_name)
-                            : <User className="h-4 w-4" />
-                          }
-                        </AvatarFallback>
-                      </Avatar>
+                      <UniversalAvatar
+                        avatarUrl={comment.author?.avatar_url}
+                        userName={comment.author?.full_name}
+                        size="sm"
+                        className="shrink-0"
+                      />
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">

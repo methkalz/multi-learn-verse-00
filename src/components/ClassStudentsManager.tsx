@@ -25,6 +25,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/lib/logger';
+import { UniversalAvatar } from '@/components/shared/UniversalAvatar';
+import { UserTitleBadge } from '@/components/shared/UserTitleBadge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +46,7 @@ interface Student {
   email?: string;
   phone?: string;
   created_at_utc: string;
+  avatar_url?: string;
 }
 
 interface NewStudent {
@@ -752,11 +755,18 @@ export const ClassStudentsManager: React.FC<ClassStudentsManagerProps> = ({
                   {students.map((student) => (
                     <div key={student.id} className="p-3 bg-muted/50 rounded-lg space-y-2">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{student.full_name}</p>
-                          {student.email && (
-                            <p className="text-sm text-muted-foreground">{student.email}</p>
-                          )}
+                        <div className="flex items-center gap-3">
+                          <UniversalAvatar
+                            avatarUrl={student.avatar_url}
+                            userName={student.full_name}
+                            size="md"
+                          />
+                          <div>
+                            <p className="font-medium">{student.full_name}</p>
+                            {student.email && (
+                              <p className="text-sm text-muted-foreground">{student.email}</p>
+                            )}
+                          </div>
                         </div>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>

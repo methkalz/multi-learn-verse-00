@@ -34,6 +34,8 @@ import { StudentProfile } from './StudentProfile';
 import { StudentDailyChallenges } from './StudentDailyChallenges';
 import StudentNotifications from './StudentNotifications';
 import AppFooter from '@/components/shared/AppFooter';
+import { UniversalAvatar } from '@/components/shared/UniversalAvatar';
+import { UserTitleBadge } from '@/components/shared/UserTitleBadge';
 
 const StudentDashboard: React.FC = () => {
   const { userProfile } = useAuth();
@@ -79,10 +81,30 @@ const StudentDashboard: React.FC = () => {
         <div className="relative container mx-auto px-6 py-12">
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <div className="animate-fade-in-up">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                أهلاً بك، {userProfile?.full_name}! 
-                <span className="inline-block ml-3 animate-wiggle">👋</span>
-              </h1>
+              <div className="flex items-center justify-center gap-6 mb-6">
+                <UniversalAvatar
+                  avatarUrl={userProfile?.avatar_url}
+                  userName={userProfile?.full_name}
+                  size="xl"
+                  className="border-4 border-white/30 shadow-2xl"
+                />
+                <div className="text-center">
+                  <h1 className="text-4xl md:text-6xl font-bold mb-2">
+                    أهلاً بك، {userProfile?.full_name}! 
+                    <span className="inline-block ml-3 animate-wiggle">👋</span>
+                  </h1>
+                  <div className="bg-white/20 text-white border border-white/20 rounded-full px-4 py-2 mb-2">
+                    <UserTitleBadge
+                      role={userProfile?.role || 'student'}
+                      displayTitle={userProfile?.display_title}
+                      points={userProfile?.points}
+                      level={userProfile?.level}
+                      size="lg"
+                      variant="secondary"
+                    />
+                  </div>
+                </div>
+              </div>
               <p className="text-xl md:text-2xl opacity-90 font-medium">
                 {todayMessage}
               </p>

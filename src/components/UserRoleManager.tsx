@@ -10,6 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/lib/logger';
+import { UniversalAvatar } from '@/components/shared/UniversalAvatar';
+import { UserTitleBadge } from '@/components/shared/UserTitleBadge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +32,10 @@ interface User {
   phone?: string;
   created_at: string;
   school_id?: string;
+  avatar_url?: string;
+  display_title?: string;
+  points?: number;
+  level?: number;
 }
 
 interface UserRoleManagerProps {
@@ -82,7 +88,7 @@ export const UserRoleManager: React.FC<UserRoleManagerProps> = ({ onBack }) => {
     try {
       let query = supabase
         .from('profiles')
-        .select('*')
+        .select('user_id, full_name, email, role, phone, created_at, school_id, avatar_url, display_title, points, level')
         .order('created_at', { ascending: false });
 
       // If not superadmin, only show users from same school
@@ -222,17 +228,29 @@ export const UserRoleManager: React.FC<UserRoleManagerProps> = ({ onBack }) => {
             <div className="space-y-4">
               {filteredUsers.map((user) => (
                 <div key={user.user_id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold">{user.full_name}</h3>
-                      <Badge className={roleColors[user.role as keyof typeof roleColors]}>
-                        {roleLabels[user.role as keyof typeof roleLabels] || user.role}
-                      </Badge>
+                  <div className="flex items-center gap-4 flex-1">
+                    <UniversalAvatar
+                      avatarUrl={user.avatar_url}
+                      userName={user.full_name}
+                      size="lg"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold">{user.full_name}</h3>
+                        <UserTitleBadge
+                          role={user.role}
+                          displayTitle={user.display_title}
+                          points={user.points}
+                          level={user.level}
+                          size="md"
+                          variant="default"
+                        />
+                      </div>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      {user.phone && (
+                        <p className="text-sm text-muted-foreground">{user.phone}</p>
+                      )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                    {user.phone && (
-                      <p className="text-sm text-muted-foreground">{user.phone}</p>
-                    )}
                   </div>
 
                   <div className="flex items-center gap-2">

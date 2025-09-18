@@ -16,6 +16,7 @@ export interface ProjectComment {
     id: string;
     full_name: string;
     role: string;
+    avatar_url?: string;
   };
 }
 
@@ -59,7 +60,7 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
       const authorIds = [...new Set(commentsData?.map(c => c.created_by) || [])];
       const { data: authorsData } = await supabase
         .from('profiles')
-        .select('user_id, full_name, role')
+        .select('user_id, full_name, role, avatar_url')
         .in('user_id', authorIds);
 
       // دمج البيانات
@@ -70,7 +71,8 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
         author: authorsMap.get(comment.created_by) ? {
           id: comment.created_by,
           full_name: authorsMap.get(comment.created_by)?.full_name || 'مستخدم غير معروف',
-          role: authorsMap.get(comment.created_by)?.role || 'student'
+          role: authorsMap.get(comment.created_by)?.role || 'student',
+          avatar_url: authorsMap.get(comment.created_by)?.avatar_url
         } : undefined
       }));
 
@@ -201,7 +203,7 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
       console.log('📲 Fetching author data...');
       const { data: authorData, error: authorError } = await supabase
         .from('profiles')
-        .select('user_id, full_name, role')
+        .select('user_id, full_name, role, avatar_url')
         .eq('user_id', user.id)
         .single();
 
@@ -218,7 +220,8 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
           author: authorData ? {
             id: user.id,
             full_name: authorData.full_name || 'مستخدم غير معروف',
-            role: authorData.role || 'student'
+            role: authorData.role || 'student',
+            avatar_url: authorData.avatar_url
           } : undefined
         };
         
@@ -339,7 +342,7 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
             // جلب معلومات المؤلف
             const { data: authorData } = await supabase
               .from('profiles')
-              .select('user_id, full_name, role')
+              .select('user_id, full_name, role, avatar_url')
               .eq('user_id', newComment.created_by)
               .single();
 
@@ -348,7 +351,8 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
               author: authorData ? {
                 id: newComment.created_by,
                 full_name: authorData.full_name || 'مستخدم غير معروف',
-                role: authorData.role || 'student'
+                role: authorData.role || 'student',
+                avatar_url: authorData.avatar_url
               } : undefined
             };
 

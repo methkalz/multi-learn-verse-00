@@ -43,6 +43,8 @@ import { useTeacherContentAccess } from '@/hooks/useTeacherContentAccess';
 import { ContentFilterBadge } from '@/components/teacher/ContentFilterBadge';
 import Grade12ProjectsWidget from '@/components/teacher/Grade12ProjectsWidget';
 import ProjectNotifications from '@/components/teacher/ProjectNotifications';
+import { UniversalAvatar } from '@/components/shared/UniversalAvatar';
+import { UserTitleBadge } from '@/components/shared/UserTitleBadge';
 
 interface TeacherClass {
   id: string;
@@ -471,15 +473,26 @@ const TeacherDashboard: React.FC = () => {
           <div className="glass-card p-8 rounded-2xl backdrop-blur-sm border-0 shadow-xl">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary/70 flex items-center justify-center">
-                    <Sparkles className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
-                      أهلاً وسهلاً {userProfile?.full_name}
-                    </h1>
-                    <p className="text-muted-foreground">
+                <div className="flex items-center gap-4">
+                  <UniversalAvatar
+                    avatarUrl={userProfile?.avatar_url}
+                    userName={userProfile?.full_name}
+                    size="xl"
+                    className="border-4 border-white/20 shadow-xl"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+                        أهلاً وسهلاً {userProfile?.full_name}
+                      </h1>
+                      <UserTitleBadge
+                        role={userProfile?.role || 'teacher'}
+                        displayTitle={userProfile?.display_title}
+                        size="lg"
+                        variant="secondary"
+                      />
+                    </div>
+                    <p className="text-muted-foreground text-lg">
                       مرحباً بك في لوحة تحكم المعلم - إدارة صفوفك وطلابك بسهولة
                     </p>
                   </div>

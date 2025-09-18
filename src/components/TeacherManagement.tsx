@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/lib/logger';
+import { UniversalAvatar } from '@/components/shared/UniversalAvatar';
+import { UserTitleBadge } from '@/components/shared/UserTitleBadge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +32,8 @@ interface Teacher {
   phone?: string;
   created_at: string;
   assigned_classes: Class[];
+  avatar_url?: string;
+  display_title?: string;
 }
 
 interface Class {
@@ -115,7 +119,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
       // Load teachers
       const { data: teachersData, error: teachersError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('user_id, full_name, email, phone, created_at, avatar_url, display_title')
         .eq('school_id', userProfile.school_id)
         .eq('role', 'teacher')
         .order('created_at', { ascending: false });
@@ -905,19 +909,32 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onBack }) 
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-secondary/3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 
                 <CardHeader className="relative pb-4 bg-gradient-to-r from-muted/20 to-transparent">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1 flex-1">
-                      <CardTitle className="text-xl font-bold bg-gradient-to-l from-foreground to-foreground/80 bg-clip-text text-transparent">
-                        {teacher.full_name}
-                      </CardTitle>
-                      <div className="flex items-center space-x-reverse space-x-2 text-muted-foreground">
-                        <Mail className="h-4 w-4" />
-                        <p className="text-sm">{teacher.email}</p>
+                  <div className="flex items-start gap-4">
+                    <UniversalAvatar
+                      avatarUrl={teacher.avatar_url}
+                      userName={teacher.full_name}
+                      size="lg"
+                      className="flex-shrink-0"
+                    />
+                    <div className="flex items-start justify-between flex-1">
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-xl font-bold bg-gradient-to-l from-foreground to-foreground/80 bg-clip-text text-transparent">
+                            {teacher.full_name}
+                          </CardTitle>
+                          <UserTitleBadge
+                            role="teacher"
+                            displayTitle={teacher.display_title}
+                            size="sm"
+                            variant="secondary"
+                          />
+                        </div>
+                        <div className="flex items-center space-x-reverse space-x-2 text-muted-foreground">
+                          <Mail className="h-4 w-4" />
+                          <p className="text-sm">{teacher.email}</p>
+                        </div>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-sm">
-                      معلم
-                    </Badge>
                   </div>
                 </CardHeader>
 

@@ -16,6 +16,8 @@ import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 import EnhancedDashboardStats from '@/components/dashboard/EnhancedDashboardStats';
 import PackageStatusCard from '@/components/dashboard/PackageStatusCard';
+import { UniversalAvatar } from '@/components/shared/UniversalAvatar';
+import { UserTitleBadge } from '@/components/shared/UserTitleBadge';
 interface SchoolStats {
   totalStudents: number;
   totalTeachers: number;
@@ -421,13 +423,29 @@ const SchoolAdminDashboard = () => {
       <header className="glass-card sticky top-0 z-50 soft-shadow backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg gradient-electric flex items-center justify-center">
-                <School className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">لوحة تحكم مدير المدرسة</h1>
-                <p className="text-sm text-muted-foreground">إدارة شاملة للمؤسسة التعليمية</p>
+            <div className="flex items-center gap-4">
+              <UniversalAvatar
+                avatarUrl={userProfile?.avatar_url}
+                userName={userProfile?.full_name}
+                size="lg"
+                className="border-2 border-white/20"
+              />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg gradient-electric flex items-center justify-center">
+                  <School className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-xl font-bold text-foreground">أهلاً {userProfile?.full_name}</h1>
+                    <UserTitleBadge
+                      role={userProfile?.role || 'school_admin'}
+                      displayTitle={userProfile?.display_title}
+                      size="md"
+                      variant="outline"
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">لوحة تحكم مدير المدرسة - إدارة شاملة للمؤسسة التعليمية</p>
+                </div>
               </div>
             </div>
             
