@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useTeacherContentAccess } from './useTeacherContentAccess';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
@@ -69,6 +70,7 @@ interface Grade10ProjectRevision {
 
 export const useGrade10Projects = () => {
   const { userProfile } = useAuth();
+  const { canAccessGrade, loading: accessLoading } = useTeacherContentAccess();
   const [projects, setProjects] = useState<Grade10MiniProject[]>([]);
   const [currentProject, setCurrentProject] = useState<Grade10MiniProject | null>(null);
   const [tasks, setTasks] = useState<Grade10ProjectTask[]>([]);
@@ -482,10 +484,10 @@ export const useGrade10Projects = () => {
   };
 
   useEffect(() => {
-    if (userProfile) {
+    if (userProfile && !accessLoading) {
       fetchProjects();
     }
-  }, [userProfile]);
+  }, [userProfile, accessLoading, canAccessGrade]);
 
   return {
     projects,

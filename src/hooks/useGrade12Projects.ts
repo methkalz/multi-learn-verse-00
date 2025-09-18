@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useTeacherContentAccess } from './useTeacherContentAccess';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
@@ -60,6 +61,7 @@ interface Grade12ProjectRevision {
 
 export const useGrade12Projects = () => {
   const { userProfile } = useAuth();
+  const { canAccessGrade, loading: accessLoading } = useTeacherContentAccess();
   const [projects, setProjects] = useState<Grade12FinalProject[]>([]);
   const [currentProject, setCurrentProject] = useState<Grade12FinalProject | null>(null);
   const [tasks, setTasks] = useState<Grade12ProjectTask[]>([]);
@@ -73,11 +75,48 @@ export const useGrade12Projects = () => {
       setLoading(true);
       logger.debug('Starting to fetch Grade 12 projects');
       
-      // Fetch projects first
-      const { data: projectsData, error: projectsError } = await supabase
+      // إذا كان المستخدم معلم، التحقق من الصلاحيات أولاً
+      if (userProfile?.role === 'teacher') {
+        if (!canAccessGrade('12')) {
+          logger.info('Teacher does not have access to Grade 12 projects');
+          setProjects([]);
+          return;
+        }
+      }
+      
+      let query = supabase
         .from('grade12_final_projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
+
+      // إذا كان المستخدم معلم، فلترة المشاريع حسب الطلاب المسؤول عنهم
+      if (userProfile?.role === 'teacher') {
+        // جلب المشاريع للطلاب المسؤول عنهم المعلم فقط
+        const { data: authorizedStudents, error: authError } = await supabase
+          .rpc('get_teacher_assigned_projects', { 
+            teacher_user_id: userProfile.user_id, 
+            project_grade: '12' 
+          });
+
+        if (authError) {
+          logger.error('Error checking teacher authorization', authError);
+          throw authError;
+        }
+
+        // فلترة الطلاب المصرح لهم
+        const authorizedStudentIds = authorizedStudents
+          ?.filter(s => s.is_authorized)
+          ?.map(s => s.student_id) || [];
+
+        if (authorizedStudentIds.length === 0) {
+          logger.info('Teacher has no authorized students for Grade 12');
+          setProjects([]);
+          return;
+        }
+
+        query = query.in('student_id', authorizedStudentIds);
+      }
+
+      const { data: projectsData, error: projectsError } = await query.order('created_at', { ascending: false });
 
       if (projectsError) {
         logger.error('Error fetching projects', projectsError);
@@ -110,7 +149,8 @@ export const useGrade12Projects = () => {
 
       logger.debug('Projects fetched successfully', { 
         projectsCount: projectsData.length,
-        studentsCount: studentsData?.length || 0 
+        studentsCount: studentsData?.length || 0,
+        userRole: userProfile?.role
       });
       
       setProjects(projectsWithStudents);
@@ -453,10 +493,10 @@ export const useGrade12Projects = () => {
   };
 
   useEffect(() => {
-    if (userProfile) {
+    if (userProfile && !accessLoading) {
       fetchProjects();
     }
-  }, [userProfile]);
+  }, [userProfile, accessLoading, canAccessGrade]);
 
   return {
     projects,

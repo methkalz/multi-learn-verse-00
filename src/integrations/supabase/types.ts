@@ -4709,6 +4709,14 @@ export type Database = {
         Args: { user_points: number }
         Returns: string
       }
+      can_teacher_access_project: {
+        Args: {
+          project_student_id: string
+          project_type: string
+          teacher_user_id: string
+        }
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           attempt_type_input: string
@@ -4796,6 +4804,15 @@ export type Database = {
       get_teacher_assigned_grade_levels: {
         Args: { teacher_user_id: string }
         Returns: string[]
+      }
+      get_teacher_assigned_projects: {
+        Args: { project_grade: string; teacher_user_id: string }
+        Returns: {
+          is_authorized: boolean
+          project_id: string
+          student_grade: string
+          student_id: string
+        }[]
       }
       get_user_role: {
         Args: Record<PropertyKey, never>

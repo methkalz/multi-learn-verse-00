@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useTeacherContentAccess } from '@/hooks/useTeacherContentAccess';
 import { toast } from '@/hooks/use-toast';
 
 export interface TeacherProject {
@@ -33,6 +34,7 @@ export interface ProjectComment {
 
 export const useTeacherProjects = () => {
   const { userProfile } = useAuth();
+  const { allowedGrades, loading: accessLoading } = useTeacherContentAccess();
   const [projects, setProjects] = useState<TeacherProject[]>([]);
   const [recentComments, setRecentComments] = useState<ProjectComment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,32 +42,121 @@ export const useTeacherProjects = () => {
 
   // جلب مشاريع طلاب المعلم
   const fetchTeacherProjects = async () => {
-    if (!userProfile?.school_id) return;
+    if (!userProfile?.school_id || accessLoading) return;
 
     try {
       setLoading(true);
       setError(null);
 
-      // استخدام الـ view المحسّن لجلب المشاريع
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('teacher_projects_view')
-        .select('*')
-        .eq('school_id', userProfile.school_id)
-        .order('updated_at', { ascending: false })
-        .limit(10);
+      // التحقق من الصفوف المسموح بها
+      if (allowedGrades.length === 0) {
+        console.log('Teacher has no allowed grades');
+        setProjects([]);
+        return;
+      }
 
-      if (projectsError) throw projectsError;
+      // جلب المشاريع مع فلترة حسب الصفوف المسموح بها
+      let allProjects: TeacherProject[] = [];
 
-      // تحويل البيانات إلى التنسيق المطلوب
-      const formattedProjects = (projectsData || []).map(project => ({
-        ...project,
-        student_name: project.student_name || 'اسم غير محدد',
-        unread_comments_count: project.unread_comments_count || 0,
-        total_comments_count: project.total_comments_count || 0,
-        completion_percentage: project.completion_percentage || 0
-      }));
+      // جلب مشاريع كل صف مسموح به
+      for (const grade of allowedGrades) {
+        let query;
+        
+        if (grade === '12') {
+          // فلترة المشاريع حسب الطلاب المسؤول عنهم أولاً
+          const { data: authorizedStudents } = await supabase
+            .rpc('get_teacher_assigned_projects', { 
+              teacher_user_id: userProfile.user_id, 
+              project_grade: '12' 
+            });
 
-      setProjects(formattedProjects);
+          const authorizedStudentIds = authorizedStudents
+            ?.filter(s => s.is_authorized)
+            ?.map(s => s.student_id) || [];
+
+          if (authorizedStudentIds.length > 0) {
+            // جلب مشاريع الصف الثاني عشر للطلاب المصرح لهم
+            const { data: grade12Projects, error } = await supabase
+              .from('grade12_final_projects')
+              .select(`
+                id,
+                title,
+                description,
+                status,
+                updated_at,
+                created_at,
+                student_id
+              `)
+              .in('student_id', authorizedStudentIds)
+              .eq('school_id', userProfile.school_id);
+
+            if (!error && grade12Projects) {
+              const formattedGrade12Projects = grade12Projects.map(project => ({
+                ...project,
+                grade: 12,
+                student_name: 'جاري تحميل...',
+                unread_comments_count: 0,
+                total_comments_count: 0,
+                completion_percentage: 0
+              }));
+
+              allProjects.push(...formattedGrade12Projects);
+            }
+          }
+        }
+
+        if (grade === '10') {
+          // جلب مشاريع الصف العاشر 
+          const { data: authorizedStudents } = await supabase
+            .rpc('get_teacher_assigned_projects', { 
+              teacher_user_id: userProfile.user_id, 
+              project_grade: '10' 
+            });
+
+          const authorizedStudentIds = authorizedStudents
+            ?.filter(s => s.is_authorized)
+            ?.map(s => s.student_id) || [];
+
+          if (authorizedStudentIds.length > 0) {
+            const { data: grade10Projects, error } = await supabase
+              .from('grade10_mini_projects')
+              .select(`
+                id,
+                title,
+                description,
+                status,
+                progress_percentage,
+                updated_at,
+                created_at,
+                student_id
+              `)
+              .in('student_id', authorizedStudentIds)
+              .eq('school_id', userProfile.school_id);
+
+            if (!error && grade10Projects) {
+              // تحويل مشاريع الصف العاشر لنفس التنسيق
+              const formattedGrade10Projects = grade10Projects.map(project => ({
+                ...project,
+                grade: 10,
+                student_name: 'جاري تحميل...',
+                unread_comments_count: 0,
+                total_comments_count: 0,
+                completion_percentage: project.progress_percentage || 0
+              }));
+
+              allProjects.push(...formattedGrade10Projects);
+            }
+          }
+        }
+      }
+
+      // ترتيب المشاريع حسب تاريخ التحديث
+      allProjects.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+      // تحديد البيانات إلى أول 10 مشاريع
+      const limitedProjects = allProjects.slice(0, 10);
+
+      setProjects(limitedProjects);
     } catch (error: any) {
       console.error('Error fetching teacher projects:', error);
       setError(error.message);
@@ -239,11 +330,11 @@ export const useTeacherProjects = () => {
   };
 
   useEffect(() => {
-    if (userProfile?.user_id && userProfile?.role === 'teacher') {
+    if (userProfile?.user_id && userProfile?.role === 'teacher' && !accessLoading) {
       fetchTeacherProjects();
       fetchRecentComments();
     }
-  }, [userProfile]);
+  }, [userProfile, allowedGrades, accessLoading]);
 
   // إعداد real-time subscription للتعليقات الجديدة
   useEffect(() => {
