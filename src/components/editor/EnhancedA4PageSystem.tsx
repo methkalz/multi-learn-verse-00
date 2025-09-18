@@ -121,29 +121,59 @@ export const EnhancedA4PageSystem = forwardRef<HTMLDivElement, EnhancedA4PageSys
                   transformOrigin: 'top center'
                 }}
               >
-                {/* الهوامش المرئية */}
+                {/* الهوامش المرئية المحسنة مثل Word */}
                 {showMargins && (
                   <>
                     {/* الهامش العلوي */}
                     <div 
-                      className="absolute top-0 left-0 right-0 border-b border-dashed border-blue-200/60"
+                      className="absolute top-0 left-0 right-0 bg-blue-50/40 border-b-2 border-dashed border-blue-300/60 flex items-center justify-center"
                       style={{ height: scaledMargin }}
-                    />
+                    >
+                      <span className="text-xs text-blue-500/70 font-medium">هامش علوي</span>
+                    </div>
                     {/* الهامش السفلي */}
                     <div 
-                      className="absolute bottom-0 left-0 right-0 border-t border-dashed border-blue-200/60"
+                      className="absolute bottom-0 left-0 right-0 bg-blue-50/40 border-t-2 border-dashed border-blue-300/60 flex items-center justify-center"
                       style={{ height: scaledMargin }}
-                    />
+                    >
+                      <span className="text-xs text-blue-500/70 font-medium">هامش سفلي</span>
+                    </div>
                     {/* الهامش الأيمن */}
                     <div 
-                      className="absolute top-0 right-0 bottom-0 border-l border-dashed border-blue-200/60"
+                      className="absolute top-0 right-0 bottom-0 bg-blue-50/40 border-l-2 border-dashed border-blue-300/60 flex items-center justify-center"
                       style={{ width: scaledMargin }}
-                    />
+                    >
+                      <span className="text-xs text-blue-500/70 font-medium transform rotate-90">هامش أيمن</span>
+                    </div>
                     {/* الهامش الأيسر */}
                     <div 
-                      className="absolute top-0 left-0 bottom-0 border-r border-dashed border-blue-200/60"
+                      className="absolute top-0 left-0 bottom-0 bg-blue-50/40 border-r-2 border-dashed border-blue-300/60 flex items-center justify-center"
                       style={{ width: scaledMargin }}
-                    />
+                    >
+                      <span className="text-xs text-blue-500/70 font-medium transform -rotate-90">هامش أيسر</span>
+                    </div>
+                    
+                    {/* خطوط إرشادية للهوامش */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      {/* الخطوط الأفقية */}
+                      <div 
+                        className="absolute left-0 right-0 border-b border-dotted border-blue-200/40"
+                        style={{ top: scaledMargin }}
+                      />
+                      <div 
+                        className="absolute left-0 right-0 border-t border-dotted border-blue-200/40"
+                        style={{ bottom: scaledMargin }}
+                      />
+                      {/* الخطوط العمودية */}
+                      <div 
+                        className="absolute top-0 bottom-0 border-r border-dotted border-blue-200/40"
+                        style={{ left: scaledMargin }}
+                      />
+                      <div 
+                        className="absolute top-0 bottom-0 border-l border-dotted border-blue-200/40"
+                        style={{ right: scaledMargin }}
+                      />
+                    </div>
                   </>
                 )}
                 
@@ -173,16 +203,10 @@ export const EnhancedA4PageSystem = forwardRef<HTMLDivElement, EnhancedA4PageSys
             ))}
           </div>
 
-          {/* المحتوى المطلق */}
+          {/* المحتوى المطلق مع مراعاة الهوامش */}
           <div 
             ref={contentRef}
-            className="absolute top-8 right-5 left-5 z-10"
-            style={{
-              paddingTop: scaledMargin,
-              paddingBottom: scaledMargin,
-              paddingRight: scaledMargin,
-              paddingLeft: scaledMargin,
-            }}
+            className="absolute top-8 left-5 right-5 z-10"
           >
             <div className="enhanced-editor-content">
               {children}
@@ -226,6 +250,7 @@ export const EnhancedA4PageSystem = forwardRef<HTMLDivElement, EnhancedA4PageSys
             line-height: 1.6;
             direction: rtl;
             text-align: right;
+            padding: 0; /* إزالة الحشو لإظهار الهوامش بوضوح */
           }
           
           .enhanced-editor-content .ProseMirror {
@@ -233,6 +258,16 @@ export const EnhancedA4PageSystem = forwardRef<HTMLDivElement, EnhancedA4PageSys
             min-height: 200px;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            padding: 96px; /* هوامش Word الافتراضية */
+            margin: 0;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: border-color 0.2s ease;
+          }
+          
+          .enhanced-editor-content .ProseMirror:focus {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(255, 255, 255, 0.8);
           }
           
           .enhanced-editor-content .ProseMirror p {
