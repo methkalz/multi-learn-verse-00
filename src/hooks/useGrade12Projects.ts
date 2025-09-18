@@ -73,7 +73,13 @@ export const useGrade12Projects = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('grade12_final_projects')
-        .select('*')
+        .select(`
+          *,
+          student_profile:profiles!grade12_final_projects_student_id_fkey(
+            full_name,
+            email
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

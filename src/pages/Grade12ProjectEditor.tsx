@@ -197,7 +197,7 @@ const Grade12ProjectEditor: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-6 mt-3 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2 hover:text-foreground/80 transition-colors">
                       <User className="h-4 w-4 text-primary" />
-                      <span>{user?.user_metadata?.full_name || 'الطالب'}</span>
+                      <span>{project?.student_profile?.full_name || 'الطالب'}</span>
                     </div>
                     <div className="flex items-center gap-2 hover:text-foreground/80 transition-colors">
                       <Calendar className="h-4 w-4 text-secondary" />

@@ -283,7 +283,7 @@ const Grade12ProjectEditor: React.FC<Grade12ProjectEditorProps> = ({
               <div>
                 <h1 className="text-xl font-bold">{project.title}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {viewMode === 'teacher' ? 'وضع المعلم' : 'وضع الطالب'}
+                  طالب: {project?.student_profile?.full_name || 'غير محدد'} • {viewMode === 'teacher' ? 'وضع المعلم' : 'وضع الطالب'}
                 </p>
               </div>
             </div>
