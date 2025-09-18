@@ -9,31 +9,40 @@ interface Grade10MiniProject {
   id: string;
   student_id: string;
   title: string;
-  description?: string;
-  content?: string;
-  project_content?: string;
+  description?: string | null;
+  content?: string | null;
+  project_content?: string | null;
   status: string;
-  grade?: number;
-  teacher_feedback?: string;
-  due_date?: string;
-  submitted_at?: string;
-  school_id: string;
-  created_by: string;
+  grade?: number | null;
+  teacher_feedback?: string | null;
+  due_date?: string | null;
+  submitted_at?: string | null;
+  school_id?: string | null;
+  created_by?: string;
   created_at: string;
   updated_at: string;
+  completed_at?: string | null;
+  progress_percentage?: number;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  student_profile?: {
+    user_id: string;
+    full_name: string;
+    email: string;
+  };
 }
 
 interface Grade10ProjectTask {
   id: string;
   project_id: string;
-  parent_task_id?: string;
+  parent_task_id?: string | null;
   title: string;
-  description?: string;
+  description?: string | null;
   is_completed: boolean;
-  due_date?: string;
-  completed_at?: string;
+  due_date?: string | null;
+  completed_at?: string | null;
   order_index: number;
-  task_type: string;
+  task_type?: string;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -53,7 +62,7 @@ interface Grade10ProjectRevision {
   id: string;
   project_id: string;
   content_snapshot: string;
-  revision_note?: string;
+  revision_note?: string | null;
   created_by: string;
   created_at: string;
 }
@@ -261,7 +270,7 @@ export const useGrade10Projects = () => {
   // حفظ مراجعة تلقائية للمشروع
   const saveRevision = async (projectId: string, content: string, note?: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('grade10_project_revisions')
         .insert([{
           project_id: projectId,
@@ -393,9 +402,9 @@ export const useGrade10Projects = () => {
     try {
       const insertData = {
         project_id: commentData.project_id!,
-        comment: commentData.comment!,
+        comment_text: commentData.comment!,
         comment_type: commentData.comment_type || 'feedback',
-        created_by: userProfile?.user_id!,
+        user_id: userProfile?.user_id!,
       };
 
       const { data, error } = await supabase
@@ -406,10 +415,20 @@ export const useGrade10Projects = () => {
 
       if (error) throw error;
       
-      setComments(prev => [data, ...prev]);
+      // Map the returned data to our expected format
+      const mappedComment: Grade10ProjectComment = {
+        id: data.id,
+        project_id: data.project_id,
+        comment: data.comment_text,
+        comment_type: data.comment_type,
+        created_by: data.user_id,
+        created_at: data.created_at
+      };
+      
+      setComments(prev => [mappedComment, ...prev]);
       toast.success('تم إضافة التعليق بنجاح');
       
-      return data;
+      return mappedComment;
     } catch (error) {
       logger.error('Error adding comment', error as Error);
       toast.error('خطأ في إضافة التعليق');
@@ -427,7 +446,18 @@ export const useGrade10Projects = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setComments(data || []);
+      
+      // Map the data to our expected format
+      const mappedComments: Grade10ProjectComment[] = (data || []).map(comment => ({
+        id: comment.id,
+        project_id: comment.project_id,
+        comment: comment.comment_text,
+        comment_type: comment.comment_type,
+        created_by: comment.user_id,
+        created_at: comment.created_at
+      }));
+      
+      setComments(mappedComments);
     } catch (error) {
       logger.error('Error fetching comments', error as Error);
       toast.error('خطأ في جلب التعليقات');
@@ -437,7 +467,7 @@ export const useGrade10Projects = () => {
   // جلب المراجعات
   const fetchRevisions = async (projectId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('grade10_project_revisions')
         .select('*')
         .eq('project_id', projectId)

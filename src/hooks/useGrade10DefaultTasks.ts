@@ -10,7 +10,7 @@ interface Grade10DefaultTask {
   phase_number: number;
   phase_title: string;
   task_title: string;
-  task_description?: string;
+  task_description?: string | null;
   order_index: number;
   is_active: boolean;
   created_at: string;
@@ -22,8 +22,8 @@ interface Grade10StudentTaskProgress {
   student_id: string;
   default_task_id: string;
   is_completed: boolean;
-  completed_at?: string;
-  notes?: string;
+  completed_at?: string | null;
+  notes?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -47,7 +47,7 @@ export const useGrade10DefaultTasks = () => {
   // جلب المهام الافتراضية
   const fetchDefaultTasks = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('grade10_default_tasks')
         .select('*')
         .eq('is_active', true)
@@ -55,8 +55,8 @@ export const useGrade10DefaultTasks = () => {
         .order('order_index', { ascending: true });
 
       if (error) throw error;
-      setAllTasks(data || []);
-      return data || [];
+      setAllTasks(data as Grade10DefaultTask[] || []);
+      return data as Grade10DefaultTask[] || [];
     } catch (error) {
       logger.error('Error fetching default tasks', error as Error);
       toast.error('خطأ في جلب المهام الافتراضية');
@@ -69,14 +69,14 @@ export const useGrade10DefaultTasks = () => {
     try {
       if (!userProfile?.user_id) return [];
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('grade10_student_task_progress')
         .select('*')
         .eq('student_id', userProfile.user_id);
 
       if (error) throw error;
-      setStudentProgress(data || []);
-      return data || [];
+      setStudentProgress(data as Grade10StudentTaskProgress[] || []);
+      return data as Grade10StudentTaskProgress[] || [];
     } catch (error) {
       logger.error('Error fetching student progress', error as Error, { userId: userProfile?.user_id });
       toast.error('خطأ في جلب تقدم الطالب');
@@ -156,7 +156,7 @@ export const useGrade10DefaultTasks = () => {
 
       logger.debug('Preparing to upsert task data', updateData);
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('grade10_student_task_progress')
         .upsert(updateData, {
           onConflict: 'student_id,default_task_id'
@@ -222,7 +222,7 @@ export const useGrade10DefaultTasks = () => {
         fetchStudentProgress()
       ]);
       
-      const organizedPhases = organizeTasksByPhases(tasks, progress);
+      const organizedPhases = organizeTasksByPhases(tasks as Grade10DefaultTask[], progress as Grade10StudentTaskProgress[]);
       setPhases(organizedPhases);
     } catch (error) {
       logger.error('Error loading default tasks and progress data', error as Error);

@@ -68,7 +68,7 @@ const Grade10ProjectTasksManager: React.FC<Grade10ProjectTasksManagerProps> = ({
     setLoading(true);
     try {
       // جلب المهام الافتراضية للصف العاشر
-      const { data: defaultTasksData, error: defaultTasksError } = await supabase
+      const { data: defaultTasksData, error: defaultTasksError } = await (supabase as any)
         .from('grade10_default_tasks')
         .select('*')
         .eq('is_active', true)
@@ -78,7 +78,7 @@ const Grade10ProjectTasksManager: React.FC<Grade10ProjectTasksManagerProps> = ({
       if (defaultTasksError) throw defaultTasksError;
 
       // جلب تقدم الطالب في المهام الافتراضية
-      const { data: progressData, error: progressError } = await supabase
+      const { data: progressData, error: progressError } = await (supabase as any)
         .from('grade10_student_task_progress')
         .select('*')
         .eq('student_id', studentId);
