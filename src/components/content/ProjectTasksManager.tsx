@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGrade12Projects } from '@/hooks/useGrade12Projects';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -22,7 +23,9 @@ import {
   Clock,
   User,
   Eye,
-  Activity
+  Activity,
+  BookOpen,
+  Layers
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -37,17 +40,59 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
   isTeacher,
   isStudent
 }) => {
+  const { userProfile } = useAuth();
   const {
     tasks,
     fetchTasks,
     addTask,
     updateTaskStatus,
-    deleteTask
+    deleteTask,
+    projects
   } = useGrade12Projects();
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [selectedParentTask, setSelectedParentTask] = useState<string>('');
+  const [defaultTasksProgress, setDefaultTasksProgress] = useState<any[]>([]);
+  const [defaultTasks, setDefaultTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // جلب المشروع الحالي
+  const currentProject = projects.find(p => p.id === projectId);
+  const studentId = currentProject?.student_id;
+
+  // جلب المهام الافتراضية وتقدم الطالب (للمعلم فقط)
+  const fetchDefaultTasksProgress = async () => {
+    if (!studentId || !isTeacher) return;
+    
+    setLoading(true);
+    try {
+      // جلب المهام الافتراضية
+      const { data: defaultTasksData, error: defaultTasksError } = await supabase
+        .from('grade12_default_tasks')
+        .select('*')
+        .eq('is_active', true)
+        .order('phase', { ascending: true })
+        .order('order_index', { ascending: true });
+
+      if (defaultTasksError) throw defaultTasksError;
+
+      // جلب تقدم الطالب في المهام الافتراضية
+      const { data: progressData, error: progressError } = await supabase
+        .from('grade12_student_task_progress')
+        .select('*')
+        .eq('student_id', studentId);
+
+      if (progressError) throw progressError;
+
+      setDefaultTasks(defaultTasksData || []);
+      setDefaultTasksProgress(progressData || []);
+    } catch (error) {
+      console.error('Error fetching default tasks progress:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (projectId) {
@@ -55,7 +100,13 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
     }
   }, [projectId, fetchTasks]);
 
-  // إضافة real-time updates للمهام
+  useEffect(() => {
+    if (studentId && isTeacher) {
+      fetchDefaultTasksProgress();
+    }
+  }, [studentId, isTeacher]);
+
+  // إضافة real-time updates للمهام الإضافية
   useEffect(() => {
     if (!projectId) return;
 
@@ -81,12 +132,67 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
     };
   }, [projectId, fetchTasks]);
 
-  // حساب التقدم الإجمالي
-  const calculateProgress = (): number => {
-    if (tasks.length === 0) return 0;
-    const allTasks = getAllTasks(tasks);
-    const completedTasks = allTasks.filter(task => task.is_completed);
-    return Math.round((completedTasks.length / allTasks.length) * 100);
+  // إضافة real-time updates للمهام الافتراضية (للمعلم فقط)
+  useEffect(() => {
+    if (!studentId || !isTeacher) return;
+
+    const channel = supabase
+      .channel(`student_tasks_progress_${studentId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'grade12_student_task_progress',
+          filter: `student_id=eq.${studentId}`,
+        },
+        () => {
+          // إعادة تحميل تقدم المهام عند حدوث تغيير
+          fetchDefaultTasksProgress();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [studentId, isTeacher]);
+
+  // حساب التقدم الشامل (المهام الافتراضية + الإضافية)
+  const calculateOverallProgress = (): { 
+    defaultTasksProgress: number; 
+    additionalTasksProgress: number; 
+    overallProgress: number;
+    defaultCompleted: number;
+    defaultTotal: number;
+    additionalCompleted: number;
+    additionalTotal: number;
+  } => {
+    // المهام الافتراضية
+    const defaultCompleted = defaultTasksProgress.filter(p => p.is_completed).length;
+    const defaultTotal = defaultTasks.length;
+    const defaultTasksProgressPerc = defaultTotal > 0 ? Math.round((defaultCompleted / defaultTotal) * 100) : 0;
+
+    // المهام الإضافية
+    const allAdditionalTasks = getAllTasks(tasks);
+    const additionalCompleted = allAdditionalTasks.filter(task => task.is_completed).length;
+    const additionalTotal = allAdditionalTasks.length;
+    const additionalTasksProgressPerc = additionalTotal > 0 ? Math.round((additionalCompleted / additionalTotal) * 100) : 0;
+
+    // التقدم الشامل
+    const totalCompleted = defaultCompleted + additionalCompleted;
+    const totalTasks = defaultTotal + additionalTotal;
+    const overallProgress = totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0;
+
+    return {
+      defaultTasksProgress: defaultTasksProgressPerc,
+      additionalTasksProgress: additionalTasksProgressPerc,
+      overallProgress,
+      defaultCompleted,
+      defaultTotal,
+      additionalCompleted,
+      additionalTotal
+    };
   };
 
   // جلب جميع المهام (الرئيسية والفرعية)
@@ -157,7 +263,97 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
     }
   };
 
-  // رندر المهام للمعلم مع تفاصيل أكثر
+  // رندر المهام الافتراضية للمعلم
+  const renderDefaultTasksForTeacher = () => {
+    if (!isTeacher || defaultTasks.length === 0) return null;
+
+    const organizedByPhase = defaultTasks.reduce((acc, task) => {
+      if (!acc[task.phase]) acc[task.phase] = [];
+      acc[task.phase].push(task);
+      return acc;
+    }, {} as any);
+
+    return (
+      <div className="space-y-4">
+        {Object.entries(organizedByPhase).map(([phase, phaseTasks]: [string, any[]]) => {
+          const phaseProgress = defaultTasksProgress.filter(p => 
+            phaseTasks.some(t => t.id === p.default_task_id) && p.is_completed
+          );
+          const phaseCompletionRate = phaseTasks.length > 0 
+            ? Math.round((phaseProgress.length / phaseTasks.length) * 100) 
+            : 0;
+
+          return (
+            <Card key={phase} className="border-l-4 border-l-primary">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    {phase}
+                  </CardTitle>
+                  <Badge variant="outline" className="bg-primary/10">
+                    {phaseProgress.length} / {phaseTasks.length}
+                  </Badge>
+                </div>
+                <Progress value={phaseCompletionRate} className="h-2" />
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  {phaseTasks.map((task) => {
+                    const progress = defaultTasksProgress.find(p => p.default_task_id === task.id);
+                    const isCompleted = progress?.is_completed || false;
+
+                    return (
+                      <div key={task.id} className={`flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 ${
+                        isCompleted 
+                          ? 'bg-green-50 border-green-200' 
+                          : 'bg-muted/30 border-border'
+                      }`}>
+                        <div className="mt-1">
+                          {isCompleted ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Circle className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        
+                        <div className="flex-1">
+                          <p className={`text-sm font-medium ${
+                            isCompleted ? 'text-green-700' : 'text-foreground'
+                          }`}>
+                            {task.title}
+                          </p>
+                          {task.description && (
+                            <p className="text-xs text-muted-foreground mt-1">{task.description}</p>
+                          )}
+                          {progress?.completed_at && (
+                            <p className="text-xs text-green-600 mt-1">
+                              اكتمل: {format(new Date(progress.completed_at), 'dd MMM yyyy - HH:mm', { locale: ar })}
+                            </p>
+                          )}
+                        </div>
+
+                        <Badge 
+                          variant={isCompleted ? "default" : "secondary"} 
+                          className={`text-xs ${
+                            isCompleted 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-orange-100 text-orange-700'
+                          }`}
+                        >
+                          {isCompleted ? 'مكتمل ✓' : 'قيد الإنجاز'}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
   const renderTasksForTeacher = (taskList: any[], level: number = 0) => {
     return taskList.map((task) => (
       <div key={task.id} className={`space-y-2 ${level > 0 ? 'mr-4 border-r-2 border-muted pr-4' : ''}`}>
@@ -300,23 +496,34 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
     return taskList.filter(task => task.task_type === 'main' || !task.parent_task_id);
   };
 
-  const allTasks = getAllTasks(tasks);
-  const completedTasks = allTasks.filter(t => t.is_completed);
-  const progressPercentage = calculateProgress();
+  const progressStats = calculateOverallProgress();
+  
+  if (loading && isTeacher) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">جاري تحميل تقدم المهام...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col gap-6">
       {/* إحصائيات التقدم المحسنة */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-r from-blue-500/10 to-blue-500/5 border-blue-500/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">المهام المكتملة</p>
-                <p className="text-2xl font-bold text-primary">{completedTasks.length}</p>
+                <p className="text-sm text-muted-foreground">المهام الأساسية</p>
+                <p className="text-2xl font-bold text-blue-600">{progressStats.defaultCompleted}/{progressStats.defaultTotal}</p>
+                <p className="text-xs text-blue-500">{progressStats.defaultTasksProgress}%</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-primary/60" />
+              <BookOpen className="h-8 w-8 text-blue-500/60" />
             </div>
+            <Progress value={progressStats.defaultTasksProgress} className="h-2 mt-2 bg-blue-100" />
           </CardContent>
         </Card>
 
@@ -324,10 +531,24 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي المهام</p>
-                <p className="text-2xl font-bold text-secondary">{allTasks.length}</p>
+                <p className="text-sm text-muted-foreground">المهام الإضافية</p>
+                <p className="text-2xl font-bold text-secondary">{progressStats.additionalCompleted}/{progressStats.additionalTotal}</p>
+                <p className="text-xs text-secondary">{progressStats.additionalTasksProgress}%</p>
               </div>
-              <Target className="h-8 w-8 text-secondary/60" />
+              <Layers className="h-8 w-8 text-secondary/60" />
+            </div>
+            <Progress value={progressStats.additionalTasksProgress} className="h-2 mt-2 bg-secondary/20" />
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">إجمالي المكتملة</p>
+                <p className="text-2xl font-bold text-primary">{progressStats.defaultCompleted + progressStats.additionalCompleted}</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-primary/60" />
             </div>
           </CardContent>
         </Card>
@@ -336,38 +557,59 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">نسبة الإنجاز</p>
-                <p className="text-2xl font-bold text-green-600">{progressPercentage}%</p>
+                <p className="text-sm text-muted-foreground">نسبة الإنجاز الشاملة</p>
+                <p className="text-2xl font-bold text-green-600">{progressStats.overallProgress}%</p>
               </div>
               <Activity className="h-8 w-8 text-green-500/60" />
             </div>
-            <Progress value={progressPercentage} className="h-2 mt-2 bg-green-100" />
+            <Progress value={progressStats.overallProgress} className="h-2 mt-2 bg-green-100" />
           </CardContent>
         </Card>
       </div>
 
       {isTeacher ? (
-        /* واجهة المعلم المحسنة */
+        /* واجهة المعلم الشاملة */
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2">
-            <Card className="h-full">
+          <div className="xl:col-span-2 space-y-6">
+            {/* المهام الأساسية (الافتراضية) */}
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Eye className="h-5 w-5 text-primary" />
-                  مراقبة تقدم الطالب
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  المهام الأساسية للمشروع النهائي
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  عرض مفصل لحالة المهام وأوقات الإنجاز
+                  تقدم الطالب في المهام الأساسية المطلوبة
                 </p>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[600px]">
+                <ScrollArea className="h-[400px]">
+                  <div className="pr-2">
+                    {renderDefaultTasksForTeacher()}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* المهام الإضافية من المعلم */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-secondary" />
+                  المهام الإضافية من المعلم
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  مهام مخصصة أضافها المعلم لهذا المشروع
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
                   <div className="space-y-4 pr-2">
                     {tasks.length === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Target className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                        <p className="text-lg mb-2">لا توجد مهام مضافة حتى الآن</p>
-                        <p className="text-sm">ابدأ بإضافة مهام للطالب من القائمة الجانبية</p>
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Target className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p className="text-base mb-2">لا توجد مهام إضافية حتى الآن</p>
+                        <p className="text-sm">يمكنك إضافة مهام مخصصة من القائمة الجانبية</p>
                       </div>
                     ) : (
                       renderTasksForTeacher(tasks)
