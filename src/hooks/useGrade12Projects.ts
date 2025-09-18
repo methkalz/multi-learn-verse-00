@@ -71,45 +71,52 @@ export const useGrade12Projects = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      logger.debug('Starting to fetch Grade 12 projects', { userRole: userProfile?.role });
+      logger.debug('Starting to fetch Grade 12 projects');
       
-      // First try to fetch projects without JOIN to test basic query
-      const { data: basicData, error: basicError } = await supabase
+      // Fetch projects first
+      const { data: projectsData, error: projectsError } = await supabase
         .from('grade12_final_projects')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (basicError) {
-        logger.error('Basic query failed', basicError);
-        throw basicError;
+      if (projectsError) {
+        logger.error('Error fetching projects', projectsError);
+        throw projectsError;
       }
 
-      logger.debug('Basic projects fetched successfully', { count: basicData?.length || 0 });
-
-      // If basic query works, try with JOIN
-      const { data, error } = await supabase
-        .from('grade12_final_projects')
-        .select(`
-          *,
-          student_profile:profiles(
-            full_name,
-            email
-          )
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        logger.error('JOIN query failed, falling back to basic data', error);
-        // Fall back to basic data if JOIN fails
-        setProjects(basicData || []);
+      if (!projectsData || projectsData.length === 0) {
+        setProjects([]);
         return;
       }
+
+      // Get unique student IDs
+      const studentIds = [...new Set(projectsData.map(p => p.student_id))];
       
-      logger.debug('Projects with student info fetched successfully', { count: data?.length || 0 });
-      setProjects(data || []);
+      // Fetch student profiles separately
+      const { data: studentsData, error: studentsError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email')
+        .in('user_id', studentIds);
+
+      if (studentsError) {
+        logger.warn('Error fetching student profiles, using projects without names', studentsError as any);
+      }
+
+      // Combine data
+      const projectsWithStudents = projectsData.map(project => ({
+        ...project,
+        student_profile: studentsData?.find(student => student.user_id === project.student_id) || null
+      }));
+
+      logger.debug('Projects fetched successfully', { 
+        projectsCount: projectsData.length,
+        studentsCount: studentsData?.length || 0 
+      });
+      
+      setProjects(projectsWithStudents);
     } catch (error) {
       logger.error('Error fetching projects', error as Error);
-      toast.error('خطأ في جلب المشاريع: ' + (error as any)?.message);
+      toast.error('خطأ في جلب المشاريع');
       setProjects([]);
     } finally {
       setLoading(false);
