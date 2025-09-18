@@ -93,7 +93,6 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
         };
       });
 
-      console.log('🔍 Final comments with authors:', commentsWithAuthor);
       setComments(commentsWithAuthor);
       
       // حساب التعليقات غير المقروءة للمستخدم الحالي
