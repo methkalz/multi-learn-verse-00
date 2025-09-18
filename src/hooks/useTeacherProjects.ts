@@ -170,66 +170,169 @@ export const useTeacherProjects = () => {
     }
   };
 
-  // جلب التعليقات الحديثة
+  // جلب التعليقات الحديثة مع فلترة حسب الصفوف المسؤول عنها
   const fetchRecentComments = async () => {
-    if (!userProfile?.school_id) return;
+    if (!userProfile?.school_id || accessLoading) return;
 
     try {
-      // جلب التعليقات مع معلومات إضافية
-      const { data: commentsData, error: commentsError } = await supabase
-        .from('grade12_project_comments')
-        .select(`
-          id,
-          project_id,
-          created_by,
-          comment,
-          comment_type,
-          created_at,
-          is_read
-        `)
-        .neq('created_by', userProfile.user_id) // تعليقات من الطلاب فقط
-        .order('created_at', { ascending: false })
-        .limit(20);
+      // التحقق من الصفوف المسموح بها
+      if (allowedGrades.length === 0) {
+        console.log('Teacher has no allowed grades - no comments');
+        setRecentComments([]);
+        return;
+      }
 
-      if (commentsError) throw commentsError;
+      let allComments: ProjectComment[] = [];
 
-      // تحويل البيانات مع جلب معلومات إضافية لكل تعليق
-      const formattedComments = await Promise.all(
-        (commentsData || []).map(async (comment) => {
-          // جلب معلومات المشروع
-          const { data: projectData } = await supabase
-            .from('grade12_final_projects')
-            .select('title, school_id')
-            .eq('id', comment.project_id)
-            .single();
+      // جلب التعليقات من كل صف مسموح به
+      for (const grade of allowedGrades) {
+        if (grade === '12') {
+          // جلب تعليقات مشاريع الصف الثاني عشر
+          const { data: grade12Comments, error: commentsError } = await supabase
+            .from('grade12_project_comments')
+            .select(`
+              id,
+              project_id,
+              created_by,
+              comment,
+              comment_type,
+              created_at,
+              is_read
+            `)
+            .neq('created_by', userProfile.user_id) // تعليقات من الطلاب فقط
+            .order('created_at', { ascending: false })
+            .limit(20);
 
-          // جلب معلومات صاحب التعليق
-          const { data: userProfile } = await supabase
-            .from('profiles')
-            .select('full_name, role')
-            .eq('user_id', comment.created_by)
-            .single();
+          if (!commentsError && grade12Comments) {
+            // تحويل البيانات مع جلب معلومات إضافية
+            const formattedGrade12Comments = await Promise.all(
+              grade12Comments.map(async (comment) => {
+                // جلب معلومات المشروع
+                const { data: projectData } = await supabase
+                  .from('grade12_final_projects')
+                  .select('title, student_id, school_id')
+                  .eq('id', comment.project_id)
+                  .single();
 
-          // تحقق من أن المشروع ينتمي لمدرسة المعلم (تم الحذف لتبسيط المعالجة)
+                // تحقق من أن المعلم مصرح له بالوصول لهذا المشروع
+                if (!projectData || projectData.school_id !== userProfile.school_id) {
+                  return null;
+                }
 
-          return {
-            id: comment.id,
-            project_id: comment.project_id,
-            user_id: comment.created_by,
-            comment_text: comment.comment,
-            comment_type: comment.comment_type,
-            created_at: comment.created_at,
-            is_read: comment.is_read,
-            user_name: userProfile?.full_name || 'اسم غير محدد',
-            user_role: userProfile?.role || 'student'
-          };
-        })
-      );
+                // التحقق من صلاحية الوصول للمشروع
+                const { data: accessCheck } = await supabase
+                  .rpc('can_teacher_access_project', {
+                    teacher_user_id: userProfile.user_id,
+                    project_student_id: projectData.student_id,
+                    project_type: 'grade12'
+                  });
 
-      // فلترة التعليقات الصالحة فقط
-      const validComments = formattedComments.filter(comment => comment !== null);
+                if (!accessCheck) {
+                  return null;
+                }
 
-      setRecentComments(validComments);
+                // جلب معلومات صاحب التعليق
+                const { data: commenterProfile } = await supabase
+                  .from('profiles')
+                  .select('full_name, role')
+                  .eq('user_id', comment.created_by)
+                  .single();
+
+                return {
+                  id: comment.id,
+                  project_id: comment.project_id,
+                  user_id: comment.created_by,
+                  comment_text: comment.comment,
+                  comment_type: comment.comment_type,
+                  created_at: comment.created_at,
+                  is_read: comment.is_read,
+                  user_name: commenterProfile?.full_name || 'اسم غير محدد',
+                  user_role: commenterProfile?.role || 'student'
+                };
+              })
+            );
+
+            const validGrade12Comments = formattedGrade12Comments.filter(comment => comment !== null);
+            allComments.push(...validGrade12Comments);
+          }
+        }
+
+        if (grade === '10') {
+          // جلب تعليقات مشاريع الصف العاشر
+          const { data: grade10Comments, error: commentsError } = await supabase
+            .from('grade10_project_comments')
+            .select(`
+              id,
+              project_id,
+              user_id,
+              comment_text,
+              comment_type,
+              created_at
+            `)
+            .neq('user_id', userProfile.user_id) // تعليقات من الطلاب فقط
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+          if (!commentsError && grade10Comments) {
+            // تحويل البيانات مع جلب معلومات إضافية
+            const formattedGrade10Comments = await Promise.all(
+              grade10Comments.map(async (comment) => {
+                // جلب معلومات المشروع
+                const { data: projectData } = await supabase
+                  .from('grade10_mini_projects')
+                  .select('title, student_id, school_id')
+                  .eq('id', comment.project_id)
+                  .single();
+
+                // تحقق من أن المعلم مصرح له بالوصول لهذا المشروع
+                if (!projectData || projectData.school_id !== userProfile.school_id) {
+                  return null;
+                }
+
+                // التحقق من صلاحية الوصول للمشروع
+                const { data: accessCheck } = await supabase
+                  .rpc('can_teacher_access_project', {
+                    teacher_user_id: userProfile.user_id,
+                    project_student_id: projectData.student_id,
+                    project_type: 'grade10'
+                  });
+
+                if (!accessCheck) {
+                  return null;
+                }
+
+                // جلب معلومات صاحب التعليق
+                const { data: commenterProfile } = await supabase
+                  .from('profiles')
+                  .select('full_name, role')
+                  .eq('user_id', comment.user_id)
+                  .single();
+
+                return {
+                  id: comment.id,
+                  project_id: comment.project_id,
+                  user_id: comment.user_id,
+                  comment_text: comment.comment_text,
+                  comment_type: comment.comment_type,
+                  created_at: comment.created_at,
+                  is_read: false, // Grade 10 comments don't have is_read field
+                  user_name: commenterProfile?.full_name || 'اسم غير محدد',
+                  user_role: commenterProfile?.role || 'student'
+                };
+              })
+            );
+
+            const validGrade10Comments = formattedGrade10Comments.filter(comment => comment !== null);
+            allComments.push(...validGrade10Comments);
+          }
+        }
+      }
+
+      // ترتيب التعليقات حسب التاريخ وتحديد العدد
+      allComments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      const limitedComments = allComments.slice(0, 20);
+
+      setRecentComments(limitedComments);
     } catch (error: any) {
       console.error('Error fetching recent comments:', error);
       toast({

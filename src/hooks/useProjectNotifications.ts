@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useTeacherContentAccess } from '@/hooks/useTeacherContentAccess';
 import { toast } from '@/hooks/use-toast';
 
 export interface ProjectNotification {
@@ -20,19 +21,29 @@ export interface ProjectNotification {
 
 export const useProjectNotifications = () => {
   const { userProfile } = useAuth();
+  const { allowedGrades, loading: accessLoading } = useTeacherContentAccess();
   const [notifications, setNotifications] = useState<ProjectNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // جلب الإشعارات
+  // جلب الإشعارات مع فلترة حسب الصفوف المسؤول عنها
   const fetchNotifications = async () => {
-    if (!userProfile?.user_id || userProfile.role !== 'teacher') return;
+    if (!userProfile?.user_id || userProfile.role !== 'teacher' || accessLoading) return;
 
     try {
       setLoading(true);
       setError(null);
 
+      // التحقق من الصفوف المسموح بها
+      if (allowedGrades.length === 0) {
+        console.log('Teacher has no allowed grades - no notifications');
+        setNotifications([]);
+        setUnreadCount(0);
+        return;
+      }
+
+      // جلب الإشعارات الأساسية مع استخدام RLS policies المحدثة
       const { data: notificationsData, error: notificationsError } = await supabase
         .from('teacher_notifications')
         .select(`
@@ -53,22 +64,71 @@ export const useProjectNotifications = () => {
 
       if (notificationsError) throw notificationsError;
 
-      // تحويل البيانات مع جلب معلومات إضافية
+      // تحويل البيانات مع جلب معلومات إضافية والتحقق من الصلاحيات
       const formattedNotifications = await Promise.all(
         (notificationsData || []).map(async (notification) => {
-          // جلب معلومات المشروع
-          const { data: projectData } = await supabase
+          let projectData = null;
+          let studentProfile = null;
+          let isAuthorized = false;
+
+          // تحديد نوع المشروع وجلب بياناته
+          // محاولة جلب من مشاريع الصف الثاني عشر أولاً
+          const { data: grade12Project } = await supabase
             .from('grade12_final_projects')
-            .select('title, student_id')
+            .select('title, student_id, school_id')
             .eq('id', notification.project_id)
             .single();
 
+          if (grade12Project) {
+            projectData = grade12Project;
+            
+            // التحقق من صلاحية الوصول لمشروع الصف الثاني عشر
+            if (allowedGrades.includes('12')) {
+              const { data: accessCheck } = await supabase
+                .rpc('can_teacher_access_project', {
+                  teacher_user_id: userProfile.user_id,
+                  project_student_id: grade12Project.student_id,
+                  project_type: 'grade12'
+                });
+              isAuthorized = accessCheck || false;
+            }
+          } else {
+            // محاولة جلب من مشاريع الصف العاشر
+            const { data: grade10Project } = await supabase
+              .from('grade10_mini_projects')
+              .select('title, student_id, school_id')
+              .eq('id', notification.project_id)
+              .single();
+
+            if (grade10Project) {
+              projectData = grade10Project;
+              
+              // التحقق من صلاحية الوصول لمشروع الصف العاشر
+              if (allowedGrades.includes('10')) {
+                const { data: accessCheck } = await supabase
+                  .rpc('can_teacher_access_project', {
+                    teacher_user_id: userProfile.user_id,
+                    project_student_id: grade10Project.student_id,
+                    project_type: 'grade10'
+                  });
+                isAuthorized = accessCheck || false;
+              }
+            }
+          }
+
+          // إذا لم يكن مصرحاً بالوصول، تجاهل الإشعار
+          if (!isAuthorized || !projectData) {
+            return null;
+          }
+
           // جلب معلومات الطالب
-          const { data: studentProfile } = await supabase
+          const { data: studentProfileData } = await supabase
             .from('profiles')
             .select('full_name')
-            .eq('user_id', projectData?.student_id)
+            .eq('user_id', projectData.student_id)
             .single();
+
+          studentProfile = studentProfileData;
 
           return {
             id: notification.id,
@@ -87,10 +147,13 @@ export const useProjectNotifications = () => {
         })
       );
 
-      setNotifications(formattedNotifications);
+      // فلترة الإشعارات الصالحة فقط
+      const validNotifications = formattedNotifications.filter(n => n !== null);
+      
+      setNotifications(validNotifications);
       
       // حساب عدد الإشعارات غير المقروءة
-      const unreadNotifications = formattedNotifications.filter(n => !n.is_read);
+      const unreadNotifications = validNotifications.filter(n => !n.is_read);
       setUnreadCount(unreadNotifications.length);
 
     } catch (error: any) {
@@ -257,10 +320,10 @@ export const useProjectNotifications = () => {
   };
 
   useEffect(() => {
-    if (userProfile?.user_id && userProfile?.role === 'teacher') {
+    if (userProfile?.user_id && userProfile?.role === 'teacher' && !accessLoading) {
       fetchNotifications();
     }
-  }, [userProfile]);
+  }, [userProfile, allowedGrades, accessLoading]);
 
   // إعداد real-time subscription للإشعارات الجديدة
   useEffect(() => {
