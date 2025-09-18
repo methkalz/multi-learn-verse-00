@@ -87,10 +87,10 @@ export const SmartA4Container: React.FC<SmartA4ContainerProps> = ({
             ${index === currentPageIndex ? 'ring-2 ring-primary scale-[1.02]' : 'hover:shadow-xl'}
           `}
           style={{
-            width: '794px', // Precise A4 width (210mm = 794px at 96 DPI)
-            height: '1123px', // Precise A4 height (297mm = 1123px at 96 DPI)
-            minHeight: '1123px',
-            maxHeight: '1123px',
+            width: '816px', // Microsoft Word A4 width (8.5in = 816px at 96 DPI)
+            height: '1056px', // Microsoft Word A4 height (11in = 1056px at 96 DPI)
+            minHeight: '1056px',
+            maxHeight: '1056px',
             overflow: 'hidden',
           }}
         >
@@ -157,8 +157,8 @@ export const SmartA4Container: React.FC<SmartA4ContainerProps> = ({
             border: none !important;
             margin: 0 !important;
             page-break-after: always;
-            width: 210mm !important;
-            height: 297mm !important;
+            width: 8.5in !important;
+            height: 11in !important;
             max-height: none !important;
             border-radius: 0 !important;
             transform: none !important;

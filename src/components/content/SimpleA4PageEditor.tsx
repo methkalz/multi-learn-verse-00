@@ -36,9 +36,9 @@ const SimpleA4PageEditor = React.forwardRef<SimpleA4PageEditorRef, SimpleA4PageE
   const pageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // A4 dimensions in pixels (at 96 DPI)
-  const A4_WIDTH = 794; // 210mm
-  const A4_HEIGHT = 1123; // 297mm
+  // Microsoft Word A4 dimensions in pixels (at 96 DPI)
+  const A4_WIDTH = 816; // 8.5 inches at 96 DPI (Word standard)
+  const A4_HEIGHT = 1056; // 11 inches at 96 DPI (Word standard)
   const PAGE_PADDING = 60; // 20mm padding
   const CONTENT_HEIGHT = A4_HEIGHT - (PAGE_PADDING * 2);
 

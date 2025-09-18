@@ -125,8 +125,8 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
             ${index === currentPageIndex ? 'ring-2 ring-primary' : ''}
           `}
           style={{
-            width: '210mm',      // A4 width
-            height: `${A4_PAGE_HEIGHT + 50}px`, // A4 height + padding
+            width: '8.5in',      // Word A4 width
+            height: `${A4_PAGE_HEIGHT + 50}px`, // Word A4 height + padding
             minHeight: `${A4_PAGE_HEIGHT + 50}px`,
             maxHeight: `${A4_PAGE_HEIGHT + 50}px`,
             overflow: 'hidden',
@@ -195,8 +195,8 @@ export const A4PageContainer: React.FC<A4PageContainerProps> = ({
             border: none !important;
             margin: 0 !important;
             page-break-after: always;
-            width: 210mm !important;
-            height: 297mm !important;
+            width: 8.5in !important;
+            height: 11in !important;
             max-height: none !important;
             border-radius: 0 !important;
           }

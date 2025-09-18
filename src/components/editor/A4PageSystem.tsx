@@ -27,10 +27,10 @@ export const A4PageSystem = forwardRef<HTMLDivElement, A4PageSystemProps>(
     const [pages, setPages] = useState<number[]>([1]);
     const [isIntersecting, setIsIntersecting] = useState<{ [key: number]: boolean }>({ 1: true });
     
-    // أبعاد A4 بالبكسل (210 × 297 مم في 96 DPI)
-    const A4_WIDTH = 794; // 210mm
-    const A4_HEIGHT = 1123; // 297mm
-    const MARGIN = 72; // هوامش 1 بوصة (25.4mm)
+    // أبعاد Microsoft Word الدقيقة لصفحة A4
+    const A4_WIDTH = 816; // 8.5 بوصة في 96 DPI (مثل Word تماماً)
+    const A4_HEIGHT = 1056; // 11 بوصة في 96 DPI (مثل Word تماماً)
+    const MARGIN = 96; // 1 بوصة هوامش (افتراضي Word)
 
     // تطبيق Zoom
     const scaledWidth = A4_WIDTH * zoom;

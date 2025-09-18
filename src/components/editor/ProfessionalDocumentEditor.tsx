@@ -337,7 +337,7 @@ export const ProfessionalDocumentEditor: React.FC<ProfessionalDocumentEditorProp
       if (!editor) return;
       const content = editor.view.dom;
       const contentHeight = content.scrollHeight;
-      const pageHeight = 842; // تقريبي لصفحة A4
+      const pageHeight = 1056; // ارتفاع صفحة Word دقيق
       const pages = Math.ceil(contentHeight / pageHeight);
       setPageCount(pages);
     }, 2000);

@@ -58,8 +58,8 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({
             background: white;
             margin: 0;
             padding: 20px;
-            max-width: 210mm;
-            min-height: 297mm;
+            max-width: 8.5in;
+            min-height: 11in;
         }
         
         h1, h2, h3, h4, h5, h6 {

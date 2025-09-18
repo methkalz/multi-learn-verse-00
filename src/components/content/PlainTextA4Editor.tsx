@@ -136,9 +136,9 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
     }, 0);
   }, []);
 
-  // A4 dimensions with Word-like margins
-  const A4_WIDTH = 794; // 210mm
-  const A4_HEIGHT = 1123; // 297mm
+  // Microsoft Word A4 dimensions with Word-like margins
+  const A4_WIDTH = 816; // 8.5 inches at 96 DPI (Word standard)
+  const A4_HEIGHT = 1056; // 11 inches at 96 DPI (Word standard)
   const PAGE_PADDING = 95; // 2.5cm margins like MS Word default
   const LINE_HEIGHT = 24; // ارتفاع مناسب للنص العربي
   const CHARS_PER_LINE = 65; // عدد أحرف مناسب مع الهوامش الجديدة
@@ -574,8 +574,8 @@ const PlainTextA4Editor = React.forwardRef<PlainTextA4EditorRef, PlainTextA4Edit
               border: none !important;
               margin: 0 !important;
               page-break-after: always;
-              width: 210mm !important;
-              height: 297mm !important;
+              width: 8.5in !important;
+              height: 11in !important;
               padding: 15mm !important;
             }
             

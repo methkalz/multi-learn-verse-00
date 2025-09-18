@@ -27,10 +27,10 @@ export const EnhancedA4PageSystem = forwardRef<HTMLDivElement, EnhancedA4PageSys
     const [pageCount, setPageCount] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
     
-    // أبعاد A4 المحسنة
-    const A4_WIDTH = 794; // 210mm في 96 DPI
-    const A4_HEIGHT = 1123; // 297mm في 96 DPI  
-    const MARGIN = 60; // هوامش محسنة
+    // أبعاد Microsoft Word الدقيقة لصفحة A4
+    const A4_WIDTH = 816; // 8.5 بوصة في 96 DPI (مثل Word تماماً)
+    const A4_HEIGHT = 1056; // 11 بوصة في 96 DPI (مثل Word تماماً)
+    const MARGIN = 96; // 1 بوصة هوامش (افتراضي Word)
     
     const scaledWidth = A4_WIDTH * zoom;
     const scaledHeight = A4_HEIGHT * zoom;
