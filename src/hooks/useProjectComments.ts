@@ -58,23 +58,39 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
 
       // جلب معلومات المؤلفين
       const authorIds = [...new Set(commentsData?.map(c => c.created_by) || [])];
-      const { data: authorsData } = await supabase
+      console.log('🔍 Author IDs to fetch:', authorIds);
+      
+      const { data: authorsData, error: authorsError } = await supabase
         .from('profiles')
         .select('user_id, full_name, role, avatar_url')
         .in('user_id', authorIds);
 
+      console.log('👥 Authors data fetched:', authorsData);
+      console.log('❌ Authors fetch error:', authorsError);
+
       // دمج البيانات
       const authorsMap = new Map(authorsData?.map(author => [author.user_id, author]) || []);
+      console.log('🗺️ Authors map:', Array.from(authorsMap.entries()));
       
-      const commentsWithAuthor = (commentsData || []).map(comment => ({
-        ...comment,
-        author: authorsMap.get(comment.created_by) ? {
-          id: comment.created_by,
-          full_name: authorsMap.get(comment.created_by)?.full_name || 'مستخدم غير معروف',
-          role: authorsMap.get(comment.created_by)?.role || 'student',
-          avatar_url: authorsMap.get(comment.created_by)?.avatar_url
-        } : undefined
-      }));
+      const commentsWithAuthor = (commentsData || []).map(comment => {
+        const authorData = authorsMap.get(comment.created_by);
+        console.log(`📝 Comment ${comment.id}: created_by=${comment.created_by}, authorData=`, authorData);
+        
+        return {
+          ...comment,
+          author: authorData ? {
+            id: comment.created_by,
+            full_name: authorData.full_name || 'مستخدم غير معروف',
+            role: authorData.role || 'student',
+            avatar_url: authorData.avatar_url
+          } : {
+            id: comment.created_by,
+            full_name: 'مستخدم غير معروف',
+            role: 'student',
+            avatar_url: null
+          }
+        };
+      });
 
       setComments(commentsWithAuthor);
       
@@ -340,11 +356,13 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
 
           if (newComment) {
             // جلب معلومات المؤلف
-            const { data: authorData } = await supabase
+            const { data: authorData, error: authorError } = await supabase
               .from('profiles')
               .select('user_id, full_name, role, avatar_url')
               .eq('user_id', newComment.created_by)
               .single();
+
+            console.log('👤 Real-time author fetch for:', newComment.created_by, authorData, authorError);
 
             const commentWithAuthor = {
               ...newComment,
@@ -353,7 +371,12 @@ export const useProjectComments = ({ projectId, enabled = true }: UseProjectComm
                 full_name: authorData.full_name || 'مستخدم غير معروف',
                 role: authorData.role || 'student',
                 avatar_url: authorData.avatar_url
-              } : undefined
+              } : {
+                id: newComment.created_by,
+                full_name: 'مستخدم غير معروف',
+                role: 'student',
+                avatar_url: null
+              }
             };
 
             setComments(prev => {
