@@ -203,10 +203,16 @@ export const EnhancedA4PageSystem = forwardRef<HTMLDivElement, EnhancedA4PageSys
             ))}
           </div>
 
-          {/* المحتوى المطلق مع مراعاة الهوامش */}
+          {/* المحتوى المطلق مع مراعاة الهوامش الدقيقة */}
           <div 
             ref={contentRef}
-            className="absolute top-8 left-5 right-5 z-10"
+            className="absolute z-10"
+            style={{
+              top: `${32 + scaledMargin}px`, // 32px offset للحاوي + هامش علوي
+              left: `${20 + scaledMargin}px`, // 20px offset للحاوي + هامش أيسر
+              right: `${20 + scaledMargin}px`, // 20px offset للحاوي + هامش أيمن
+              width: `${scaledWidth - (40 + scaledMargin * 2)}px` // العرض مطروحاً منه الهوامش
+            }}
           >
             <div className="enhanced-editor-content">
               {children}
@@ -258,7 +264,7 @@ export const EnhancedA4PageSystem = forwardRef<HTMLDivElement, EnhancedA4PageSys
             min-height: 200px;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            padding: 96px; /* هوامش Word الافتراضية */
+            padding: 0; /* إزالة الهوامش في وضع معاينة الصفحات لأنها مضبوطة بالموضع المطلق */
             margin: 0;
             background: transparent;
             border: 1px solid transparent;
