@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import BackButton from './BackButton';
+import { UniversalAvatar } from './UniversalAvatar';
+import { UserTitleBadge } from './UserTitleBadge';
 
 interface AppHeaderProps {
   title?: string;
@@ -34,7 +36,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   showLogout = false 
 }) => {
   const navigate = useNavigate();
-  const { signOut, userProfile } = useAuth();
+  const { signOut, userProfile, user } = useAuth();
   const [headerSettings, setHeaderSettings] = useState<HeaderSettings>({
     logo_url: '/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png',
     logo_size: 'medium',
@@ -116,9 +118,33 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
           {showLogout && (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
-                {userProfile?.full_name}
-              </span>
+              {user && userProfile && (
+                <>
+                  <div className="text-right">
+                    <div className="text-sm font-medium" style={{ color: headerSettings.text_color }}>
+                      {userProfile.full_name || user.email}
+                    </div>
+                    <div className="text-xs">
+                      <UserTitleBadge
+                        role={userProfile.role}
+                        displayTitle={userProfile.display_title}
+                        points={userProfile.points}
+                        level={userProfile.level}
+                        size="sm"
+                        variant="outline"
+                      />
+                    </div>
+                  </div>
+                  
+                  <UniversalAvatar
+                    avatarUrl={userProfile.avatar_url}
+                    userName={userProfile.full_name}
+                    size="sm"
+                    className="border-2 border-primary/20"
+                  />
+                </>
+              )}
+              
               <Button
                 variant="outline"
                 size="sm"

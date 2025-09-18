@@ -149,6 +149,39 @@ export type Database = {
         }
         Relationships: []
       }
+      avatar_images: {
+        Row: {
+          category: string
+          created_at: string | null
+          display_name: string
+          file_path: string
+          filename: string
+          id: string
+          is_active: boolean | null
+          order_index: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          display_name: string
+          file_path: string
+          filename: string
+          id?: string
+          is_active?: boolean | null
+          order_index?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          display_name?: string
+          file_path?: string
+          filename?: string
+          id?: string
+          is_active?: boolean | null
+          order_index?: number | null
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           color: string | null
@@ -3679,33 +3712,45 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string | null
+          display_title: string | null
           email: string | null
           full_name: string
           is_primary_admin: boolean | null
+          level: number | null
           phone: string | null
+          points: number | null
           role: Database["public"]["Enums"]["app_role"]
           school_id: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string | null
+          display_title?: string | null
           email?: string | null
           full_name: string
           is_primary_admin?: boolean | null
+          level?: number | null
           phone?: string | null
+          points?: number | null
           role: Database["public"]["Enums"]["app_role"]
           school_id?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string | null
+          display_title?: string | null
           email?: string | null
           full_name?: string
           is_primary_admin?: boolean | null
+          level?: number | null
           phone?: string | null
+          points?: number | null
           role?: Database["public"]["Enums"]["app_role"]
           school_id?: string | null
           updated_at?: string | null
@@ -4660,6 +4705,10 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_student_title: {
+        Args: { user_points: number }
+        Returns: string
+      }
       check_rate_limit: {
         Args: {
           attempt_type_input: string
