@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Play, CheckCircle, Star, Gamepad2, Users, Monitor, BookOpen } from 'lucide-react';
 import TypewriterEffect from '@/components/TypewriterEffect';
-import FeatureSection from '@/components/landing/FeatureSection';
-import GradeContent from '@/components/landing/GradeContent';
-import SpecialOffer from '@/components/landing/SpecialOffer';
 import WhatsAppButton from '@/components/landing/WhatsAppButton';
+import DashboardImageSlider from '@/components/landing/DashboardImageSlider';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -63,20 +61,20 @@ const LandingPage: React.FC = () => {
               {/* الشعار والعنوان */}
               <div className="mb-16">
                 <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="شعار المنصة" className="h-20 w-auto mx-auto mb-12" />
-                <h1 className="text-5xl md:text-7xl font-light text-gray-900 mb-8 tracking-tight">
-                  التقنية ببساطة
+                <h1 className="text-4xl md:text-6xl font-light text-gray-900 mb-6 tracking-tight">
+                  نظام تعليمي وإداري ذكي لتخصص الحوسبة
                 </h1>
                 <div className="w-16 h-px bg-gray-300 mx-auto mb-12"></div>
               </div>
               
               {/* العنوان المتحرك */}
               <div className="mb-16">
-                <h2 className="text-xl md:text-2xl font-normal text-gray-700 mb-8 leading-relaxed min-h-[2rem] md:min-h-[3rem]">
+                <h2 className="text-xl md:text-2xl font-normal text-gray-700 mb-8 leading-relaxed">
                   <TypewriterEffect 
                     texts={[
-                      "نظام تعليمي وإداري شامل لتخصص الحوسبة والشبكات",
-                      "نتعلّم ونكتشف المزيد من التقنيات بكل شغف وإبداع", 
-                      "نحصل على أفضل تجربة تعليمية وأعلى النتائج الأكاديمية"
+                      "ارتقِ بمستوى طلابك ووفر وقتك مع منصة تعليمية وإدارية شاملة وذكية",
+                      "صُممت خصيصًا لدعم المدارس والمعلمين والطلاب والإدارة", 
+                      "نلتزم بتحسين معدل نجاح الطلاب في امتحانات البجروت"
                     ]} 
                     typeSpeed={60} 
                     deleteSpeed={30} 
@@ -85,27 +83,42 @@ const LandingPage: React.FC = () => {
                 </h2>
               </div>
               
-              <p className="text-base md:text-lg text-gray-600 mb-16 max-w-2xl mx-auto leading-relaxed">
-                منصة تعليمية متكاملة تشمل مواد دراسية، امتحانات تفاعلية، متابعة دقيقة، وتغذية راجعة فورية
+              <p className="text-lg md:text-xl text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed font-medium">
+                منصة واحدة تقدم كل ما تحتاجه
               </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16 text-sm md:text-base">
+                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                  <span className="text-gray-700">📚 مواد تعليمية جاهزة</span>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                  <span className="text-gray-700">📝 بنك امتحانات بجروت</span>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                  <span className="text-gray-700">🎮 ألعاب تعليمية محفزة</span>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                  <span className="text-gray-700">📊 تقارير تفصيلية فورية</span>
+                </div>
+              </div>
               
               {/* أزرار العمل */}
               <div className="flex gap-4 justify-center flex-wrap mb-20">
                 <Button 
                   size="lg" 
-                  onClick={() => navigate('/auth')}
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-md transition-colors font-medium"
+                  onClick={() => window.open('https://wa.me/972528359103?text=مرحبا.. معني بالحصول على تفاصيل أكثر عن النظام المميز', '_blank')}
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md transition-colors font-medium"
                 >
-                  ابدأ التجربة المجانية
+                  اطلب الآن
                   <ArrowRight className="mr-2 h-4 w-4" />
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  onClick={() => scrollToSection('content')}
+                  onClick={() => scrollToSection('features')}
                   className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-md transition-colors font-medium"
                 >
-                  استكشف المحتوى
+                  تعرف على الميزات
                 </Button>
               </div>
 
@@ -127,43 +140,66 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* ميزات المنصة */}
-        <section id="features" className="py-24 bg-gray-50">
+        {/* عرض اللوحات */}
+        <section className="py-24 bg-gray-50">
           <div className="container mx-auto px-6">
-            <div className="text-center mb-20">
+            <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
-                ميزات المنصة
+                لوحات تحكم مخصصة لكل مستخدم
               </h2>
               <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                تقنيات حديثة ومبتكرة تجعل التعليم أكثر متعة وفعالية
+                كل مستخدم له لوحة تحكم مصممة خصيصاً لاحتياجاته
               </p>
             </div>
+            <DashboardImageSlider />
+          </div>
+        </section>
+
+        {/* ميزات للمعلم */}
+        <section id="features" className="py-24 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-20">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
+                ميزات للمعلم
+              </h2>
+              <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {[
                 {
-                  title: 'ألعاب تفاعلية',
-                  description: 'ألعاب تعليمية ممتعة تعزز التعلم',
-                  icon: Gamepad2
+                  title: 'مواد جاهزة حسب مناهج الوزارة',
+                  description: 'محتوى شامل لكل صف مطابق للمناهج الرسمية',
+                  icon: BookOpen
                 },
                 {
-                  title: 'فيديوهات تعليمية',
-                  description: 'شروحات مصورة عالية الجودة',
+                  title: 'محتوى تفاعلي',
+                  description: 'عروض وفيديوهات وشروحات للمواضيع الصعبة',
                   icon: Play
                 },
                 {
-                  title: 'نظام أفاتار',
-                  description: 'تخصيص الشخصية والمكافآت',
+                  title: 'بنك أسئلة متطور',
+                  description: 'مولد امتحانات جاهزة مع الحلول',
+                  icon: CheckCircle
+                },
+                {
+                  title: 'أوراق عمل بضغطة زر',
+                  description: 'إعداد امتحانات وأوراق عمل فوري',
+                  icon: Gamepad2
+                },
+                {
+                  title: 'تقارير متابعة تفصيلية',
+                  description: 'متابعة كل طالب مع عرض الأسئلة غير المجاب عنها',
                   icon: Users
                 },
                 {
-                  title: 'تصحيح ذكي',
-                  description: 'تقييم فوري ودقيق للإجابات',
-                  icon: CheckCircle
+                  title: 'دعم المشاريع',
+                  description: 'مساعدة في تنفيذ مشاريع الطلاب وفحص التشابه',
+                  icon: Monitor
                 }
               ].map((feature, index) => (
-                <div key={index} className="text-center group">
+                <div key={index} className="text-center group p-6 border border-gray-100 rounded-lg hover:border-gray-200 transition-colors">
                   <div className="w-16 h-16 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors">
                     <feature.icon className="h-8 w-8 text-gray-700" />
                   </div>
@@ -176,98 +212,131 @@ const LandingPage: React.FC = () => {
         </section>
 
         {/* المحتوى التعليمي */}
-        <section id="content" className="py-24 bg-white">
+        <section id="content" className="py-24 bg-gray-50">
           <div className="container mx-auto px-6">
             <div className="text-center mb-20">
               <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
-                المحتوى التعليمي
+                المحتوى حسب الصفوف
               </h2>
               <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                محتوى شامل لجميع صفوف تخصص الحوسبة والشبكات
-              </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               {[
-                { grade: 'الصف العاشر', description: 'أساسيات البرمجة والحاسوب', subjects: '6 مواد' },
-                { grade: 'الصف الحادي عشر', description: 'تطوير المهارات التقنية', subjects: '8 مواد' },
-                { grade: 'الصف الثاني عشر', description: 'مشاريع متقدمة وتطبيقية', subjects: '10 مواد' }
+                { 
+                  grade: 'الصف العاشر', 
+                  description: 'التعرف على نظام ويندوز، مقدمة في الشبكات، ومشاريع مصغرة مع فيديوهات',
+                  features: ['نظام ويندوز', 'مقدمة الشبكات', 'مشاريع مصغرة', 'فيديوهات تعليمية']
+                },
+                { 
+                  grade: 'الصف الحادي عشر', 
+                  description: 'المادة المطلوبة (70%) لامتحان البجروت',
+                  features: ['منهج البجروت', '70% من المطلوب', 'تحضير شامل', 'امتحانات تجريبية']
+                },
+                { 
+                  grade: 'الصف الثاني عشر', 
+                  description: 'مهام قصيرة وفيديوهات عملية لتنفيذ مشروع التخرج، مع فحص نسبة التشابه',
+                  features: ['مشروع التخرج', 'فيديوهات عملية', 'فحص التشابه', 'متابعة مستمرة']
+                }
               ].map((item, index) => (
-                <div key={index} className="text-center p-8 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-                  <h3 className="text-xl font-medium text-gray-900 mb-3">{item.grade}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{item.description}</p>
-                  <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{item.subjects}</span>
+                <div key={index} className="bg-white p-8 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                  <h3 className="text-xl font-medium text-gray-900 mb-4">{item.grade}</h3>
+                  <p className="text-gray-600 text-sm mb-6 leading-relaxed">{item.description}</p>
+                  <ul className="space-y-2">
+                    {item.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center text-gray-700 text-sm">
+                        <span className="w-1.5 h-1.5 bg-primary rounded-full mr-3"></span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Call to Action نهائي */}
-        <section className="py-24 bg-gray-900 text-white">
-          <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-light mb-8">
-              ابدأ رحلتك التعليمية اليوم
-            </h2>
-            <p className="text-lg mb-12 max-w-2xl mx-auto text-gray-300">
-              انضم إلى آلاف المعلمين والطلاب الذين يستخدمون منصتنا
-            </p>
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/auth')}
-              className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 rounded-md transition-colors font-medium"
-            >
-              ابدأ الآن مجاناً
-              <ArrowRight className="mr-2 h-4 w-4" />
-            </Button>
+        {/* ميزات للطالب والإدارة */}
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-6xl mx-auto">
+              
+              {/* ميزات للطالب */}
+              <div>
+                <h2 className="text-2xl md:text-3xl font-light text-gray-900 mb-8">ميزات للطالب</h2>
+                <div className="space-y-6">
+                  {[
+                    'وصول كامل للمحتوى من البيت أو المدرسة',
+                    'ألعاب تعليمية محفزة ورسوم متحركة تزيد المشاركة',
+                    'فيديوهات Packet Tracer لدعم المشاريع (عاشر وثاني عشر)',
+                    'حفظ المشروع داخل المنظومة لمنع ضياعه',
+                    'نظام تحفيزي ذكي يتطور مع تقدم الطالب',
+                    'متابعة واضحة لمسار مشروع التخرج خطوة بخطوة'
+                  ].map((feature, index) => (
+                    <div key={index} className="flex items-start">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                      <p className="text-gray-700">{feature}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ميزات للإدارة */}
+              <div>
+                <h2 className="text-2xl md:text-3xl font-light text-gray-900 mb-8">ميزات للإدارة</h2>
+                <div className="space-y-6">
+                  {[
+                    'رفع نتائج التحصيل في امتحانات البجروت',
+                    'تقوية العلاقة مع الأهالي عبر رسائل واتساب بعد كل اختبار',
+                    'تقارير شاملة لمستوى كل صف ولوحة متابعة متكاملة',
+                    'تقليل نسب "חשד" بتقليل الأخطاء والغش في مشاريع التخرج',
+                    'فحص ذكي للمشاريع قبل التسليم'
+                  ].map((feature, index) => (
+                    <div key={index} className="flex items-start">
+                      <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                      <p className="text-gray-700">{feature}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 py-16">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center md:text-right">
-              <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
-                <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="الشعار" className="h-8 w-auto" />
-                <span className="text-lg font-medium text-gray-900">التقنية ببساطة</span>
+        {/* عرض خاص للمدارس */}
+        <section className="py-24 bg-blue-50">
+          <div className="container mx-auto px-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-8">
+              عرض خاص للمدارس
+            </h2>
+            <div className="max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div className="bg-white p-8 rounded-lg shadow-sm">
+                  <h3 className="text-xl font-medium text-gray-900 mb-4">🎁 تجربة مجانية</h3>
+                  <p className="text-gray-600">تجربة مجانية لمدة أسبوعين كاملين</p>
+                </div>
+                <div className="bg-white p-8 rounded-lg shadow-sm">
+                  <h3 className="text-xl font-medium text-gray-900 mb-4">💰 دعم גפ"ן</h3>
+                  <p className="text-gray-600">فرصة الحصول على النظام مع دعم منظومة גפ"ן</p>
+                </div>
               </div>
-              <p className="text-gray-600 text-sm">
-                منصة تعليمية شاملة لتخصص الحوسبة والشبكات
-              </p>
-            </div>
-            <div className="text-center md:text-right">
-              <h3 className="font-medium mb-4 text-gray-900">روابط سريعة</h3>
-              <ul className="space-y-2 text-gray-600 text-sm">
-                <li><a href="#" className="hover:text-gray-900 transition-colors">الصفحة الرئيسية</a></li>
-                <li><a href="#features" className="hover:text-gray-900 transition-colors">الميزات</a></li>
-                <li><a href="#content" className="hover:text-gray-900 transition-colors">المحتوى</a></li>
-              </ul>
-            </div>
-            <div className="text-center md:text-right">
-              <h3 className="font-medium mb-4 text-gray-900">الدعم</h3>
-              <ul className="space-y-2 text-gray-600 text-sm">
-                <li><a href="#" className="hover:text-gray-900 transition-colors">مركز المساعدة</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">اتصل بنا</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">الأسئلة الشائعة</a></li>
-              </ul>
-            </div>
-            <div className="text-center md:text-right">
-              <h3 className="font-medium mb-4 text-gray-900">تواصل معنا</h3>
-              <div className="space-y-2 text-gray-600 text-sm">
-                <p>info@tech-simple.com</p>
-                <p>+972-052-835-9103</p>
-                <p>فلسطين</p>
+              
+              <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
+                <h3 className="text-xl font-medium text-gray-900 mb-4">📞 للتواصل والاستفسار</h3>
+                <p className="text-lg text-gray-700 mb-6">يونس عمارنة: 0528359103</p>
+                <Button 
+                  size="lg" 
+                  onClick={() => window.open('https://wa.me/972528359103?text=مرحبا.. معني بالحصول على تفاصيل أكثر عن النظام المميز', '_blank')}
+                  className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 rounded-md transition-colors font-medium text-lg"
+                >
+                  اطلب الآن
+                  <ArrowRight className="mr-3 h-5 w-5" />
+                </Button>
               </div>
             </div>
           </div>
-          <div className="border-t border-gray-100 mt-12 pt-8 text-center text-gray-500 text-sm">
-            <p>&copy; 2024 منصة التقنية ببساطة. جميع الحقوق محفوظة.</p>
-          </div>
-        </div>
-      </footer>
+        </section>
     </div>
   );
 };
