@@ -265,7 +265,7 @@ const LandingPage: React.FC = () => {
                   <ul className="space-y-3">
                     {item.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center text-gray-700 text-sm">
-                        <div className="w-2 h-2 bg-gradient-to-r from-current to-current rounded-full mr-4 flex-shrink-0 opacity-60"></div>
+                        <div className="w-2 h-2 bg-gradient-to-r from-current to-current rounded-full mr-3 flex-shrink-0 opacity-60"></div>
                         <span className="font-medium">{feature}</span>
                       </li>
                     ))}
