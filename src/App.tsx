@@ -52,8 +52,9 @@ import {
   withLazyLoading
 } from "@/components/LazyComponents";
 
-// Lazy load Grade 12 Project Editor
+// Lazy load Grade 12 Project Editor and Landing Page
 const Grade12ProjectEditorPage = React.lazy(() => import('@/pages/Grade12ProjectEditor'));
+const LandingPage = React.lazy(() => import('@/pages/LandingPage'));
 import { PageLoading } from "@/components/ui/LoadingComponents";
 
 // Global React Query client configuration for server state management
@@ -92,6 +93,7 @@ const App = () => {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<Index />} />
+                  <Route path="/landingpage" element={<Suspense fallback={<PageLoading message="جاري تحميل صفحة الهبوط..." />}><LandingPage /></Suspense>} />
                   
                   {/* Authentication routes */}
                   <Route path="/auth" element={<LazyAuth />} />
