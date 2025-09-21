@@ -247,13 +247,13 @@ const LandingPage: React.FC = () => {
                         className="w-20 h-20 rounded-full object-cover shadow-lg border-4 border-white mx-auto group-hover:scale-110 transition-transform duration-300"
                       />
                       
-                      {/* Grade icon overlay */}
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-lg border-2 border-gray-100">
+                      {/* Grade icon overlay with floating animation */}
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-lg border-2 border-gray-100 animate-bounce" style={{ animationDuration: '3s' }}>
                         {item.gradeIcon}
                       </div>
                       
-                      {/* Grade number badge */}
-                      <div className="absolute -bottom-2 -left-2 w-7 h-7 bg-gradient-to-r from-gray-600 to-gray-800 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                      {/* Grade number badge with subtle float */}
+                      <div className="absolute -bottom-2 -left-2 w-7 h-7 bg-gradient-to-r from-gray-600 to-gray-800 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg animate-pulse" style={{ animationDuration: '4s' }}>
                         {item.gradeNumber}
                       </div>
                     </div>
