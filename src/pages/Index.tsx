@@ -1,28 +1,19 @@
 /**
- * Landing Page Component (Index)
+ * Enhanced Landing Page Component (Index)
  * 
- * The main entry point and marketing page for the educational platform.
- * Features a modern design with animated elements, interactive sections,
- * and responsive layout optimized for Arabic content (RTL).
+ * Comprehensive marketing page for the educational computing platform.
+ * Features Arabic content with detailed sections for teachers, students, and administration.
  * 
- * Features:
- * - Hero section with typewriter effect and animated backgrounds
- * - Educational materials showcase (Grade 10, 11, 12)
- * - Benefits section for different user types (teacher, student, school)
- * - Interactive features highlight with floating animations
- * - Call-to-action sections with conditional rendering based on auth state
- * - Smooth scrolling navigation between sections
- * - Floating light orbs and ambient animations
- * - Responsive design with mobile-first approach
- * 
- * SEO Optimized:
- * - Semantic HTML structure
- * - Proper heading hierarchy
- * - Meta description ready content
- * - Arabic language support (RTL)
+ * New Features:
+ * - Detailed feature sections for each user type
+ * - Grade-specific content breakdown
+ * - Image slider with dashboard screenshots  
+ * - WhatsApp direct contact integration
+ * - Special offers and trial information
+ * - Enhanced responsive design
  * 
  * @author Educational Platform Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 import { useEffect } from 'react';
@@ -30,9 +21,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { Monitor, Network, Award, BookOpen, Users, GraduationCap, Gamepad2, Play, ArrowRight, CheckCircle } from 'lucide-react';
+import { Monitor, Network, Award, BookOpen, Users, GraduationCap, Gamepad2, Play, ArrowRight, CheckCircle, Target, Zap, Trophy } from 'lucide-react';
 import TypewriterEffect from '@/components/TypewriterEffect';
 import { PageLoading } from '@/components/ui/LoadingComponents';
+import { ImageSlider } from '@/components/landing/ImageSlider';
+import { WhatsAppButton } from '@/components/landing/WhatsAppButton';
+import { FeatureSection } from '@/components/landing/FeatureSection';
+import { GradeContent } from '@/components/landing/GradeContent';
+import { SpecialOffer } from '@/components/landing/SpecialOffer';
 /**
  * Index Component Implementation
  * 
@@ -140,14 +136,39 @@ const Index = () => {
               </div>
               
               {/* Main Headline */}
-              <h2 className="text-2xl md:text-3xl font-semibold text-gray-600 mb-6 leading-relaxed min-h-[2.5rem] md:min-h-[3rem] text-center">
-                <TypewriterEffect texts={["نظام تعليمي وإداري شامل لتخصص الحوسبة", "نتعلّم ونعرف المزيد والمزيد بكل شغف", "نحصل على أفضل تجربة وأعلى نتائج"]} typeSpeed={80} deleteSpeed={40} pauseDuration={3000} />
+              <h1 className="text-3xl md:text-4xl font-bold font-cairo text-gray-800 mb-6 leading-relaxed">
+                نظام تعليمي وإداري ذكي لتخصص الحوسبة
+              </h1>
+              
+              <h2 className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed max-w-4xl mx-auto">
+                ارتقِ بمستوى طلابك ووفر وقتك مع منصة تعليمية وإدارية شاملة وذكية، 
+                صُممت خصيصًا لدعم المدارس والمعلمين والطلاب والإدارة
               </h2>
               
-              <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed text-center">
-                يشمل مواد، امتحانات، متابعة، وتغذية راجعة فورية
-                <br />
-                <span className="text-primary font-semibold">مطابق لتعليمات وزارة التربية</span>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 max-w-4xl mx-auto shadow-lg">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">منصة واحدة تقدم كل ما تحتاجه:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>مواد تعليمية جاهزة</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>بنك امتحانات بجروت ومولد امتحانات فوري</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>ألعاب تعليمية محفزة</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>تقارير تفصيلية وفورية</span>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-lg font-semibold text-primary mb-12">
+                نلتزم بتحسين معدل نجاح الطلاب في امتحانات البجروت
               </p>
               
               {/* CTA Buttons */}
@@ -195,104 +216,99 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Educational Content Section */}
-        <section id="materials" className="py-20 bg-muted/40 relative z-10 -mt-[150px]">
-          <div className="container mx-auto px-6 relative z-10 text-center">
+        {/* Image Slider Section */}
+        <section className="py-20 bg-muted/40 relative z-10 -mt-[120px]">
+          <div className="container mx-auto px-6">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4 text-center">المواد التعليمية</h2>
+              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4">
+                استكشف واجهات النظام
+              </h2>
               <div className="w-16 h-1 gradient-blue mx-auto rounded-full mb-6"></div>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
-                منهج شامل لتخصص الحوسبة مطابق لتعليمات وزارة التربية والتعليم
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                تصفح لقطات حية من لوحات التحكم المختلفة للمعلمين والطلاب والإدارة
               </p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {[{
-              title: "الصف العاشر",
-              icon: Monitor,
-              items: ["التعرف على نظام التشغيل الويندوز", "مقدمة عن الشبكات", "تعليمات لبناء مشروع مصغر"],
-              gradient: "gradient-blue"
-            }, {
-              title: "الصف الحادي عشر",
-              icon: Network,
-              items: ["مادة الـ 70% المطلوبة لامتحان البجروت", "تحضير شامل ومنهجي للامتحانات النهائية"],
-              gradient: "gradient-orange"
-            }, {
-              title: "الصف الثاني عشر",
-              icon: Award,
-              items: ["مهام وفيديوهات مسجلة لتنفيذ مشروع التخرج", "فحص نسبة التشابه بين مشاريع الطلاب"],
-              gradient: "gradient-blue"
-            }].map((grade, index) => (
-              <Card key={grade.title} className="modern-card group relative z-20">
-                <CardHeader className="text-center pb-4 relative z-20">
-                  <div className={`w-16 h-16 mx-auto mb-4 ${grade.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 relative z-20`}>
-                    <grade.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-cairo text-gray-800 relative z-20 text-center">{grade.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="relative z-20">
-                  <ul className="space-y-3">
-                    {grade.items.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
-                        <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
+            <ImageSlider />
+          </div>
+        </section>
+
+        {/* Grade Content Details */}
+        <GradeContent />
+
+        {/* Detailed Features Sections */}
+        <section className="py-20 bg-muted/40">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4">
+                ميزات شاملة لكل المستخدمين
+              </h2>
+              <div className="w-16 h-1 gradient-orange mx-auto rounded-full mb-6"></div>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                نقدم حلول متخصصة ومصممة خصيصاً لتلبية احتياجات المعلمين والطلاب وإدارة المدارس
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              <FeatureSection type="teacher" />
+              <FeatureSection type="student" />
+              <FeatureSection type="admin" />
             </div>
           </div>
         </section>
 
-        {/* Benefits Section */}
+        {/* Key Benefits Section */}
         <section id="benefits" className="py-20 bg-white relative z-10">
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4 text-center">لماذا تختار منصتنا؟</h2>
+              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4">
+                لماذا نظامنا هو الأفضل؟
+              </h2>
               <div className="w-16 h-1 gradient-orange mx-auto rounded-full mb-6"></div>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
-                نوفر حلول شاملة للمعلمين والطلاب والمدارس
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                نقدم حلول مبتكرة ومجربة لرفع مستوى التعليم وتحسين نتائج الطلاب
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {[{
-              title: "للمعلم",
-              icon: BookOpen,
-              benefits: ["مواد تعليمية وفق المنهاج الرسمي", "أوراق عمل وامتحانات جاهزة", "تصحيح تلقائي يوفر الوقت", "لوحة تحكم شاملة للمتابعة"],
-              gradient: "gradient-blue"
-            }, {
-              title: "للطالب",
-              icon: GraduationCap,
-              benefits: ["تعلم تفاعلي من أي مكان", "ألعاب تعليمية ممتعة", "فيديوهات Packet Tracer", "حفظ آمن للمشاريع"],
-              gradient: "gradient-orange"
-            }, {
-              title: "للمدرسة",
-              icon: Users,
-              benefits: ["رفع مستوى التحصيل", "تواصل فعال مع الأهل", "تقارير مفصلة", "مراقبة شاملة للتقدم"],
-              gradient: "gradient-blue"
-            }].map((benefit, index) => (
-              <Card key={benefit.title} className="modern-card group text-center">
-                <CardHeader className="pb-4">
-                  <div className={`w-16 h-16 mx-auto mb-4 ${benefit.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <benefit.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-cairo text-gray-800 text-center">{benefit.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {benefit.benefits.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
-                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
+                title: "نتائج مضمونة",
+                icon: Target,
+                description: "تحسين معدلات النجاح في البجروت",
+                benefits: ["زيادة نسب النجاح بنسبة تصل إلى 30%", "تقليل معدل الرسوب", "تحسين جودة المشاريع", "رفع مستوى الفهم"],
+                gradient: "gradient-blue"
+              }, {
+                title: "توفير الوقت والجهد",
+                icon: Zap,
+                description: "أتمتة المهام الإدارية والتعليمية",
+                benefits: ["توفير 60% من وقت التحضير", "تصحيح تلقائي للامتحانات", "تقارير فورية", "إدارة مبسطة للمحتوى"],
+                gradient: "gradient-orange"
+              }, {
+                title: "جودة عالمية",
+                icon: Trophy,
+                description: "معايير دولية في التعليم",
+                benefits: ["مطابق للمعايير الدولية", "تحديث مستمر للمحتوى", "دعم فني متخصص", "ضمان الجودة"],
+                gradient: "gradient-blue"
+              }].map((benefit, index) => (
+                <Card key={benefit.title} className="modern-card group text-center hover:shadow-2xl transition-all duration-300">
+                  <CardHeader className="pb-4">
+                    <div className={`w-20 h-20 mx-auto mb-4 ${benefit.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <benefit.icon className="h-10 w-10 text-white" />
+                    </div>
+                    <CardTitle className="text-xl font-cairo text-gray-800 mb-2">{benefit.title}</CardTitle>
+                    <p className="text-gray-600 font-medium">{benefit.description}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {benefit.benefits.map((item, i) => (
+                        <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
+                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
@@ -385,23 +401,45 @@ const Index = () => {
         </section>
       </main>
 
+        {/* Special Offer Section */}
+        <SpecialOffer />
+
       {/* Footer */}
-      <footer className="bg-gray-50 border-t">
-        <div className="container mx-auto px-6 py-12">
+      <footer className="bg-gray-800 text-white py-12 relative z-10">
+        <div className="container mx-auto px-6">
           <div className="text-center">
-            <h3 className="text-2xl font-bold font-cairo text-gradient-blue mb-4 text-center">
-              التقنية ببساطة
-            </h3>
-            <p className="text-gray-600 mb-6 text-center">
-              نظام تعليمي وإداري شامل لتخصص الحوسبة - مطابق لتعليمات وزارة التربية
+            <div className="flex items-center justify-center mb-6">
+              <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="شعار الموقع" className="h-12 w-auto ml-3" />
+              <span className="text-2xl font-bold font-cairo">نظام التعليم الذكي</span>
+            </div>
+            <p className="text-gray-400 max-w-3xl mx-auto leading-relaxed mb-6">
+              منصة تعليمية وإدارية شاملة لتخصص الحوسبة، مطابقة لمعايير وزارة التربية والتعليم
             </p>
-            <div className="w-16 h-1 gradient-blue mx-auto rounded-full mb-6"></div>
-            <p className="text-sm text-gray-500 text-center">
-              &copy; 2024 التقنية ببساطة. جميع الحقوق محفوظة.
-            </p>
+            
+            <div className="bg-gray-700/50 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
+              <h4 className="text-lg font-semibold mb-4">للتواصل والاستفسار</h4>
+              <p className="text-gray-300 mb-2">يونس عمارنة</p>
+              <p className="text-white font-bold text-xl mb-4">0528359103</p>
+              <div className="flex justify-center">
+                <WhatsAppButton 
+                  variant="default"
+                  size="md"
+                  className="bg-green-600 hover:bg-green-700"
+                />
+              </div>
+            </div>
+            
+            <div className="mt-8 pt-8 border-t border-gray-700">
+              <p className="text-gray-500">
+                © 2024 نظام التعليم الذكي. جميع الحقوق محفوظة.
+              </p>
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Button */}
+      <WhatsAppButton variant="floating" />
     </div>
   );
 };
