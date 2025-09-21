@@ -145,11 +145,11 @@ const LandingPage: React.FC = () => {
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
-                لوحات تحكم مخصصة لكل مستخدم
+                ميزات النظام التفصيلية
               </h2>
               <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                كل مستخدم له لوحة تحكم مصممة خصيصاً لاحتياجاته
+                استكشف كيف يخدم النظام كل فئة من المستخدمين
               </p>
             </div>
             <DashboardImageSlider />
