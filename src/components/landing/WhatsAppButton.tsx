@@ -11,7 +11,7 @@ interface WhatsAppButtonProps {
   message?: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'floating';
+  variant?: 'default' | 'floating' | 'footer';
 }
 
 export const WhatsAppButton = ({ 
@@ -45,6 +45,18 @@ export const WhatsAppButton = ({
         aria-label="تواصل عبر الواتساب"
       >
         <MessageCircle className="w-6 h-6" />
+      </button>
+    );
+  }
+
+  if (variant === 'footer') {
+    return (
+      <button
+        onClick={openWhatsApp}
+        className={`text-gray-400 hover:text-white transition-colors flex items-center gap-2 ${className}`}
+      >
+        <MessageCircle className="w-4 h-4" />
+        واتساب: {phoneNumber}
       </button>
     );
   }

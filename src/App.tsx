@@ -26,6 +26,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/lib/error-boundary";
 import useSiteSettings from "@/hooks/useSiteSettings";
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 import EnhancedGameDataManagement from "./components/games/EnhancedGameDataManagement";
 import { 
@@ -92,6 +93,7 @@ const App = () => {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<Index />} />
+                  <Route path="/landingpage" element={<LandingPage />} />
                   
                   {/* Authentication routes */}
                   <Route path="/auth" element={<LazyAuth />} />

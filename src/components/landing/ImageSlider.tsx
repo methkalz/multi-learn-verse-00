@@ -24,25 +24,60 @@ const slides: SlideImage[] = [
     category: 'teacher'
   },
   {
-    id: '2', 
+    id: '2',
+    title: 'إدارة المحتوى للمعلم',
+    description: 'أدوات متقدمة لإنشاء وتعديل المحتوى التعليمي',
+    image: '/avatars/teacher-female-1.png',
+    category: 'teacher'
+  },
+  {
+    id: '3',
+    title: 'تقارير المعلم المفصلة',
+    description: 'متابعة تقدم الطلاب وتحليل الأداء',
+    image: '/avatars/teacher-male-2.png',
+    category: 'teacher'
+  },
+  {
+    id: '4', 
     title: 'لوحة تحكم الطالب',
     description: 'بيئة تعليمية تفاعلية مع الألعاب والمحتوى',
     image: '/avatars/student-boy-1.png',
     category: 'student'
   },
   {
-    id: '3',
+    id: '5',
+    title: 'الألعاب التعليمية للطلاب',
+    description: 'ألعاب تفاعلية محفزة لتعزيز التعلم',
+    image: '/avatars/student-creative.png',
+    category: 'student'
+  },
+  {
+    id: '6',
+    title: 'مكتبة المواد للطلاب',
+    description: 'وصول سهل لجميع المواد والفيديوهات التعليمية',
+    image: '/avatars/student-girl-1.png',
+    category: 'student'
+  },
+  {
+    id: '7',
     title: 'لوحة إدارة المدرسة',
     description: 'إحصائيات وتقارير شاملة للإدارة',
     image: '/avatars/admin-school-formal.png',
     category: 'admin'
   },
   {
-    id: '4',
-    title: 'الألعاب التعليمية',
-    description: 'ألعاب تفاعلية محفزة لتعزيز التعلم',
-    image: '/avatars/student-creative.png',
-    category: 'games'
+    id: '8',
+    title: 'إدارة المدرسين والطلاب',
+    description: 'أدوات شاملة لإدارة المستخدمين والصلاحيات',
+    image: '/avatars/admin-school-female.png',
+    category: 'admin'
+  },
+  {
+    id: '9',
+    title: 'تقارير الإدارة المتقدمة',
+    description: 'لوحات معلومات تفاعلية للمتابعة الإدارية',
+    image: '/avatars/admin-school-male.png',
+    category: 'admin'
   }
 ];
 
@@ -137,21 +172,76 @@ export const ImageSlider = () => {
         ))}
       </div>
 
-      {/* Slide Categories */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-        {slides.map((slide, index) => (
-          <button
-            key={slide.id}
-            onClick={() => goToSlide(index)}
-            className={`p-3 rounded-lg text-sm transition-all duration-200 ${
-              index === currentSlide
-                ? 'bg-primary text-white shadow-lg'
-                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-            }`}
-          >
-            {slide.title}
-          </button>
-        ))}
+      {/* Slide Categories by Type */}
+      <div className="mt-8 space-y-4">
+        {/* Teacher Section */}
+        <div>
+          <h4 className="text-lg font-semibold text-gray-800 mb-3 text-center">🎓 لوحات المعلم</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {slides.filter(slide => slide.category === 'teacher').map((slide, index) => {
+              const slideIndex = slides.findIndex(s => s.id === slide.id);
+              return (
+                <button
+                  key={slide.id}
+                  onClick={() => goToSlide(slideIndex)}
+                  className={`p-3 rounded-lg text-sm transition-all duration-200 ${
+                    slideIndex === currentSlide
+                      ? 'bg-primary text-white shadow-lg'
+                      : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  {slide.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Student Section */}
+        <div>
+          <h4 className="text-lg font-semibold text-gray-800 mb-3 text-center">👩‍🎓 لوحات الطالب</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {slides.filter(slide => slide.category === 'student').map((slide, index) => {
+              const slideIndex = slides.findIndex(s => s.id === slide.id);
+              return (
+                <button
+                  key={slide.id}
+                  onClick={() => goToSlide(slideIndex)}
+                  className={`p-3 rounded-lg text-sm transition-all duration-200 ${
+                    slideIndex === currentSlide
+                      ? 'bg-primary text-white shadow-lg'
+                      : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  {slide.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Admin Section */}
+        <div>
+          <h4 className="text-lg font-semibold text-gray-800 mb-3 text-center">🏫 لوحات الإدارة</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {slides.filter(slide => slide.category === 'admin').map((slide, index) => {
+              const slideIndex = slides.findIndex(s => s.id === slide.id);
+              return (
+                <button
+                  key={slide.id}
+                  onClick={() => goToSlide(slideIndex)}
+                  className={`p-3 rounded-lg text-sm transition-all duration-200 ${
+                    slideIndex === currentSlide
+                      ? 'bg-primary text-white shadow-lg'
+                      : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  {slide.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
