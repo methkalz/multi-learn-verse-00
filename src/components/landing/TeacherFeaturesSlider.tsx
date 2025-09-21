@@ -47,7 +47,7 @@ const TeacherFeaturesSlider: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl"></div>
       
       <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl overflow-hidden border border-blue-100">
-        <div className="relative h-96">
+        <div className="relative h-96 px-16"> {/* Added padding to avoid arrow overlap */}
           {slides.map((slide, index) => (
             <div
               key={index}
@@ -59,11 +59,11 @@ const TeacherFeaturesSlider: React.FC = () => {
                     : 'opacity-0 translate-x-full scale-95'
               }`}
             >
-              <div className="flex flex-col md:flex-row h-full">
-                <div className="flex-1 p-8 md:p-12 flex flex-col justify-center relative">
+              <div className="flex flex-col md:flex-row h-full px-4">
+                <div className="flex-1 p-6 md:p-8 flex flex-col justify-center relative">
                   {/* Decorative Elements */}
-                  <div className="absolute top-4 left-4 w-16 h-16 bg-blue-100 rounded-full opacity-50 animate-pulse"></div>
-                  <div className="absolute bottom-4 right-4 w-12 h-12 bg-blue-200 rounded-full opacity-30 animate-bounce"></div>
+                  <div className="absolute top-4 left-4 w-16 h-16 bg-blue-100 rounded-full opacity-30 animate-pulse"></div>
+                  <div className="absolute bottom-4 right-4 w-12 h-12 bg-blue-200 rounded-full opacity-20 animate-bounce"></div>
                   
                   <div className="relative z-10">
                     <div className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-4 animate-fade-in">
@@ -86,11 +86,11 @@ const TeacherFeaturesSlider: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex-1 flex items-center justify-center p-8 md:p-12 relative overflow-hidden">
+                <div className="flex-1 flex items-center justify-center p-6 md:p-8 relative overflow-hidden">
                   {/* Animated Background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100"></div>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200 rounded-full opacity-20 transform rotate-45 animate-spin-slow"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-200 rounded-full opacity-30 animate-pulse"></div>
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-200 rounded-full opacity-20 animate-float"></div>
+                  <div className="absolute bottom-0 left-0 w-20 h-20 bg-indigo-200 rounded-full opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
                   
                   <div className="relative z-10 group">
                     <div className="relative transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
@@ -102,12 +102,10 @@ const TeacherFeaturesSlider: React.FC = () => {
                       {/* Floating Dots */}
                       <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-400 rounded-full animate-bounce"></div>
                       <div className="absolute -bottom-3 -left-3 w-3 h-3 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
-                      <div className="absolute top-1/2 -right-4 w-2 h-2 bg-blue-300 rounded-full animate-ping"></div>
                     </div>
                     
                     {/* Orbit Ring */}
-                    <div className="absolute inset-0 border-2 border-blue-200 rounded-full animate-spin-slow opacity-30"></div>
-                    <div className="absolute inset-4 border border-blue-100 rounded-full animate-reverse-spin opacity-20"></div>
+                    <div className="absolute inset-0 border-2 border-blue-200 rounded-full animate-spin-slow opacity-20"></div>
                   </div>
                 </div>
               </div>
@@ -115,46 +113,34 @@ const TeacherFeaturesSlider: React.FC = () => {
           ))}
         </div>
 
-        {/* Enhanced Navigation */}
+        {/* Enhanced Navigation - Positioned outside content area */}
         <button
           onClick={prevSlide}
-          className="absolute left-6 top-1/2 transform -translate-y-1/2 bg-white hover:bg-blue-50 text-blue-600 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl border border-blue-100"
+          className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white hover:bg-blue-50 text-blue-600 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-blue-100 z-20"
         >
-          <ChevronLeft className="h-6 w-6" />
+          <ChevronLeft className="h-5 w-5" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-white hover:bg-blue-50 text-blue-600 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl border border-blue-100"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white hover:bg-blue-50 text-blue-600 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-blue-100 z-20"
         >
-          <ChevronRight className="h-6 w-6" />
+          <ChevronRight className="h-5 w-5" />
         </button>
 
         {/* Enhanced Dots */}
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`relative transition-all duration-300 ${
+              className={`transition-all duration-300 ${
                 index === currentSlide 
-                  ? 'w-8 h-3 bg-blue-500 rounded-full' 
-                  : 'w-3 h-3 bg-blue-200 hover:bg-blue-300 rounded-full hover:scale-125'
+                  ? 'w-6 h-2 bg-blue-500 rounded-full' 
+                  : 'w-2 h-2 bg-blue-200 hover:bg-blue-300 rounded-full hover:scale-125'
               }`}
-            >
-              {index === currentSlide && (
-                <div className="absolute inset-0 bg-blue-400 rounded-full animate-pulse"></div>
-              )}
-            </button>
+            />
           ))}
         </div>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="mt-6 w-full bg-blue-100 rounded-full h-1">
-        <div 
-          className="bg-gradient-to-r from-blue-400 to-blue-600 h-1 rounded-full transition-all duration-300"
-          style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
-        ></div>
       </div>
     </div>
   );
