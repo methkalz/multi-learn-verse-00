@@ -95,28 +95,16 @@ const AdminFeaturesSlider: React.FC = () => {
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
                   
                   <div className="relative z-10 group">
-                     <div 
-                       className="relative transform transition-all duration-500 group-hover:scale-105 cursor-pointer"
-                       onClick={() => setEnlargedImage(slide.image)}
-                     >
+                     <div className="relative transform transition-all duration-500 group-hover:scale-105">
                        <img
                          src={slide.image}
                          alt={slide.title}
-                         className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10 hover:shadow-3xl transition-all duration-300 hover:brightness-110"
+                         onClick={() => setEnlargedImage(slide.image)}
+                         className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10 cursor-pointer hover:shadow-3xl transition-shadow duration-300"
                        />
-                       
-                       {/* Hover overlay to indicate clickability */}
-                       <div className="absolute inset-0 bg-black/0 hover:bg-black/10 rounded-2xl transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
-                         <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
-                           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                           </svg>
-                         </div>
-                       </div>
-                       
                        {/* Admin Elements */}
-                       <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce pointer-events-none"></div>
-                       <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-indigo-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
+                       <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce"></div>
+                       <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
                      </div>
                     
                     {/* Orbit Ring */}
