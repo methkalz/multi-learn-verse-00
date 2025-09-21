@@ -7,22 +7,22 @@ const AdminFeaturesSlider: React.FC = () => {
 
   const slides = [
     {
-      title: 'تقارير شاملة للإدارة',
-      description: 'لوحة متابعة متكاملة لمستوى كل صف',
-      image: '/avatars/admin-school-female.png',
-      features: ['إحصائيات شاملة', 'مؤشرات الأداء', 'تحليل البيانات']
+      title: 'إدارة شاملة للصفوف',
+      description: 'واجهة موحدة لإدارة جميع الصفوف والطلاب',
+      image: '/admin-features/class-management.png',
+      features: ['تنظيم الصفوف', 'إدارة الطلاب', 'متابعة فورية']
     },
     {
-      title: 'فحص ذكي للمشاريع',
-      description: 'تقليل نسب الغش وفحص التشابه قبل التسليم',
-      image: '/avatars/admin-school-male.png',
-      features: ['فحص التشابه', 'منع الغش', 'ضمان الأصالة']
+      title: 'وصول سريع للأدوات',
+      description: 'لوحة تحكم ذكية للوصول السريع للوظائف',
+      image: '/admin-features/quick-dashboard.png',
+      features: ['أدوات متنوعة', 'أحداث قادمة', 'وصول مباشر']
     },
     {
-      title: 'تواصل مع الأهالي',
-      description: 'رسائل واتساب تلقائية بعد كل اختبار',
-      image: '/avatars/admin-school-formal.png',
-      features: ['تواصل فوري', 'تقارير للأهالي', 'شفافية كاملة']
+      title: 'تقارير وإحصائيات تفصيلية',
+      description: 'مؤشرات أداء شاملة ومتابعة مستمرة',
+      image: '/admin-features/statistics-dashboard.png',
+      features: ['إحصائيات فورية', 'تتبع التقدم', 'تقارير شاملة']
     }
   ];
 
@@ -93,16 +93,16 @@ const AdminFeaturesSlider: React.FC = () => {
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
                   
                   <div className="relative z-10 group">
-                    <div className="relative transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
-                      <img
-                        src={slide.image}
-                        alt={slide.title}
-                        className="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover shadow-2xl border-4 border-white"
-                      />
-                      {/* Admin Elements */}
-                      <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce"></div>
-                      <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
-                    </div>
+                     <div className="relative transform transition-all duration-500 group-hover:scale-105">
+                       <img
+                         src={slide.image}
+                         alt={slide.title}
+                         className="w-64 h-40 md:w-80 md:h-48 rounded-2xl object-cover shadow-2xl border-4 border-white"
+                       />
+                       {/* Admin Elements */}
+                       <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce"></div>
+                       <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+                     </div>
                     
                     {/* Orbit Ring */}
                     <div className="absolute inset-0 border-2 border-purple-200 rounded-full animate-spin-slow opacity-20"></div>
