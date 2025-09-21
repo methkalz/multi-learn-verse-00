@@ -1,8 +1,28 @@
 /**
- * Index Component - Main Home Page 
+ * Landing Page Component (Index)
  * 
- * Simple authenticated home page that redirects users to their appropriate dashboard
- * or shows the login form for unauthenticated users.
+ * The main entry point and marketing page for the educational platform.
+ * Features a modern design with animated elements, interactive sections,
+ * and responsive layout optimized for Arabic content (RTL).
+ * 
+ * Features:
+ * - Hero section with typewriter effect and animated backgrounds
+ * - Educational materials showcase (Grade 10, 11, 12)
+ * - Benefits section for different user types (teacher, student, school)
+ * - Interactive features highlight with floating animations
+ * - Call-to-action sections with conditional rendering based on auth state
+ * - Smooth scrolling navigation between sections
+ * - Floating light orbs and ambient animations
+ * - Responsive design with mobile-first approach
+ * 
+ * SEO Optimized:
+ * - Semantic HTML structure
+ * - Proper heading hierarchy
+ * - Meta description ready content
+ * - Arabic language support (RTL)
+ * 
+ * @author Educational Platform Team
+ * @version 1.0.0
  */
 
 import { useEffect } from 'react';
@@ -13,7 +33,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { Monitor, Network, Award, BookOpen, Users, GraduationCap, Gamepad2, Play, ArrowRight, CheckCircle } from 'lucide-react';
 import TypewriterEffect from '@/components/TypewriterEffect';
 import { PageLoading } from '@/components/ui/LoadingComponents';
-
 /**
  * Index Component Implementation
  * 
@@ -32,7 +51,6 @@ const Index = () => {
   if (loading) {
     return <PageLoading message="Loading..." />;
   }
-
   /**
    * Smooth Scroll Navigation Helper
    * 
@@ -53,7 +71,6 @@ const Index = () => {
       });
     }
   };
-
   return (
     <div className="min-h-screen bg-white creative-background flex flex-col" dir="rtl">
       {/* Header */}
@@ -74,8 +91,8 @@ const Index = () => {
               <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-primary transition-colors">
                 ميزات تفاعلية
               </button>
-              <Button onClick={() => navigate('/landingpage')} className="gradient-blue text-white hover:scale-105 transition-all duration-300">
-                صفحة الهبوط
+              <Button onClick={() => scrollToSection('cta')} className="gradient-blue text-white hover:scale-105 transition-all duration-300">
+                ابدأ الآن
               </Button>
             </div>
           </div>
@@ -116,21 +133,21 @@ const Index = () => {
                   <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="شعار الموقع" className="h-20 md:h-24 w-auto" />
                 </div>
                 <h1 className="text-5xl md:text-7xl font-bold font-cairo mb-4">
-                  <TypewriterEffect 
-                    texts={["التقنية ببساطة"]} 
-                    className="text-5xl md:text-7xl font-bold font-cairo text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-primary"
-                  />
+                  
+                  
                 </h1>
                 <div className="w-20 h-1 gradient-blue mx-auto rounded-full"></div>
               </div>
               
               {/* Main Headline */}
-              <h2 className="text-3xl md:text-4xl font-bold font-cairo text-gray-800 mb-6 leading-relaxed">
-                منصة تعليمية شاملة لتخصص الحوسبة
+              <h2 className="text-2xl md:text-3xl font-semibold text-gray-600 mb-6 leading-relaxed min-h-[2.5rem] md:min-h-[3rem] text-center">
+                <TypewriterEffect texts={["نظام تعليمي وإداري شامل لتخصص الحوسبة", "نتعلّم ونعرف المزيد والمزيد بكل شغف", "نحصل على أفضل تجربة وأعلى نتائج"]} typeSpeed={80} deleteSpeed={40} pauseDuration={3000} />
               </h2>
               
-              <p className="text-xl md:text-2xl text-gray-700 mb-12 leading-relaxed">
-                ابدأ رحلتك في عالم التقنية مع منصة تفاعلية مصممة خصيصاً لطلاب ومعلمي الحوسبة
+              <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed text-center">
+                يشمل مواد، امتحانات، متابعة، وتغذية راجعة فورية
+                <br />
+                <span className="text-primary font-semibold">مطابق لتعليمات وزارة التربية</span>
               </p>
               
               {/* CTA Buttons */}
@@ -146,8 +163,8 @@ const Index = () => {
                       تسجيل الدخول
                       <ArrowRight className="mr-2 h-5 w-5" />
                     </Button>
-                    <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300 text-lg px-8 py-4 rounded-xl" onClick={() => navigate('/landingpage')}>
-                      تعرف على المنصة
+                    <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300 text-lg px-8 py-4 rounded-xl" onClick={() => navigate('/auth')}>
+                      ابدأ الآن
                     </Button>
                   </>
                 )}
@@ -178,51 +195,47 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Educational Materials Section */}
-        <section id="materials" className="py-20 bg-muted/40 relative z-10 -mt-[120px]">
-          <div className="container mx-auto px-6">
+        {/* Educational Content Section */}
+        <section id="materials" className="py-20 bg-muted/40 relative z-10 -mt-[150px]">
+          <div className="container mx-auto px-6 relative z-10 text-center">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4">المواد التعليمية</h2>
+              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4 text-center">المواد التعليمية</h2>
               <div className="w-16 h-1 gradient-blue mx-auto rounded-full mb-6"></div>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                محتوى شامل ومتدرج يغطي جميع مستويات تخصص الحوسبة
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
+                منهج شامل لتخصص الحوسبة مطابق لتعليمات وزارة التربية والتعليم
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {[{
               title: "الصف العاشر",
               icon: Monitor,
-              description: "أساسيات الحوسبة ونظام التشغيل",
-              topics: ["مقدمة في الحوسبة", "نظام ويندوز", "الشبكات الأساسية", "مشاريع عملية"],
+              items: ["التعرف على نظام التشغيل الويندوز", "مقدمة عن الشبكات", "تعليمات لبناء مشروع مصغر"],
               gradient: "gradient-blue"
             }, {
               title: "الصف الحادي عشر",
               icon: Network,
-              description: "البرمجة والشبكات المتقدمة",
-              topics: ["لغات البرمجة", "قواعد البيانات", "أمن المعلومات", "تطوير التطبيقات"],
+              items: ["مادة الـ 70% المطلوبة لامتحان البجروت", "تحضير شامل ومنهجي للامتحانات النهائية"],
               gradient: "gradient-orange"
             }, {
               title: "الصف الثاني عشر",
               icon: Award,
-              description: "مشروع التخرج والتحضير للبجروت",
-              topics: ["تطوير المشاريع", "إدارة المشاريع", "التوثيق المهني", "العرض والتقديم"],
+              items: ["مهام وفيديوهات مسجلة لتنفيذ مشروع التخرج", "فحص نسبة التشابه بين مشاريع الطلاب"],
               gradient: "gradient-blue"
             }].map((grade, index) => (
-              <Card key={grade.title} className="modern-card group text-center hover:shadow-2xl transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <div className={`w-20 h-20 mx-auto mb-4 ${grade.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <grade.icon className="h-10 w-10 text-white" />
+              <Card key={grade.title} className="modern-card group relative z-20">
+                <CardHeader className="text-center pb-4 relative z-20">
+                  <div className={`w-16 h-16 mx-auto mb-4 ${grade.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 relative z-20`}>
+                    <grade.icon className="h-8 w-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-cairo text-gray-800">{grade.title}</CardTitle>
-                  <CardDescription className="text-gray-600 font-medium">{grade.description}</CardDescription>
+                  <CardTitle className="text-xl font-cairo text-gray-800 relative z-20 text-center">{grade.title}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {grade.topics.map((topic, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span>{topic}</span>
+                <CardContent className="relative z-20">
+                  <ul className="space-y-3">
+                    {grade.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
+                        <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                        <span>{item}</span>
                       </li>
                     ))}
                   </ul>
@@ -233,46 +246,50 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Why Choose Us Section */}
+        {/* Benefits Section */}
         <section id="benefits" className="py-20 bg-white relative z-10">
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4">لماذا منصتنا؟</h2>
+              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-4 text-center">لماذا تختار منصتنا؟</h2>
               <div className="w-16 h-1 gradient-orange mx-auto rounded-full mb-6"></div>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                نقدم تجربة تعليمية فريدة تجمع بين الجودة والمتعة والفعالية
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto text-center">
+                نوفر حلول شاملة للمعلمين والطلاب والمدارس
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {[{
-              title: "مناهج معتمدة",
+              title: "للمعلم",
               icon: BookOpen,
-              description: "محتوى مطابق تماماً لمناهج وزارة التربية والتعليم",
+              benefits: ["مواد تعليمية وفق المنهاج الرسمي", "أوراق عمل وامتحانات جاهزة", "تصحيح تلقائي يوفر الوقت", "لوحة تحكم شاملة للمتابعة"],
               gradient: "gradient-blue"
             }, {
-              title: "تفاعل ومرح",
-              icon: Gamepad2,
-              description: "ألعاب وأنشطة تفاعلية تجعل التعلم ممتعاً ومشوقاً",
-              gradient: "gradient-orange"
-            }, {
-              title: "متابعة شاملة",
-              icon: Users,
-              description: "نظام متقدم لمتابعة تقدم الطلاب وتقييم الأداء",
-              gradient: "gradient-blue"
-            }, {
-              title: "خبرة ميدانية",
+              title: "للطالب",
               icon: GraduationCap,
-              description: "فريق من المعلمين ذوي الخبرة في تدريس الحوسبة",
+              benefits: ["تعلم تفاعلي من أي مكان", "ألعاب تعليمية ممتعة", "فيديوهات Packet Tracer", "حفظ آمن للمشاريع"],
               gradient: "gradient-orange"
+            }, {
+              title: "للمدرسة",
+              icon: Users,
+              benefits: ["رفع مستوى التحصيل", "تواصل فعال مع الأهل", "تقارير مفصلة", "مراقبة شاملة للتقدم"],
+              gradient: "gradient-blue"
             }].map((benefit, index) => (
-              <Card key={benefit.title} className="modern-card group text-center hover:shadow-xl transition-all duration-300">
-                <CardContent className="pt-6">
-                  <div className={`w-16 h-16 mx-auto mb-4 ${benefit.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+              <Card key={benefit.title} className="modern-card group text-center">
+                <CardHeader className="pb-4">
+                  <div className={`w-16 h-16 mx-auto mb-4 ${benefit.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                     <benefit.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="font-semibold text-gray-800 text-lg mb-2">{benefit.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{benefit.description}</p>
+                  <CardTitle className="text-xl font-cairo text-gray-800 text-center">{benefit.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {benefit.benefits.map((item, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             ))}
@@ -330,91 +347,62 @@ const Index = () => {
               icon: CheckCircle,
               gradient: "gradient-orange"
             }].map((feature, index) => (
-              <Card key={feature.title} className="modern-card interactive-card text-center group hover:shadow-2xl transition-all duration-300">
-                <CardContent className="pt-6">
-                  <div className={`w-16 h-16 mx-auto mb-4 ${feature.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-gray-800 text-lg">{feature.title}</h3>
-                </CardContent>
-              </Card>
+              <div key={feature.title} className="text-center group relative z-30">
+                <div className={`w-12 h-12 mx-auto mb-3 ${feature.gradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 relative z-30`}>
+                  <feature.icon className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-gray-800 relative z-30 text-center">{feature.title}</h3>
+              </div>
             ))}
             </div>
           </div>
         </section>
 
         {/* Call to Action */}
-        <section className="py-20 bg-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5"></div>
+        <section id="cta" className="py-20 bg-white relative z-10">
           <div className="container mx-auto px-6 relative z-10">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-6">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-4xl font-bold font-cairo text-gray-800 mb-6 text-center">
                 ابدأ رحلتك التعليمية الآن
               </h2>
-              <p className="text-xl text-gray-600 mb-12 leading-relaxed">
-                انضم إلى آلاف الطلاب والمعلمين الذين يستخدمون منصتنا لتحقيق التميز في الحوسبة
+              <div className="w-20 h-1 gradient-blue mx-auto rounded-full mb-6"></div>
+              <p className="text-xl text-gray-600 mb-8 text-center">
+                انضم إلى آلاف المدارس والمعلمين الذين يستخدمون منصتنا
               </p>
-              <div className="flex gap-6 justify-center flex-wrap">
-                {user ? (
-                  <Button size="lg" className="gradient-blue hover:gradient-orange text-white hover:scale-105 transition-all duration-300 text-lg px-8 py-4 rounded-xl shadow-lg" onClick={() => navigate('/dashboard')}>
-                    الذهاب إلى لوحة التحكم
-                    <ArrowRight className="mr-2 h-5 w-5" />
-                  </Button>
-                ) : (
-                  <Button size="lg" className="gradient-blue hover:gradient-orange text-white hover:scale-105 transition-all duration-300 text-lg px-8 py-4 rounded-xl shadow-lg" onClick={() => navigate('/auth')}>
-                    ابدأ الآن مجاناً
-                    <ArrowRight className="mr-2 h-5 w-5" />
-                  </Button>
-                )}
-                <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300 text-lg px-8 py-4 rounded-xl" onClick={() => navigate('/landingpage')}>
-                  تعرف على المزيد
+              {user ? (
+                <Button size="lg" onClick={() => navigate('/dashboard')} className="gradient-blue text-white hover:scale-105 transition-all duration-300 text-xl px-12 py-6 rounded-2xl shadow-lg">
+                  الذهاب إلى لوحة التحكم
+                  <ArrowRight className="mr-2 h-6 w-6" />
                 </Button>
-              </div>
+              ) : (
+                <Button size="lg" onClick={() => navigate('/auth')} className="gradient-blue text-white hover:scale-105 transition-all duration-300 text-xl px-12 py-6 rounded-2xl shadow-lg">
+                  ابدأ مجاناً الآن
+                  <ArrowRight className="mr-2 h-6 w-6" />
+                </Button>
+              )}
             </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="شعار الموقع" className="h-8 w-auto" />
-                <span className="text-lg font-semibold">التقنية ببساطة</span>
-              </div>
-              <p className="text-gray-400 leading-relaxed">
-                منصة تعليمية شاملة لتخصص الحوسبة تهدف لرفع مستوى التعليم وتحقيق التميز
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold mb-4">روابط سريعة</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><button onClick={() => scrollToSection('materials')} className="hover:text-white transition-colors">المواد</button></li>
-                <li><button onClick={() => scrollToSection('benefits')} className="hover:text-white transition-colors">المزايا</button></li>
-                <li><button onClick={() => scrollToSection('features')} className="hover:text-white transition-colors">الميزات</button></li>
-                <li><button onClick={() => navigate('/landingpage')} className="hover:text-white transition-colors">صفحة الهبوط</button></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold mb-4">تواصل معنا</h3>
-              <div className="space-y-2 text-gray-400">
-                <p>للاستفسارات والدعم الفني</p>
-                <p>متوفرون لخدمتكم على مدار الساعة</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 التقنية ببساطة. جميع الحقوق محفوظة.</p>
+      <footer className="bg-gray-50 border-t">
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold font-cairo text-gradient-blue mb-4 text-center">
+              التقنية ببساطة
+            </h3>
+            <p className="text-gray-600 mb-6 text-center">
+              نظام تعليمي وإداري شامل لتخصص الحوسبة - مطابق لتعليمات وزارة التربية
+            </p>
+            <div className="w-16 h-1 gradient-blue mx-auto rounded-full mb-6"></div>
+            <p className="text-sm text-gray-500 text-center">
+              &copy; 2024 التقنية ببساطة. جميع الحقوق محفوظة.
+            </p>
           </div>
         </div>
       </footer>
     </div>
   );
 };
-
 export default Index;
