@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import './slider-animations.css';
 
 const AdminFeaturesSlider: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
 
   const slides = [
     {
@@ -97,7 +99,8 @@ const AdminFeaturesSlider: React.FC = () => {
                        <img
                          src={slide.image}
                          alt={slide.title}
-                         className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10"
+                         onClick={() => setEnlargedImage(slide.image)}
+                         className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10 cursor-pointer hover:shadow-3xl transition-shadow duration-300"
                        />
                        {/* Admin Elements */}
                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce"></div>
@@ -142,6 +145,27 @@ const AdminFeaturesSlider: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Image Enlargement Dialog */}
+      <Dialog open={!!enlargedImage} onOpenChange={() => setEnlargedImage(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-black/90 border-none">
+          <div className="relative">
+            <button
+              onClick={() => setEnlargedImage(null)}
+              className="absolute top-4 right-4 z-50 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-all duration-200 hover:scale-110"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            {enlargedImage && (
+              <img
+                src={enlargedImage}
+                alt="صورة مكبرة"
+                className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
