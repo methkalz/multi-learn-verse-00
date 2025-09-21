@@ -97,7 +97,7 @@ const AdminFeaturesSlider: React.FC = () => {
                        <img
                          src={slide.image}
                          alt={slide.title}
-                         className="w-80 h-52 md:w-96 md:h-60 lg:w-[28rem] lg:h-72 rounded-2xl object-cover shadow-2xl border-4 border-white"
+                         className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10"
                        />
                        {/* Admin Elements */}
                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce"></div>
