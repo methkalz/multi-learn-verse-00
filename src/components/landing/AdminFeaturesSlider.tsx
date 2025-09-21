@@ -5,7 +5,7 @@ import './slider-animations.css';
 
 const AdminFeaturesSlider: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  const [enlargedImageIndex, setEnlargedImageIndex] = useState<number | null>(null);
 
   const slides = [
     {
@@ -41,6 +41,18 @@ const AdminFeaturesSlider: React.FC = () => {
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const nextEnlargedImage = () => {
+    if (enlargedImageIndex !== null) {
+      setEnlargedImageIndex((prev) => prev === null ? 0 : (prev + 1) % slides.length);
+    }
+  };
+
+  const prevEnlargedImage = () => {
+    if (enlargedImageIndex !== null) {
+      setEnlargedImageIndex((prev) => prev === null ? 0 : (prev - 1 + slides.length) % slides.length);
+    }
   };
 
   return (
@@ -99,7 +111,7 @@ const AdminFeaturesSlider: React.FC = () => {
                        <img
                          src={slide.image}
                          alt={slide.title}
-                         onClick={() => setEnlargedImage(slide.image)}
+                          onClick={() => setEnlargedImageIndex(index)}
                          className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10 cursor-pointer hover:shadow-3xl transition-shadow duration-300"
                        />
                         {/* Admin Elements - pointer-events-none to allow clicking through */}
@@ -147,22 +159,52 @@ const AdminFeaturesSlider: React.FC = () => {
       </div>
 
       {/* Image Enlargement Dialog */}
-      <Dialog open={!!enlargedImage} onOpenChange={() => setEnlargedImage(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-black/90 border-none">
-          <div className="relative">
+      <Dialog open={enlargedImageIndex !== null} onOpenChange={() => setEnlargedImageIndex(null)}>
+        <DialogContent className="max-w-6xl max-h-[95vh] p-0 bg-black/95 border-none overflow-hidden">
+          <div className="relative h-full">
+            {/* Close Button */}
             <button
-              onClick={() => setEnlargedImage(null)}
-              className="absolute top-4 right-4 z-50 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-all duration-200 hover:scale-110"
+              onClick={() => setEnlargedImageIndex(null)}
+              className="absolute top-6 right-6 z-50 bg-red-500/80 hover:bg-red-500 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-lg border-2 border-white/20"
             >
               <X className="h-6 w-6" />
             </button>
-            {enlargedImage && (
-              <img
-                src={enlargedImage}
-                alt="صورة مكبرة"
-                className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
-              />
+            
+            {/* Navigation Arrows */}
+            <button
+              onClick={prevEnlargedImage}
+              className="absolute left-6 top-1/2 transform -translate-y-1/2 z-50 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </button>
+            <button
+              onClick={nextEnlargedImage}
+              className="absolute right-6 top-1/2 transform -translate-y-1/2 z-50 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
+            >
+              <ChevronRight className="h-8 w-8" />
+            </button>
+
+            {/* Image Container */}
+            {enlargedImageIndex !== null && (
+              <div className="w-full h-full flex items-center justify-center p-6">
+                <div className="text-center">
+                  <img
+                    src={slides[enlargedImageIndex].image}
+                    alt={slides[enlargedImageIndex].title}
+                    className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+                  />
+                  <h3 className="text-white text-xl font-bold mt-4">{slides[enlargedImageIndex].title}</h3>
+                  <p className="text-white/80 text-sm mt-2">{slides[enlargedImageIndex].description}</p>
+                </div>
+              </div>
             )}
+
+            {/* Image Counter */}
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full">
+              <span className="text-white text-sm">
+                {enlargedImageIndex !== null ? enlargedImageIndex + 1 : 0} / {slides.length}
+              </span>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
