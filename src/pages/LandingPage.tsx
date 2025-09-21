@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Play, CheckCircle, Star, Gamepad2, Users, Monitor, BookOpen } from 'lucide-react';
 import TypewriterEffect from '@/components/TypewriterEffect';
 import WhatsAppButton from '@/components/landing/WhatsAppButton';
-import DashboardImageSlider from '@/components/landing/DashboardImageSlider';
+import TeacherFeaturesSlider from '@/components/landing/TeacherFeaturesSlider';
+import StudentFeaturesSlider from '@/components/landing/StudentFeaturesSlider';
+import AdminFeaturesSlider from '@/components/landing/AdminFeaturesSlider';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -140,79 +142,56 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* عرض اللوحات */}
-        <section className="py-24 bg-gray-50">
+        {/* ميزات للمعلم */}
+        <section id="features" className="py-24 bg-gray-50">
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
-                ميزات النظام التفصيلية
-              </h2>
-              <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                استكشف كيف يخدم النظام كل فئة من المستخدمين
-              </p>
-            </div>
-            <DashboardImageSlider />
-          </div>
-        </section>
-
-        {/* ميزات للمعلم */}
-        <section id="features" className="py-24 bg-white">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-20">
               <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
                 ميزات للمعلم
               </h2>
               <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                أدوات متطورة لإدارة التعليم والمتابعة الفعالة
+              </p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {[
-                {
-                  title: 'مواد جاهزة حسب مناهج الوزارة',
-                  description: 'محتوى شامل لكل صف مطابق للمناهج الرسمية',
-                  icon: BookOpen
-                },
-                {
-                  title: 'محتوى تفاعلي',
-                  description: 'عروض وفيديوهات وشروحات للمواضيع الصعبة',
-                  icon: Play
-                },
-                {
-                  title: 'بنك أسئلة متطور',
-                  description: 'مولد امتحانات جاهزة مع الحلول',
-                  icon: CheckCircle
-                },
-                {
-                  title: 'أوراق عمل بضغطة زر',
-                  description: 'إعداد امتحانات وأوراق عمل فوري',
-                  icon: Gamepad2
-                },
-                {
-                  title: 'تقارير متابعة تفصيلية',
-                  description: 'متابعة كل طالب مع عرض الأسئلة غير المجاب عنها',
-                  icon: Users
-                },
-                {
-                  title: 'دعم المشاريع',
-                  description: 'مساعدة في تنفيذ مشاريع الطلاب وفحص التشابه',
-                  icon: Monitor
-                }
-              ].map((feature, index) => (
-                <div key={index} className="text-center group p-6 border border-gray-100 rounded-lg hover:border-gray-200 transition-colors">
-                  <div className="w-16 h-16 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                    <feature.icon className="h-8 w-8 text-gray-700" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
-                </div>
-              ))}
-            </div>
+            <TeacherFeaturesSlider />
           </div>
         </section>
 
-        {/* المحتوى التعليمي */}
-        <section id="content" className="py-24 bg-gray-50">
+        {/* ميزات للطالب */}
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
+                ميزات للطالب
+              </h2>
+              <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                تعلم تفاعلي وممتع يحفز على الإنجاز والتقدم
+              </p>
+            </div>
+            <StudentFeaturesSlider />
+          </div>
+        </section>
+
+        {/* ميزات للإدارة */}
+        <section className="py-24 bg-gray-50">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
+                ميزات للإدارة
+              </h2>
+              <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                متابعة شاملة وتحليل دقيق لتحسين الأداء التعليمي
+              </p>
+            </div>
+            <AdminFeaturesSlider />
+          </div>
+        </section>
+
+        {/* المحتوى حسب الصفوف */}
+        <section id="content" className="py-24 bg-white">
           <div className="container mx-auto px-6">
             <div className="text-center mb-20">
               <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
@@ -252,53 +231,6 @@ const LandingPage: React.FC = () => {
                   </ul>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ميزات للطالب والإدارة */}
-        <section className="py-24 bg-white">
-          <div className="container mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-6xl mx-auto">
-              
-              {/* ميزات للطالب */}
-              <div>
-                <h2 className="text-2xl md:text-3xl font-light text-gray-900 mb-8">ميزات للطالب</h2>
-                <div className="space-y-6">
-                  {[
-                    'وصول كامل للمحتوى من البيت أو المدرسة',
-                    'ألعاب تعليمية محفزة ورسوم متحركة تزيد المشاركة',
-                    'فيديوهات Packet Tracer لدعم المشاريع (عاشر وثاني عشر)',
-                    'حفظ المشروع داخل المنظومة لمنع ضياعه',
-                    'نظام تحفيزي ذكي يتطور مع تقدم الطالب',
-                    'متابعة واضحة لمسار مشروع التخرج خطوة بخطوة'
-                  ].map((feature, index) => (
-                    <div key={index} className="flex items-start">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-4 flex-shrink-0"></span>
-                      <p className="text-gray-700">{feature}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ميزات للإدارة */}
-              <div>
-                <h2 className="text-2xl md:text-3xl font-light text-gray-900 mb-8">ميزات للإدارة</h2>
-                <div className="space-y-6">
-                  {[
-                    'رفع نتائج التحصيل في امتحانات البجروت',
-                    'تقوية العلاقة مع الأهالي عبر رسائل واتساب بعد كل اختبار',
-                    'تقارير شاملة لمستوى كل صف ولوحة متابعة متكاملة',
-                    'تقليل نسب "חשד" بتقليل الأخطاء والغش في مشاريع التخرج',
-                    'فحص ذكي للمشاريع قبل التسليم'
-                  ].map((feature, index) => (
-                    <div key={index} className="flex items-start">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-4 flex-shrink-0"></span>
-                      <p className="text-gray-700">{feature}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </section>
