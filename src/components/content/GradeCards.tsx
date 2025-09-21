@@ -20,6 +20,8 @@ const GradeCards: React.FC = () => {
       grade: '10',
       name: 'الصف العاشر',
       description: 'إدارة الفيديوهات التعليمية وملفات العمل',
+      avatar: '/avatars/student-boy-1.png',
+      gradeIcon: '🎯',
       features: [
         'رفع وإدارة مقاطع الفيديو',
         'ملفات الوورد للعمل عليها',
@@ -40,6 +42,8 @@ const GradeCards: React.FC = () => {
       grade: '11',
       name: 'الصف الحادي عشر',
       description: 'إدارة الدروس النصية والاختبارات والألعاب التعليمية',
+      avatar: '/avatars/student-girl-1.png',
+      gradeIcon: '📚',
       features: [
         'دروس نصية منظمة في أقسام ومواضيع',
         'ألعاب تفاعلية ومسابقات',
@@ -60,6 +64,8 @@ const GradeCards: React.FC = () => {
       grade: '12',
       name: 'الصف الثاني عشر',
       description: 'إدارة المشاريع النهائية ومكتبة الملفات المساعدة',
+      avatar: '/avatars/student-creative.png',
+      gradeIcon: '🎓',
       features: [
         'مشاريع التخرج النهائية',
         'محرر المستندات المتقدم',
@@ -155,12 +161,27 @@ const GradeCards: React.FC = () => {
               )}
               
               <CardHeader className="text-center pb-4 relative flex flex-col items-center">
-                <div className={`inline-flex items-center justify-center w-20 h-20 mx-auto mb-4 rounded-full text-white shadow-lg ${
-                  isDisabled 
-                    ? 'bg-gradient-to-br from-muted-foreground to-muted-foreground/80' 
-                    : `bg-gradient-to-br ${grade.gradient} group-hover:scale-110`
-                } transition-transform duration-300`}>
-                  <IconComponent className="h-10 w-10" />
+                {/* Avatar Container */}
+                <div className="relative mb-4">
+                  <img
+                    src={grade.avatar}
+                    alt={grade.name}
+                    className="w-20 h-20 rounded-full object-cover shadow-lg border-4 border-white"
+                  />
+                  
+                  {/* Grade Icon Overlay */}
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-lg border-2 border-gray-100">
+                    {grade.gradeIcon}
+                  </div>
+                  
+                  {/* Grade Number Badge */}
+                  <div className={`absolute -bottom-2 -left-2 w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg ${
+                    isDisabled 
+                      ? 'bg-gradient-to-br from-muted-foreground to-muted-foreground/80' 
+                      : `bg-gradient-to-br ${grade.gradient}`
+                  }`}>
+                    {grade.grade}
+                  </div>
                 </div>
                 
                 <CardTitle className={`text-2xl font-bold mb-2 ${
