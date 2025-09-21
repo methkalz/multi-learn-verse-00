@@ -102,13 +102,13 @@ const AdminFeaturesSlider: React.FC = () => {
                          onClick={() => setEnlargedImage(slide.image)}
                          className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10 cursor-pointer hover:shadow-3xl transition-shadow duration-300"
                        />
-                       {/* Admin Elements */}
-                       <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce"></div>
-                       <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
-                     </div>
-                    
-                    {/* Orbit Ring */}
-                    <div className="absolute inset-0 border-2 border-purple-200 rounded-full animate-spin-slow opacity-20"></div>
+                        {/* Admin Elements - pointer-events-none to allow clicking through */}
+                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce pointer-events-none"></div>
+                        <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-indigo-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
+                      </div>
+                     
+                     {/* Orbit Ring - pointer-events-none to allow clicking through */}
+                     <div className="absolute inset-0 border-2 border-purple-200 rounded-full animate-spin-slow opacity-20 pointer-events-none"></div>
                   </div>
                 </div>
               </div>
