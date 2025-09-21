@@ -32,49 +32,52 @@ const SpecialOffer: React.FC = () => {
 
   const offers = [
     {
-      title: 'باقة المدرسة الكاملة',
-      originalPrice: '5000',
-      discountPrice: '2500',
-      discount: '50%',
+      title: 'تجربة المدرسة الكاملة',
+      price: 'مجاني',
+      duration: '30 يوم',
       features: [
         'جميع المواد التعليمية للصفوف 10-12',
         'إدارة شاملة لـ 500 طالب',
         'لوحات تحكم متقدمة للمعلمين',
         'تقارير وإحصائيات مفصلة',
         'دعم فني على مدار الساعة',
-        'تدريب مجاني للمعلمين'
+        'تدريب مجاني للمعلمين',
+        'جميع الألعاب التفاعلية',
+        'مكتبة الفيديوهات كاملة'
       ],
       badge: 'الأكثر شعبية',
       color: 'from-blue-600 to-purple-600'
     },
     {
-      title: 'باقة المعلم المتميز',
-      originalPrice: '1500',
-      discountPrice: '750',
-      discount: '50%',
+      title: 'تجربة المعلم المتميز',
+      price: 'مجاني',
+      duration: '30 يوم',
       features: [
-        'محتوى تعليمي لصف واحد',
-        'إدارة حتى 100 طالب',
+        'محتوى تعليمي كامل لجميع الصفوف',
+        'إدارة غير محدودة للطلاب',
         'أدوات التصحيح التلقائي',
         'مكتبة الألعاب التفاعلية',
         'فيديوهات تعليمية حصرية',
-        'تقارير أداء الطلاب'
+        'تقارير أداء الطلاب',
+        'أدوات إنشاء الامتحانات',
+        'نظام المشاريع التفاعلية'
       ],
       badge: 'قيمة ممتازة',
       color: 'from-green-500 to-teal-600'
     },
     {
-      title: 'باقة الطالب الذكي',
-      originalPrice: '200',
-      discountPrice: '100',
-      discount: '50%',
+      title: 'تجربة الطالب الذكي',
+      price: 'مجاني',
+      duration: '30 يوم',
       features: [
         'الوصول لجميع المواد التعليمية',
         'ألعاب تفاعلية ممتعة',
         'فيديوهات Packet Tracer',
         'حفظ آمن للمشاريع',
         'تتبع التقدم الشخصي',
-        'شهادات إنجاز'
+        'شهادات إنجاز',
+        'نظام الأفاتار الشخصي',
+        'مسابقات وتحديات يومية'
       ],
       badge: 'للطلاب',
       color: 'from-orange-500 to-red-500'
@@ -93,15 +96,15 @@ const SpecialOffer: React.FC = () => {
       <div className="container mx-auto px-6 relative z-10">
         {/* العنوان الرئيسي */}
         <div className="text-center mb-16">
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center justify-center gap-3 mb-6">
             <Gift className="h-8 w-8 text-yellow-400" />
             <h2 className="text-4xl md:text-5xl font-bold">
-              عرض خاص محدود الوقت
+              جرب المنصة مجاناً
             </h2>
             <Gift className="h-8 w-8 text-yellow-400" />
           </div>
           <p className="text-xl text-blue-200 mb-8">
-            خصم 50% على جميع الباقات - لفترة محدودة فقط!
+            احصل على وصول كامل لجميع الميزات - تجربة مجانية شاملة!
           </p>
 
           {/* العد التنازلي */}
@@ -149,16 +152,13 @@ const SpecialOffer: React.FC = () => {
                   <Crown className="h-12 w-12 mx-auto mb-4 text-yellow-400" />
                   <h3 className="text-2xl font-bold mb-2">{offer.title}</h3>
                   
-                  {/* الأسعار */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className="text-3xl font-bold">{offer.discountPrice} ₪</span>
-                      <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                        -{offer.discount}
-                      </span>
+                  {/* السعر والمدة */}
+                  <div className="mb-6">
+                    <div className="text-center mb-2">
+                      <span className="text-4xl font-bold text-yellow-400">{offer.price}</span>
                     </div>
-                    <div className="text-gray-300 line-through text-lg">
-                      {offer.originalPrice} ₪
+                    <div className="text-gray-300 text-lg">
+                      لمدة {offer.duration}
                     </div>
                   </div>
                 </div>
@@ -173,28 +173,27 @@ const SpecialOffer: React.FC = () => {
                   ))}
                 </div>
 
-                {/* زر الشراء */}
+                {/* زر التجربة */}
                 <Button 
                   className="w-full bg-white text-gray-900 hover:bg-gray-100 font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105"
                   size="lg"
                 >
-                  اشترك الآن
-                  <Clock className="mr-2 h-5 w-5" />
+                  ابدأ التجربة المجانية
+                  <Gift className="mr-2 h-5 w-5" />
                 </Button>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* ضمان الاسترداد */}
+        {/* ضمان التجربة */}
         <div className="text-center mt-16">
           <div className="bg-white/10 rounded-2xl p-8 max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold mb-4 text-yellow-400">
-              🛡️ ضمان استرداد 100%
+              🚀 تجربة مجانية كاملة
             </h3>
             <p className="text-gray-200 leading-relaxed">
-              نحن واثقون من جودة منصتنا! إذا لم تكن راضياً خلال 30 يوماً، 
-              سنعيد إليك كامل المبلغ دون أي أسئلة
+              لا حاجة لبطاقة ائتمان! جرب جميع الميزات مجاناً لمدة 30 يوماً واكتشف القوة الحقيقية لمنصة التقنية ببساطة
             </p>
           </div>
         </div>

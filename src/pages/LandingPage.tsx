@@ -152,19 +152,19 @@ const LandingPage: React.FC = () => {
         </section>
 
         {/* الميزات التفاعلية */}
-        <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50" dir="rtl">
+        <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50" dir="rtl">
           <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+            <div className="text-center mb-20">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
                 ميزات تفاعلية متقدمة
               </h2>
-              <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full mb-6"></div>
+              <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full mb-8"></div>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 تقنيات حديثة ومبتكرة تجعل التعليم أكثر متعة وفعالية
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 max-w-6xl mx-auto">
               {[
                 {
                   title: 'ألعاب تفاعلية',
@@ -209,19 +209,19 @@ const LandingPage: React.FC = () => {
         </section>
 
         {/* Call to Action نهائي */}
-        <section className="py-20 bg-gradient-to-r from-primary to-secondary text-white" dir="rtl">
+        <section className="py-24 bg-gradient-to-r from-primary to-secondary text-white" dir="rtl">
           <div className="container mx-auto px-6 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">
               هل أنت مستعد لتجربة التعليم المستقبلي؟
             </h2>
-            <p className="text-xl mb-12 max-w-3xl mx-auto leading-relaxed opacity-90">
+            <p className="text-xl mb-16 max-w-3xl mx-auto leading-relaxed opacity-90">
               انضم إلى آلاف المعلمين والطلاب الذين يستخدمون منصتنا لتحقيق النجاح الأكاديمي
             </p>
             <div className="flex gap-6 justify-center flex-wrap">
               <Button 
                 size="lg" 
                 onClick={() => navigate('/auth')}
-                className="bg-white text-primary hover:bg-gray-100 text-xl px-10 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 font-bold"
+                className="bg-white text-primary hover:bg-gray-100 text-xl px-12 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 font-bold"
               >
                 ابدأ الآن مجاناً
                 <ArrowRight className="mr-3 h-6 w-6" />
@@ -232,46 +232,46 @@ const LandingPage: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12" dir="rtl">
+      <footer className="bg-gray-900 text-white py-16" dir="rtl">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="الشعار" className="h-10 w-auto" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+            <div className="text-center md:text-right">
+              <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
+                <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="الشعار" className="h-12 w-auto" />
                 <span className="text-xl font-bold">التقنية ببساطة</span>
               </div>
               <p className="text-gray-400 leading-relaxed">
                 منصة تعليمية شاملة لتخصص الحوسبة والشبكات
               </p>
             </div>
-            <div>
-              <h3 className="font-bold mb-4">روابط سريعة</h3>
-              <ul className="space-y-2 text-gray-400">
+            <div className="text-center md:text-right">
+              <h3 className="font-bold mb-6 text-lg">روابط سريعة</h3>
+              <ul className="space-y-3 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">الصفحة الرئيسية</a></li>
                 <li><a href="#features" className="hover:text-white transition-colors">الميزات</a></li>
                 <li><a href="#content" className="hover:text-white transition-colors">المحتوى</a></li>
                 <li><a href="#offers" className="hover:text-white transition-colors">العروض</a></li>
               </ul>
             </div>
-            <div>
-              <h3 className="font-bold mb-4">الدعم</h3>
-              <ul className="space-y-2 text-gray-400">
+            <div className="text-center md:text-right">
+              <h3 className="font-bold mb-6 text-lg">الدعم</h3>
+              <ul className="space-y-3 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">مركز المساعدة</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">اتصل بنا</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">الأسئلة الشائعة</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">سياسة الخصوصية</a></li>
               </ul>
             </div>
-            <div>
-              <h3 className="font-bold mb-4">تواصل معنا</h3>
-              <div className="space-y-2 text-gray-400">
+            <div className="text-center md:text-right">
+              <h3 className="font-bold mb-6 text-lg">تواصل معنا</h3>
+              <div className="space-y-3 text-gray-400">
                 <p>📧 info@tech-simple.com</p>
-                <p>📱 +972-XX-XXX-XXXX</p>
+                <p>📱 +972-599-123-456</p>
                 <p>📍 فلسطين</p>
               </div>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
             <p>&copy; 2024 منصة التقنية ببساطة. جميع الحقوق محفوظة.</p>
           </div>
         </div>

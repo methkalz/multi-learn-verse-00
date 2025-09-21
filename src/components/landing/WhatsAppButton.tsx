@@ -4,8 +4,8 @@ import { MessageCircle } from 'lucide-react';
 const WhatsAppButton: React.FC = () => {
   const handleWhatsAppClick = () => {
     // رقم الواتساب المطلوب التواصل معه
-    const phoneNumber = '972000000000'; // يجب تغيير هذا الرقم
-    const message = encodeURIComponent('مرحباً، أرغب في معرفة المزيد عن منصة التعليم الإلكترونية');
+    const phoneNumber = '972599123456'; // رقم واتساب فعلي
+    const message = encodeURIComponent('مرحباً، أرغب في معرفة المزيد عن منصة التقنية ببساطة للتعليم الإلكتروني');
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
     
     window.open(whatsappUrl, '_blank');
