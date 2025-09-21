@@ -111,7 +111,7 @@ const AdminFeaturesSlider: React.FC = () => {
                        <img
                          src={slide.image}
                          alt={slide.title}
-                          onClick={() => setEnlargedImageIndex(index)}
+                          onClick={() => setEnlargedImageIndex(0)}
                          className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10 cursor-pointer hover:shadow-3xl transition-shadow duration-300"
                        />
                         {/* Admin Elements - pointer-events-none to allow clicking through */}
