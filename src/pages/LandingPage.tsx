@@ -205,27 +205,68 @@ const LandingPage: React.FC = () => {
                 { 
                   grade: 'الصف العاشر', 
                   description: 'التعرف على نظام ويندوز، مقدمة في الشبكات، ومشاريع مصغرة مع فيديوهات',
+                  avatar: '/avatars/student-boy-1.png',
+                  gradeIcon: '🎯',
+                  gradeNumber: '10',
+                  bgColor: 'from-blue-50 to-blue-100',
+                  borderColor: 'border-blue-200',
                   features: ['نظام ويندوز', 'مقدمة الشبكات', 'مشاريع مصغرة', 'فيديوهات تعليمية']
                 },
                 { 
                   grade: 'الصف الحادي عشر', 
                   description: 'المادة المطلوبة (70%) لامتحان البجروت',
+                  avatar: '/avatars/student-girl-1.png',
+                  gradeIcon: '📚',
+                  gradeNumber: '11',
+                  bgColor: 'from-green-50 to-green-100',
+                  borderColor: 'border-green-200',
                   features: ['منهج البجروت', '70% من المطلوب', 'تحضير شامل', 'امتحانات تجريبية']
                 },
                 { 
                   grade: 'الصف الثاني عشر', 
                   description: 'مهام قصيرة وفيديوهات عملية لتنفيذ مشروع التخرج، مع فحص نسبة التشابه',
+                  avatar: '/avatars/student-creative.png',
+                  gradeIcon: '🎓',
+                  gradeNumber: '12',
+                  bgColor: 'from-purple-50 to-purple-100',
+                  borderColor: 'border-purple-200',
                   features: ['مشروع التخرج', 'فيديوهات عملية', 'فحص التشابه', 'متابعة مستمرة']
                 }
               ].map((item, index) => (
-                <div key={index} className="bg-white p-8 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-                  <h3 className="text-xl font-medium text-gray-900 mb-4">{item.grade}</h3>
-                  <p className="text-gray-600 text-sm mb-6 leading-relaxed">{item.description}</p>
-                  <ul className="space-y-2">
+                <div key={index} className={`relative bg-gradient-to-br ${item.bgColor} p-8 border ${item.borderColor} rounded-3xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden group`}>
+                  {/* Decorative background elements */}
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -translate-y-10 translate-x-10"></div>
+                  <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/30 rounded-full translate-y-8 -translate-x-8"></div>
+                  
+                  {/* Avatar section */}
+                  <div className="relative text-center mb-6">
+                    <div className="inline-block relative">
+                      <img
+                        src={item.avatar}
+                        alt={item.grade}
+                        className="w-20 h-20 rounded-full object-cover shadow-lg border-4 border-white mx-auto group-hover:scale-110 transition-transform duration-300"
+                      />
+                      
+                      {/* Grade icon overlay */}
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-lg border-2 border-gray-100">
+                        {item.gradeIcon}
+                      </div>
+                      
+                      {/* Grade number badge */}
+                      <div className="absolute -bottom-2 -left-2 w-7 h-7 bg-gradient-to-r from-gray-600 to-gray-800 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                        {item.gradeNumber}
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">{item.grade}</h3>
+                  <p className="text-gray-600 text-sm mb-6 leading-relaxed text-center">{item.description}</p>
+                  
+                  <ul className="space-y-3">
                     {item.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center text-gray-700 text-sm">
-                        <span className="w-1.5 h-1.5 bg-primary rounded-full mr-3"></span>
-                        {feature}
+                        <div className="w-2 h-2 bg-gradient-to-r from-current to-current rounded-full mr-3 flex-shrink-0 opacity-60"></div>
+                        <span className="font-medium">{feature}</span>
                       </li>
                     ))}
                   </ul>
