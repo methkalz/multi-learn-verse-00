@@ -7,22 +7,28 @@ const StudentFeaturesSlider: React.FC = () => {
 
   const slides = [
     {
-      title: 'ألعاب تعليمية محفزة',
-      description: 'ألعاب ورسوم متحركة تزيد المشاركة والحماس',
-      image: '/avatars/student-boy-1.png',
-      features: ['تعلم ممتع', 'تحدي وإثارة', 'مكافآت وإنجازات']
+      title: 'الصف العاشر',
+      description: 'التعرف على نظام ويندوز متقدمة في الشبكات، ومشاريع متقدمة مع فيديوهات عملية التنفيذ مفتوح للشباب',
+      avatar: '/avatars/student-boy-1.png',
+      gradeIcon: '🎯',
+      grade: '10',
+      features: ['مشاريع التخرج', 'فيديوهات عملية', 'فحص الشباب', 'متابعة مستمرة']
     },
     {
-      title: 'فيديوهات Packet Tracer',
-      description: 'دعم المشاريع للصف العاشر والثاني عشر',
-      image: '/avatars/student-girl-1.png',
-      features: ['شروحات عملية', 'أمثلة تطبيقية', 'خطوة بخطوة']
+      title: 'الصف الحادي عشر',
+      description: 'المناهج المطلوبة (x70) لامتحان البحوث',
+      avatar: '/avatars/student-girl-1.png',
+      gradeIcon: '📚',
+      grade: '11',
+      features: ['منهج البحوث', '70% من المطلوب', 'تحضير شامل', 'مهارات تحرية']
     },
     {
-      title: 'نظام تحفيزي ذكي',
-      description: 'يتطور مع تقدم الطالب ويحفز على الإنجاز',
-      image: '/avatars/student-boy-2.png',
-      features: ['مستويات متقدمة', 'شارات الإنجاز', 'تحفيز مستمر']
+      title: 'الصف الثاني عشر',
+      description: 'مهام قصيرة وفيديوهات عملية التنفيذ مفتوح للشباب، متابعة النشاطات، ومشاريع متقدمة مع فيديوهات تعليمية',
+      avatar: '/avatars/student-creative.png',
+      gradeIcon: '🎓',
+      grade: '12',
+      features: ['مشاريع تخرج', 'فيديوهات', 'مقدمة الشبكات', 'مشاريع متقدمة', 'فيديوهات تعليمية']
     }
   ];
 
@@ -93,15 +99,32 @@ const StudentFeaturesSlider: React.FC = () => {
                   <div className="absolute bottom-0 right-0 w-20 h-20 bg-emerald-200 rounded-full opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
                   
                   <div className="relative z-10 group">
-                    <div className="relative transform transition-all duration-500 group-hover:scale-110 group-hover:-rotate-3">
-                      <img
-                        src={slide.image}
-                        alt={slide.title}
-                        className="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover shadow-2xl border-4 border-white"
-                      />
-                      {/* Gaming Elements */}
-                      <div className="absolute -top-3 -right-3 w-6 h-6 bg-yellow-400 rounded-full animate-bounce flex items-center justify-center text-xs">⭐</div>
-                      <div className="absolute -bottom-2 -left-2 w-5 h-5 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+                    <div className="relative transform transition-all duration-500 group-hover:scale-110">
+                      {/* Grade Badge */}
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                          الصف {slide.grade}
+                        </div>
+                      </div>
+
+                      {/* Avatar Container */}
+                      <div className="relative">
+                        <img
+                          src={slide.avatar}
+                          alt={slide.title}
+                          className="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover shadow-2xl border-4 border-white"
+                        />
+                        
+                        {/* Grade Icon */}
+                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-2xl border-2 border-gray-100">
+                          {slide.gradeIcon}
+                        </div>
+                        
+                        {/* Floating Elements */}
+                        <div className="absolute -bottom-3 -left-3 w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-bounce flex items-center justify-center text-white text-sm font-bold">
+                          {slide.grade}
+                        </div>
+                      </div>
                     </div>
                     
                     {/* Orbit Ring */}
