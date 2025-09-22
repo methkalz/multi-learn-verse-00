@@ -99,19 +99,8 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
               
-              {/* أزرار العمل */}
-              <div className="flex gap-4 justify-center flex-wrap mb-20">
-                <Button size="lg" onClick={() => window.open('https://wa.me/972528359103?text=مرحبا.. معني بالحصول على تفاصيل أكثر عن النظام المميز', '_blank')} className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md transition-colors font-medium">
-                  اطلب الآن
-                  <ArrowRight className="mr-2 h-4 w-4" />
-                </Button>
-                <Button size="lg" variant="outline" onClick={() => scrollToSection('features')} className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-md transition-colors font-medium">
-                  تعرف على الميزات
-                </Button>
-              </div>
-
               {/* الإحصائيات */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto mb-16">
                 {[{
                 number: 500,
                 suffix: '+',
@@ -139,6 +128,18 @@ const LandingPage: React.FC = () => {
                     <div className="text-gray-600 text-sm">{stat.label}</div>
                   </div>)}
               </div>
+
+              {/* أزرار العمل */}
+              <div className="flex gap-4 justify-center flex-wrap mb-20">
+                <Button size="lg" onClick={() => window.open('https://wa.me/972528359103?text=مرحبا.. معني بالحصول على تفاصيل أكثر عن النظام المميز', '_blank')} className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md transition-colors font-medium">
+                  اطلب الآن
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => scrollToSection('features')} className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-md transition-colors font-medium">
+                  تعرف على الميزات
+                </Button>
+              </div>
+
             </div>
           </div>
         </section>
