@@ -73,18 +73,30 @@ const LandingPage: React.FC = () => {
                 منصة واحدة تقدم كل ما تحتاجه
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16 text-sm md:text-base">
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <span className="text-gray-700">📚 مواد تعليمية جاهزة</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl text-center border border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <BookOpen className="h-8 w-8 text-white" />
+                  </div>
+                  <span className="text-gray-700 font-medium">مواد تعليمية جاهزة</span>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <span className="text-gray-700">📝 بنك امتحانات بجروت</span>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl text-center border border-green-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <Monitor className="h-8 w-8 text-white" />
+                  </div>
+                  <span className="text-gray-700 font-medium">بنك امتحانات بجروت</span>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <span className="text-gray-700">🎮 ألعاب تعليمية محفزة</span>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl text-center border border-purple-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <Gamepad2 className="h-8 w-8 text-white" />
+                  </div>
+                  <span className="text-gray-700 font-medium">ألعاب تعليمية محفزة</span>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <span className="text-gray-700">📊 تقارير تفصيلية فورية</span>
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl text-center border border-orange-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <span className="text-gray-700 font-medium">تقارير تفصيلية فورية</span>
                 </div>
               </div>
               
