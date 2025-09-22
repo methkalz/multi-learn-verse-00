@@ -192,13 +192,13 @@ const AdminFeaturesSlider: React.FC = () => {
         {/* Enhanced Navigation */}
         <button
           onClick={prevSlide}
-          className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-purple-50 text-purple-600 p-1.5 sm:p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-purple-100 z-20"
+          className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/70 hover:bg-white/90 text-purple-600 p-1.5 sm:p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-purple-100 z-20 backdrop-blur-sm"
         >
           <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-purple-50 text-purple-600 p-1.5 sm:p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-purple-100 z-20"
+          className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/70 hover:bg-white/90 text-purple-600 p-1.5 sm:p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-purple-100 z-20 backdrop-blur-sm"
         >
           <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
