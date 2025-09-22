@@ -92,8 +92,8 @@ const App = () => {
               <Suspense fallback={<PageLoading message="Loading..." />}>
                 <Routes>
                   {/* Public routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/landingpage" element={<Suspense fallback={<PageLoading message="لحظة.. منجهزلك الصفحة" />}><LandingPage /></Suspense>} />
+                  <Route path="/" element={<Suspense fallback={<PageLoading message="لحظة.. منجهزلك الصفحة" />}><LandingPage /></Suspense>} />
+                  <Route path="/index2" element={<Index />} />
                   
                   {/* Authentication routes */}
                   <Route path="/auth" element={<LazyAuth />} />
