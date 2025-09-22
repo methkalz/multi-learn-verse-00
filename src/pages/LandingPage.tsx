@@ -100,7 +100,7 @@ const LandingPage: React.FC = () => {
               </div>
               
               {/* الإحصائيات */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto mb-16">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto mb-16 text-center">
                 {[{
                 number: 500,
                 suffix: '+',
