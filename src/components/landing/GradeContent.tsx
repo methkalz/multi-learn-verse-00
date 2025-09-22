@@ -104,11 +104,11 @@ const GradeContent: React.FC = () => {
                 {/* المحتوى الأساسي */}
                 <div className="space-y-3">
                   {grade.content.map((item, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
-                      <span className="text-sm text-gray-700 leading-relaxed">
-                        {item}
-                      </span>
+                     <div key={index} className="flex items-start gap-2">
+                       <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                       <span className="text-sm text-gray-700 leading-relaxed ml-2">
+                         {item}
+                       </span>
                     </div>
                   ))}
                 </div>

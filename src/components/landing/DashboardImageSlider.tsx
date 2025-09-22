@@ -107,8 +107,8 @@ const DashboardImageSlider: React.FC = () => {
                 <ul className="space-y-2">
                   {slide.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center text-gray-700 text-sm">
-                      <span className="w-1.5 h-1.5 bg-primary rounded-full mr-3 flex-shrink-0"></span>
-                      {feature}
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0"></span>
+                      <span className="ml-2">{feature}</span>
                     </li>
                   ))}
                 </ul>
