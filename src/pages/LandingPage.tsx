@@ -1,15 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Play, CheckCircle, Star, Gamepad2, Users, Monitor, BookOpen } from 'lucide-react';
+import { ArrowRight, Play, CheckCircle, Star, Gamepad2, Users, Monitor, BookOpen, Gift, Heart, Clock, Phone } from 'lucide-react';
 import TypewriterEffect from '@/components/TypewriterEffect';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
 import WhatsAppButton from '@/components/landing/WhatsAppButton';
 import TeacherFeaturesSlider from '@/components/landing/TeacherFeaturesSlider';
 import StudentFeaturesSlider from '@/components/landing/StudentFeaturesSlider';
 import AdminFeaturesSlider from '@/components/landing/AdminFeaturesSlider';
+import CountdownTimer from '@/components/ui/CountdownTimer';
+
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+
+  // تاريخ انتهاء التجربة المجانية - 29 سبتمبر 2025 الساعة 17:00 توقيت القدس
+  const freeTrialEndDate = new Date('2025-09-29T17:00:00+03:00'); // +03:00 is Jerusalem timezone (UTC+3)
+  
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -272,29 +278,42 @@ const LandingPage: React.FC = () => {
       </main>
 
         {/* عرض خاص للمدارس */}
-        <section className="py-24 bg-blue-50">
+        <section className="py-24 bg-gradient-to-br from-blue-50 via-purple-50 to-blue-50">
           <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-8">
-              عرض خاص للمدارس
-            </h2>
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-12">
+                عرض خاص للمدارس
+              </h2>
+              
+              {/* العداد التنازلي */}
+              <CountdownTimer targetDate={freeTrialEndDate} />
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div className="bg-white p-8 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-medium text-gray-900 mb-4">🎁 تجربة مجانية</h3>
-                  <p className="text-gray-600">تجربة مجانية لمدة أسبوعين كاملين</p>
+                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Gift className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">تجربة مجانية</h3>
+                  <p className="text-gray-600 leading-relaxed">تجربة مجانية لمدة أسبوعين كاملين مع إمكانية الوصول لجميع الميزات</p>
                 </div>
-                <div className="bg-white p-8 rounded-lg shadow-sm">
-                  <h3 className="text-xl font-medium text-gray-900 mb-4">💰 دعم גפ"ן</h3>
-                  <p className="text-gray-600">فرصة الحصول على النظام مع دعم منظومة גפ"ן</p>
+                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Heart className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">دعم גפ"ן</h3>
+                  <p className="text-gray-600 leading-relaxed">فرصة الحصول على النظام مع دعم منظومة גפ"ן المالي</p>
                 </div>
               </div>
               
-              <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-                <h3 className="text-xl font-medium text-gray-900 mb-4">📞 للتواصل والاستفسار</h3>
-                <p className="text-lg text-gray-700 mb-6">يونس عمارنة: 0528359103</p>
-                <Button size="lg" onClick={() => window.open('https://api.whatsapp.com/send/?phone=972528359103&text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D8%B1%D8%BA%D8%A8+%D9%81%D9%8A+%D9%85%D8%B9%D8%B1%D9%81%D8%A9+%D8%A7%D9%84%D9%85%D8%B2%D9%8A%D8%AF+%D8%B9%D9%86+%D9%85%D9%86%D8%B5%D8%A9+%D8%A7%D9%84%D8%AA%D9%82%D9%86%D9%8A%D8%A9+%D8%A8%D8%A8%D8%B3%D8%A7%D8%B7%D8%A9+%D9%84%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85+%D8%A7%D9%84%D8%A5%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A&type=phone_number&app_absent=0', '_blank')} className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 rounded-md transition-colors font-medium text-lg">
+              <div className="bg-white p-10 rounded-2xl shadow-xl mb-8 border border-gray-100">
+                <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Phone className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">للتواصل والاستفسار</h3>
+                <p className="text-xl text-gray-700 mb-8 font-medium">يونس عمارنة: 0528359103</p>
+                <Button size="lg" onClick={() => window.open('https://api.whatsapp.com/send/?phone=972528359103&text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D8%B1%D8%BA%D8%A8+%D9%81%D9%8A+%D9%85%D8%B9%D8%B1%D9%81%D8%A9+%D8%A7%D9%84%D9%85%D8%B2%D9%8A%D8%AF+%D8%B9%D9%86+%D9%85%D9%86%D8%B5%D8%A9+%D8%A7%D9%84%D8%AA%D9%82%D9%86%D9%8A%D8%A9+%D8%A8%D8%A8%D8%B3%D8%A7%D8%B7%D8%A9+%D9%84%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85+%D8%A7%D9%84%D8%A5%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A&type=phone_number&app_absent=0', '_blank')} className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-16 py-5 rounded-xl transition-all duration-300 font-bold text-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                   اطلب الآن
-                  <ArrowRight className="mr-3 h-5 w-5" />
+                  <ArrowRight className="mr-3 h-6 w-6" />
                 </Button>
               </div>
             </div>
