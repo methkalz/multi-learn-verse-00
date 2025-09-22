@@ -62,12 +62,12 @@ const AdminFeaturesSlider: React.FC = () => {
   };
 
   return (
-    <div className="relative max-w-5xl mx-auto">
+    <div className="relative max-w-5xl mx-auto px-2 sm:px-4">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-indigo-100 rounded-3xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-indigo-100 rounded-2xl sm:rounded-3xl"></div>
       
       <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-purple-100">
-        <div className="relative h-72 sm:h-80 md:h-96 px-4 sm:px-8 md:px-16">
+        <div className="relative h-[24rem] sm:h-80 md:h-96 px-2 sm:px-8 md:px-16">
           {slides.map((slide, index) => (
             <div
               key={index}
@@ -79,26 +79,26 @@ const AdminFeaturesSlider: React.FC = () => {
                     : 'opacity-0 scale-95 rotate-1'
               }`}
             >
-              <div className="flex flex-col md:flex-row h-full px-2 sm:px-4">
-                <div className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col justify-center relative">
+              <div className="flex flex-col h-full px-1 sm:px-2">
+                <div className="flex-1 p-2 sm:p-4 md:p-6 lg:p-8 flex flex-col justify-center relative">
                   {/* Decorative Elements */}
-                  <div className="absolute top-4 right-4 w-16 h-16 bg-purple-100 rounded-full opacity-30 animate-pulse"></div>
-                  <div className="absolute bottom-4 left-4 w-12 h-12 bg-indigo-200 rounded-full opacity-20 animate-bounce"></div>
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-16 sm:h-16 bg-purple-100 rounded-full opacity-30 animate-pulse"></div>
+                  <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-6 h-6 sm:w-12 sm:h-12 bg-indigo-200 rounded-full opacity-20 animate-bounce"></div>
                   
                   <div className="relative z-10">
-                    <div className="inline-block px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium mb-4 animate-fade-in">
+                    <div className="inline-block px-2 py-1 sm:px-4 sm:py-2 bg-purple-100 text-purple-800 rounded-full text-xs sm:text-sm font-medium mb-2 sm:mb-4 animate-fade-in">
                       للإدارة
                     </div>
-                    <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 md:mb-4 animate-slide-up">
+                    <h3 className="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 md:mb-4 animate-slide-up leading-tight">
                       {slide.title}
                     </h3>
-                    <p className="text-gray-600 mb-3 sm:mb-4 md:mb-6 text-sm sm:text-base md:text-lg leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                    <p className="text-gray-600 mb-2 sm:mb-3 md:mb-6 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
                       {slide.description}
                     </p>
-                    <ul className="space-y-2 sm:space-y-3">
+                    <ul className="space-y-1 sm:space-y-2 md:space-y-3">
                       {slide.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
-                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-purple-400 to-indigo-600 rounded-full ml-2 flex-shrink-0 animate-pulse"></div>
+                          <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-gradient-to-r from-purple-400 to-indigo-600 rounded-full ml-1 sm:ml-2 flex-shrink-0 animate-pulse"></div>
                           <span className="text-xs sm:text-sm md:text-base font-medium">{feature}</span>
                         </li>
                       ))}
@@ -106,27 +106,27 @@ const AdminFeaturesSlider: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex-1 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden">
+                <div className="flex-shrink-0 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden">
                   {/* Animated Background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-indigo-50 to-purple-100"></div>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-purple-200 rounded-full opacity-20 animate-pulse"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-0 right-0 w-16 h-16 sm:w-32 sm:h-32 bg-purple-200 rounded-full opacity-20 animate-pulse"></div>
+                  <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-24 sm:h-24 bg-indigo-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
                   
-                  <div className="relative z-10 group">
+                  <div className="relative z-10 group w-full max-w-[200px] sm:max-w-[300px] md:max-w-none">
                      <div className="relative transform transition-all duration-500 group-hover:scale-105">
-                        <img
-                          src={slide.image}
-                          alt={slide.title}
-                          onClick={() => setEnlargedImageIndex(index)}
-                          className="max-w-full max-h-[12rem] sm:max-h-[16rem] md:max-h-[20rem] lg:max-h-[24rem] xl:max-h-[28rem] w-auto h-auto rounded-xl sm:rounded-2xl object-contain shadow-2xl border-2 sm:border-4 border-white bg-white/10 cursor-pointer hover:shadow-3xl transition-shadow duration-300"
-                        />
+                       <img
+                         src={slide.image}
+                         alt={slide.title}
+                         onClick={() => setEnlargedImageIndex(index)}
+                         className="w-full max-h-[8rem] sm:max-h-[12rem] md:max-h-[16rem] lg:max-h-[20rem] xl:max-h-[24rem] object-contain rounded-lg sm:rounded-xl md:rounded-2xl shadow-xl border border-white bg-white/10 cursor-pointer hover:shadow-2xl transition-shadow duration-300"
+                       />
                         {/* Admin Elements - pointer-events-none to allow clicking through */}
-                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-purple-400 rounded-full animate-bounce pointer-events-none"></div>
-                        <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-indigo-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
+                        <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-3 h-3 sm:w-5 sm:h-5 bg-purple-400 rounded-full animate-bounce pointer-events-none"></div>
+                        <div className="absolute -bottom-1 -left-1 sm:-bottom-3 sm:-left-3 w-2 h-2 sm:w-4 sm:h-4 bg-indigo-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
                       </div>
                      
                      {/* Orbit Ring - pointer-events-none to allow clicking through */}
-                     <div className="absolute inset-0 border-2 border-purple-200 rounded-full animate-spin-slow opacity-20 pointer-events-none"></div>
+                     <div className="absolute inset-0 border border-purple-200 sm:border-2 rounded-full animate-spin-slow opacity-20 pointer-events-none"></div>
                   </div>
                 </div>
               </div>
