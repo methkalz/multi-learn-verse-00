@@ -93,7 +93,7 @@ const App = () => {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<Index />} />
-                  <Route path="/landingpage" element={<Suspense fallback={<PageLoading message="جاري تحميل صفحة الهبوط..." />}><LandingPage /></Suspense>} />
+                  <Route path="/landingpage" element={<Suspense fallback={<PageLoading message="لحظة.. منجهزلك الصفحة" />}><LandingPage /></Suspense>} />
                   
                   {/* Authentication routes */}
                   <Route path="/auth" element={<LazyAuth />} />
