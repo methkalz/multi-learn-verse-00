@@ -317,6 +317,7 @@ const LandingPage: React.FC = () => {
                   className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 rounded-2xl transition-all duration-300 font-medium text-lg w-full max-w-xs mx-auto block shadow-lg hover:shadow-xl hover:scale-105 text-center"
                 >
                   اطلب الآن
+                  <ArrowRight className="mr-3 h-5 w-5" />
                 </Button>
               </div>
             </div>
