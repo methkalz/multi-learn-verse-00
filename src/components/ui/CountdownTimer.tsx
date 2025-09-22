@@ -53,7 +53,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate }) => {
           <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
             <Clock className="h-6 w-6 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">العرض محدود الوقت!</h3>
+          <h3 className="text-2xl font-bold text-gray-900">احصل على التجربة المجانية الآن</h3>
         </div>
         <p className="text-gray-700 text-lg mb-6">
           التجربة المجانية تنتهي في <span className="font-bold text-blue-600">29 سبتمبر 2025</span> الساعة <span className="font-bold text-blue-600">17:00</span> توقيت القدس
