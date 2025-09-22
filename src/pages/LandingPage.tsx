@@ -58,7 +58,7 @@ const LandingPage: React.FC = () => {
             <div className="max-w-4xl mx-auto text-center">
               {/* الشعار والعنوان */}
               <div className="mb-16">
-                <img src="/logo-edunet.png" alt="شعار المنصة" className="h-20 w-auto mx-auto mb-12" />
+                <img src="/logo-edunet.png" alt="شعار المنصة" className="h-28 w-auto mx-auto mb-12 mt-8" />
                 <h1 className="text-4xl text-gray-900 mb-6 tracking-tight text-center md:text-5xl font-normal">نظام تعليمي وإداري ذكي لتخصص الحوسبة</h1>
                 <div className="w-16 h-px bg-gray-300 mx-auto mb-12"></div>
               </div>
