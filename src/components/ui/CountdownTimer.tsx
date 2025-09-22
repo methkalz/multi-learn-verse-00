@@ -70,7 +70,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate }) => {
       <div className="text-center mt-6">
         <div className="inline-flex items-center gap-2 text-red-600 font-medium animate-pulse">
           <Heart className="h-4 w-4" />
-          <span>أسرع واحصل على التجربة المجانية الآن!</span>
+          <span>نسخة مجانية كاملة المواصفات والإضافات الرائعة</span>
           <Heart className="h-4 w-4" />
         </div>
       </div>
