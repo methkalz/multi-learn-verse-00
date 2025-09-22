@@ -162,11 +162,11 @@ const LandingPage: React.FC = () => {
         <section className="py-24 bg-white">
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6 text-center">
                 ميزات للطالب
               </h2>
               <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center">
                 تعلم تفاعلي وممتع يحفز على الإنجاز والتقدم
               </p>
             </div>
