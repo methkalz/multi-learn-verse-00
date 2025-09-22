@@ -288,7 +288,7 @@ const LandingPage: React.FC = () => {
               {/* العداد التنازلي */}
               <CountdownTimer targetDate={freeTrialEndDate} />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 text-center">
                 <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
                   <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Gift className="h-8 w-8 text-white" />
