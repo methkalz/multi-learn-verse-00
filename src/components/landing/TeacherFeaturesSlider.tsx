@@ -137,13 +137,13 @@ const TeacherFeaturesSlider: React.FC = () => {
                   <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 w-6 h-6 bg-blue-200 rounded-full opacity-20 animate-bounce"></div>
                   
                   <div className="relative z-10">
-                    <div className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-2 animate-fade-in">
+                    <div className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-2 animate-fade-in text-center mx-auto">
                       للمعلم
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 animate-slide-up leading-tight">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 animate-slide-up leading-tight text-center">
                       {slide.title}
                     </h3>
-                    <p className="text-gray-600 mb-3 text-sm leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                    <p className="text-gray-600 mb-3 text-sm leading-relaxed animate-slide-up text-center" style={{ animationDelay: '0.1s' }}>
                       {slide.description}
                     </p>
                     <ul className="space-y-1">
