@@ -116,22 +116,22 @@ const LandingPage: React.FC = () => {
                 number: 500,
                 suffix: '+',
                 label: 'مواد تفاعلية',
-                duration: 2000
+                duration: 3000
               }, {
                 number: 50,
                 suffix: '+',
                 label: 'معلم متميز',
-                duration: 1500
+                duration: 2500
               }, {
                 number: 25,
                 suffix: '+',
                 label: 'مدرسة شريكة',
-                duration: 1800
+                duration: 3200
               }, {
                 number: 98,
                 suffix: '%',
                 label: 'نسبة الرضا',
-                duration: 2500
+                duration: 4000
               }].map((stat, index) => <div key={index} className="text-center">
                     <div className="text-2xl md:text-3xl font-light text-gray-900 mb-2">
                       <AnimatedCounter end={stat.number} duration={stat.duration} suffix={stat.suffix} />
