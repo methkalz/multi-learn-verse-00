@@ -12,6 +12,7 @@ const StudentFeaturesSlider: React.FC = () => {
       avatar: '/avatars/student-boy-1.png',
       gradeIcon: '🎯',
       grade: '10',
+      image: '/student-features/student-projects.png',
       features: ['مشاريع التخرج', 'فيديوهات عملية', 'فحص الشباب', 'متابعة مستمرة']
     },
     {
@@ -20,6 +21,7 @@ const StudentFeaturesSlider: React.FC = () => {
       avatar: '/avatars/student-girl-1.png',
       gradeIcon: '📚',
       grade: '11',
+      image: '/student-features/student-progress.png',
       features: ['منهج البحوث', '70% من المطلوب', 'تحضير شامل', 'مهارات تحرية']
     },
     {
@@ -28,6 +30,7 @@ const StudentFeaturesSlider: React.FC = () => {
       avatar: '/avatars/student-creative.png',
       gradeIcon: '🎓',
       grade: '12',
+      image: '/student-features/student-dashboard.png',
       features: ['مشاريع تخرج', 'فيديوهات', 'مقدمة الشبكات', 'مشاريع متقدمة', 'فيديوهات تعليمية']
     }
   ];
@@ -98,37 +101,42 @@ const StudentFeaturesSlider: React.FC = () => {
                   <div className="absolute top-0 left-0 w-28 h-28 bg-green-200 rounded-full opacity-20 animate-float"></div>
                   <div className="absolute bottom-0 right-0 w-20 h-20 bg-emerald-200 rounded-full opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
                   
-                  <div className="relative z-10 group">
-                    <div className="relative transform transition-all duration-500 group-hover:scale-110">
-                      {/* Grade Badge */}
-                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                          الصف {slide.grade}
-                        </div>
-                      </div>
+                  <div className="relative z-10 w-full h-full flex flex-col items-center justify-center space-y-4">
+                    {/* Grade Badge */}
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg mb-2">
+                      الصف {slide.grade}
+                    </div>
 
-                      {/* Avatar Container */}
-                      <div className="relative">
-                        <img
-                          src={slide.avatar}
-                          alt={slide.title}
-                          className="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover shadow-2xl border-4 border-white"
-                        />
-                        
-                        {/* Grade Icon */}
-                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-2xl border-2 border-gray-100">
-                          {slide.gradeIcon}
-                        </div>
-                        
-                        {/* Floating Elements */}
-                        <div className="absolute -bottom-3 -left-3 w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-bounce flex items-center justify-center text-white text-sm font-bold">
-                          {slide.grade}
-                        </div>
+                    {/* Feature Image */}
+                    <div className="relative group">
+                      <img
+                        src={slide.image}
+                        alt={slide.title}
+                        className="w-full max-w-sm h-48 md:h-56 object-cover rounded-lg shadow-xl border-2 border-white/20 transform transition-all duration-500 group-hover:scale-105"
+                      />
+                      
+                      {/* Image Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
+                      
+                      {/* Grade Icon */}
+                      <div className="absolute -top-2 -right-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-2xl border-2 border-gray-100">
+                        {slide.gradeIcon}
                       </div>
                     </div>
-                    
-                    {/* Orbit Ring */}
-                    <div className="absolute inset-0 border-2 border-green-200 rounded-full animate-spin-slow opacity-20"></div>
+
+                    {/* Student Avatar */}
+                    <div className="relative">
+                      <img
+                        src={slide.avatar}
+                        alt={slide.title}
+                        className="w-16 h-16 rounded-full object-cover shadow-lg border-2 border-white"
+                      />
+                      
+                      {/* Floating Grade Number */}
+                      <div className="absolute -bottom-1 -left-1 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-bounce flex items-center justify-center text-white text-xs font-bold">
+                        {slide.grade}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
