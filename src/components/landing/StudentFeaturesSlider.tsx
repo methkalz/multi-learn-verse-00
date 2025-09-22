@@ -1,35 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import './slider-animations.css';
 
 const StudentFeaturesSlider: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [enlargedImageIndex, setEnlargedImageIndex] = useState<number | null>(null);
 
   const slides = [
     {
       title: 'الصف العاشر',
       description: 'التعرف على نظام ويندوز متقدمة في الشبكات، ومشاريع متقدمة مع فيديوهات عملية التنفيذ مفتوح للشباب',
-      avatar: '/avatars/student-boy-1.png',
-      gradeIcon: '🎯',
-      grade: '10',
       image: '/student-features/student-projects.png',
       features: ['مشاريع التخرج', 'فيديوهات عملية', 'فحص الشباب', 'متابعة مستمرة']
     },
     {
       title: 'الصف الحادي عشر',
       description: 'المناهج المطلوبة (x70) لامتحان البحوث',
-      avatar: '/avatars/student-girl-1.png',
-      gradeIcon: '📚',
-      grade: '11',
       image: '/student-features/student-progress.png',
       features: ['منهج البحوث', '70% من المطلوب', 'تحضير شامل', 'مهارات تحرية']
     },
     {
       title: 'الصف الثاني عشر',
       description: 'مهام قصيرة وفيديوهات عملية التنفيذ مفتوح للشباب، متابعة النشاطات، ومشاريع متقدمة مع فيديوهات تعليمية',
-      avatar: '/avatars/student-creative.png',
-      gradeIcon: '🎓',
-      grade: '12',
       image: '/student-features/student-dashboard.png',
       features: ['مشاريع تخرج', 'فيديوهات', 'مقدمة الشبكات', 'مشاريع متقدمة', 'فيديوهات تعليمية']
     }
@@ -50,6 +43,18 @@ const StudentFeaturesSlider: React.FC = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  const nextEnlargedImage = () => {
+    if (enlargedImageIndex !== null) {
+      setEnlargedImageIndex((prev) => prev === null ? 0 : (prev + 1) % slides.length);
+    }
+  };
+
+  const prevEnlargedImage = () => {
+    if (enlargedImageIndex !== null) {
+      setEnlargedImageIndex((prev) => prev === null ? 0 : (prev - 1 + slides.length) % slides.length);
+    }
+  };
+
   return (
     <div className="relative max-w-5xl mx-auto">
       {/* Background Pattern */}
@@ -62,17 +67,17 @@ const StudentFeaturesSlider: React.FC = () => {
               key={index}
               className={`absolute inset-0 transition-all duration-700 ease-in-out ${
                 index === currentSlide 
-                  ? 'opacity-100 translate-y-0 scale-100' 
+                  ? 'opacity-100 scale-100 rotate-0' 
                   : index < currentSlide 
-                    ? 'opacity-0 -translate-y-full scale-95' 
-                    : 'opacity-0 translate-y-full scale-95'
+                    ? 'opacity-0 scale-95 -rotate-1' 
+                    : 'opacity-0 scale-95 rotate-1'
               }`}
             >
               <div className="flex flex-col md:flex-row h-full px-4">
                 <div className="flex-1 p-6 md:p-8 flex flex-col justify-center relative">
                   {/* Decorative Elements */}
-                  <div className="absolute top-4 left-4 w-20 h-20 bg-green-100 rounded-full opacity-30 animate-pulse"></div>
-                  <div className="absolute bottom-4 right-4 w-14 h-14 bg-emerald-200 rounded-full opacity-20 animate-bounce"></div>
+                  <div className="absolute top-4 right-4 w-16 h-16 bg-green-100 rounded-full opacity-30 animate-pulse"></div>
+                  <div className="absolute bottom-4 left-4 w-12 h-12 bg-emerald-200 rounded-full opacity-20 animate-bounce"></div>
                   
                   <div className="relative z-10">
                     <div className="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium mb-4 animate-fade-in">
@@ -86,7 +91,7 @@ const StudentFeaturesSlider: React.FC = () => {
                     </p>
                     <ul className="space-y-3">
                       {slide.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center text-gray-700 animate-slide-left" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
+                        <li key={idx} className="flex items-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
                           <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full ml-2 flex-shrink-0 animate-pulse"></div>
                           <span className="text-base font-medium">{feature}</span>
                         </li>
@@ -98,45 +103,24 @@ const StudentFeaturesSlider: React.FC = () => {
                 <div className="flex-1 flex items-center justify-center p-6 md:p-8 relative overflow-hidden">
                   {/* Animated Background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100"></div>
-                  <div className="absolute top-0 left-0 w-28 h-28 bg-green-200 rounded-full opacity-20 animate-float"></div>
-                  <div className="absolute bottom-0 right-0 w-20 h-20 bg-emerald-200 rounded-full opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-200 rounded-full opacity-20 animate-pulse"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-emerald-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
                   
-                  <div className="relative z-10 w-full h-full flex flex-col items-center justify-center space-y-4">
-                    {/* Grade Badge */}
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg mb-2">
-                      الصف {slide.grade}
-                    </div>
-
-                    {/* Feature Image */}
-                    <div className="relative group">
-                      <img
-                        src={slide.image}
-                        alt={slide.title}
-                        className="w-full max-w-sm h-48 md:h-56 object-cover rounded-lg shadow-xl border-2 border-white/20 transform transition-all duration-500 group-hover:scale-105"
-                      />
-                      
-                      {/* Image Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
-                      
-                      {/* Grade Icon */}
-                      <div className="absolute -top-2 -right-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-2xl border-2 border-gray-100">
-                        {slide.gradeIcon}
+                  <div className="relative z-10 group">
+                     <div className="relative transform transition-all duration-500 group-hover:scale-105">
+                       <img
+                         src={slide.image}
+                         alt={slide.title}
+                         onClick={() => setEnlargedImageIndex(index)}
+                         className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10 cursor-pointer hover:shadow-3xl transition-shadow duration-300"
+                       />
+                        {/* Student Elements - pointer-events-none to allow clicking through */}
+                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-400 rounded-full animate-bounce pointer-events-none"></div>
+                        <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-emerald-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
                       </div>
-                    </div>
-
-                    {/* Student Avatar */}
-                    <div className="relative">
-                      <img
-                        src={slide.avatar}
-                        alt={slide.title}
-                        className="w-16 h-16 rounded-full object-cover shadow-lg border-2 border-white"
-                      />
-                      
-                      {/* Floating Grade Number */}
-                      <div className="absolute -bottom-1 -left-1 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-bounce flex items-center justify-center text-white text-xs font-bold">
-                        {slide.grade}
-                      </div>
-                    </div>
+                     
+                     {/* Orbit Ring - pointer-events-none to allow clicking through */}
+                     <div className="absolute inset-0 border-2 border-green-200 rounded-full animate-spin-slow opacity-20 pointer-events-none"></div>
                   </div>
                 </div>
               </div>
@@ -173,6 +157,57 @@ const StudentFeaturesSlider: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Image Enlargement Dialog */}
+      <Dialog open={enlargedImageIndex !== null} onOpenChange={() => setEnlargedImageIndex(null)}>
+        <DialogContent className="max-w-6xl max-h-[95vh] p-0 bg-black/95 border-none overflow-hidden">
+          <div className="relative h-full">
+            {/* Close Button */}
+            <button
+              onClick={() => setEnlargedImageIndex(null)}
+              className="absolute top-6 right-6 z-50 bg-red-500/80 hover:bg-red-500 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-lg border-2 border-white/20"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
+            {/* Navigation Arrows */}
+            <button
+              onClick={prevEnlargedImage}
+              className="absolute left-6 top-1/2 transform -translate-y-1/2 z-50 bg-gray-900/80 hover:bg-gray-900 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-xl border-2 border-white/30"
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </button>
+            <button
+              onClick={nextEnlargedImage}
+              className="absolute right-6 top-1/2 transform -translate-y-1/2 z-50 bg-gray-900/80 hover:bg-gray-900 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-xl border-2 border-white/30"
+            >
+              <ChevronRight className="h-8 w-8" />
+            </button>
+
+            {/* Image Container */}
+            {enlargedImageIndex !== null && (
+              <div className="w-full h-full flex items-center justify-center p-6">
+                <div className="text-center">
+                  <img
+                    src={slides[enlargedImageIndex].image}
+                    alt={slides[enlargedImageIndex].title}
+                    className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+                  />
+                  <h3 className="text-white text-xl font-bold mt-4">{slides[enlargedImageIndex].title}</h3>
+                  <p className="text-white/80 text-sm mt-2">{slides[enlargedImageIndex].description}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Image Counter */}
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full">
+              <span className="text-white text-sm">
+                {enlargedImageIndex !== null ? enlargedImageIndex + 1 : 0} / {slides.length}
+              </span>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
