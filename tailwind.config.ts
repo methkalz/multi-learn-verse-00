@@ -200,6 +200,13 @@ export default {
 				'cursor-blink': {
 					'0%, 50%': { opacity: '1' },
 					'51%, 100%': { opacity: '0' }
+				},
+				
+				// Wiggle animation for horizontal movement
+				'wiggle': {
+					'0%, 100%': { transform: 'translateX(0px)' },
+					'25%': { transform: 'translateX(4px)' },
+					'75%': { transform: 'translateX(-4px)' }
 				}
 			},
 			
