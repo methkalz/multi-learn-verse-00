@@ -137,7 +137,7 @@ const StudentFeaturesSlider: React.FC = () => {
                   <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-6 h-6 bg-emerald-200 rounded-full opacity-20 animate-bounce"></div>
                   
                   <div className="relative z-10">
-                    <div className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium mb-2 animate-fade-in text-center mx-auto">
+                    <div className="block px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium mb-2 animate-fade-in text-center w-fit mx-auto">
                       للطالب
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2 animate-slide-up leading-tight text-center">
@@ -146,9 +146,9 @@ const StudentFeaturesSlider: React.FC = () => {
                     <p className="text-gray-600 mb-3 text-sm leading-relaxed animate-slide-up text-center" style={{ animationDelay: '0.1s' }}>
                       {slide.description}
                     </p>
-                    <ul className="space-y-1">
+                    <ul className="space-y-1 flex flex-col items-center">
                       {slide.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center justify-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
+                        <li key={idx} className="flex items-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
                           <div className="w-1 h-1 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full ml-1 flex-shrink-0 animate-pulse"></div>
                           <span className="text-sm font-medium">{feature}</span>
                         </li>
