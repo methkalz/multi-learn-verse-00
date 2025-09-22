@@ -43,6 +43,16 @@ All colors MUST be HSL.
     --teal-bright: 180 85% 55%;
     --cyan-electric: 190 100% 65%;
 
+    /* Lighter variants for dimmed states */
+    --blue-25: 214 60% 92%;
+    --blue-50: 214 70% 85%;
+    --green-25: 150 50% 92%;
+    --green-50: 150 60% 85%;
+    --purple-25: 270 50% 92%;
+    --purple-50: 270 60% 85%;
+    --orange-25: 25 50% 92%;
+    --orange-50: 25 60% 85%;
+
     /* Yellows & Golds */
     --yellow-bright: 55 100% 65%;
     --yellow-electric: 45 95% 60%;

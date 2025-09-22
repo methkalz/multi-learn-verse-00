@@ -9,9 +9,11 @@ import TeacherFeaturesSlider from '@/components/landing/TeacherFeaturesSlider';
 import StudentFeaturesSlider from '@/components/landing/StudentFeaturesSlider';
 import AdminFeaturesSlider from '@/components/landing/AdminFeaturesSlider';
 import CountdownTimer from '@/components/ui/CountdownTimer';
+import { useTrafficLightEffect } from '@/hooks/useTrafficLightEffect';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const activeBox = useTrafficLightEffect();
 
   // تاريخ انتهاء التجربة المجانية - 29 سبتمبر 2025 الساعة 17:00 توقيت القدس
   const freeTrialEndDate = new Date('2025-09-29T17:00:00+03:00'); // +03:00 is Jerusalem timezone (UTC+3)
@@ -81,26 +83,58 @@ const LandingPage: React.FC = () => {
               
               
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto mb-12 md:mb-16 mt-16 md:mt-24 px-2">
-                <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 pt-10 md:pt-12 pb-4 md:pb-6 px-3 md:px-6 rounded-xl md:rounded-2xl text-center border border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className={`relative pt-10 md:pt-12 pb-4 md:pb-6 px-3 md:px-6 rounded-xl md:rounded-2xl text-center border transition-all duration-500 ${
+                  activeBox === 0 
+                    ? 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-2xl scale-105' 
+                    : 'bg-gradient-to-br from-blue-25 to-blue-50 border-blue-100 opacity-60 shadow-sm'
+                }`}>
+                  <div className={`absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 ${
+                    activeBox === 0 
+                      ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
+                      : 'bg-gradient-to-br from-blue-300 to-blue-400'
+                  }`}>
                     <BookOpen className="h-6 w-6 md:h-8 md:w-8 text-white" />
                   </div>
                   <span className="text-gray-700 font-medium text-sm md:text-base">مواد تعليمية جاهزة</span>
                 </div>
-                <div className="relative bg-gradient-to-br from-green-50 to-green-100 pt-10 md:pt-12 pb-4 md:pb-6 px-3 md:px-6 rounded-xl md:rounded-2xl text-center border border-green-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className={`relative pt-10 md:pt-12 pb-4 md:pb-6 px-3 md:px-6 rounded-xl md:rounded-2xl text-center border transition-all duration-500 ${
+                  activeBox === 1 
+                    ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-2xl scale-105' 
+                    : 'bg-gradient-to-br from-green-25 to-green-50 border-green-100 opacity-60 shadow-sm'
+                }`}>
+                  <div className={`absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 ${
+                    activeBox === 1 
+                      ? 'bg-gradient-to-br from-green-500 to-green-600' 
+                      : 'bg-gradient-to-br from-green-300 to-green-400'
+                  }`}>
                     <Monitor className="h-6 w-6 md:h-8 md:w-8 text-white" />
                   </div>
                   <span className="text-gray-700 font-medium text-sm md:text-base">بنك امتحانات بجروت</span>
                 </div>
-                <div className="relative bg-gradient-to-br from-purple-50 to-purple-100 pt-10 md:pt-12 pb-4 md:pb-6 px-3 md:px-6 rounded-xl md:rounded-2xl text-center border border-purple-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className={`relative pt-10 md:pt-12 pb-4 md:pb-6 px-3 md:px-6 rounded-xl md:rounded-2xl text-center border transition-all duration-500 ${
+                  activeBox === 2 
+                    ? 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-2xl scale-105' 
+                    : 'bg-gradient-to-br from-purple-25 to-purple-50 border-purple-100 opacity-60 shadow-sm'
+                }`}>
+                  <div className={`absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 ${
+                    activeBox === 2 
+                      ? 'bg-gradient-to-br from-purple-500 to-purple-600' 
+                      : 'bg-gradient-to-br from-purple-300 to-purple-400'
+                  }`}>
                     <Gamepad2 className="h-6 w-6 md:h-8 md:w-8 text-white" />
                   </div>
                   <span className="text-gray-700 font-medium text-sm md:text-base">ألعاب تعليمية محفزة</span>
                 </div>
-                <div className="relative bg-gradient-to-br from-orange-50 to-orange-100 pt-10 md:pt-12 pb-4 md:pb-6 px-3 md:px-6 rounded-xl md:rounded-2xl text-center border border-orange-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className={`relative pt-10 md:pt-12 pb-4 md:pb-6 px-3 md:px-6 rounded-xl md:rounded-2xl text-center border transition-all duration-500 ${
+                  activeBox === 3 
+                    ? 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-2xl scale-105' 
+                    : 'bg-gradient-to-br from-orange-25 to-orange-50 border-orange-100 opacity-60 shadow-sm'
+                }`}>
+                  <div className={`absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 ${
+                    activeBox === 3 
+                      ? 'bg-gradient-to-br from-orange-500 to-orange-600' 
+                      : 'bg-gradient-to-br from-orange-300 to-orange-400'
+                  }`}>
                     <Users className="h-6 w-6 md:h-8 md:w-8 text-white" />
                   </div>
                   <span className="text-gray-700 font-medium text-sm md:text-base">تقارير تفصيلية فورية</span>
