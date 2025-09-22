@@ -1,28 +1,72 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import './slider-animations.css';
 
 const TeacherFeaturesSlider: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [enlargedImageIndex, setEnlargedImageIndex] = useState<number | null>(null);
 
   const slides = [
     {
-      title: 'مواد جاهزة حسب مناهج الوزارة',
-      description: 'محتوى شامل لكل صف مطابق للمناهج الرسمية',
-      image: '/avatars/teacher-female-1.png',
-      features: ['محتوى مطابق للمناهج', 'تحديث مستمر', 'جودة عالية']
+      title: 'لوحة تحكم المعلم',
+      description: 'إدارة شاملة للصفوف والطلاب مع إحصائيات مفصلة ومتابعة التقدم',
+      image: '/teacher-features/teacher-dashboard.png',
+      features: ['إدارة الصفوف', 'متابعة الطلاب', 'الإحصائيات', 'التقارير']
     },
     {
-      title: 'بنك أسئلة متطور',
-      description: 'مولد امتحانات جاهزة مع الحلول الكاملة',
-      image: '/avatars/teacher-male-1.png',
-      features: ['آلاف الأسئلة', 'حلول مفصلة', 'تصنيف حسب الصعوبة']
+      title: 'إدارة الصفوف الدراسية',
+      description: 'تنظيم الطلاب في صفوف وإدارة المحتوى التعليمي بسهولة ومرونة',
+      image: '/teacher-features/class-management.png',
+      features: ['تجميع الطلاب', 'توزيع المهام', 'متابعة التقدم', 'التقييم']
     },
     {
-      title: 'تقارير متابعة تفصيلية',
-      description: 'متابعة كل طالب مع عرض الأسئلة غير المجاب عنها',
-      image: '/avatars/teacher-female-2.png',
-      features: ['تحليل الأداء', 'تقارير فورية', 'متابعة فردية']
+      title: 'إدارة الطلاب',
+      description: 'نظام شامل لإدارة ومتابعة الطلاب والأنشطة التعليمية',
+      image: '/teacher-features/student-management.png',
+      features: ['قوائم الطلاب', 'الحضور والغياب', 'تتبع الأداء', 'التواصل']
+    },
+    {
+      title: 'الدروس المرئية',
+      description: 'مكتبة شاملة من الفيديوهات التعليمية والشروحات العملية',
+      image: '/teacher-features/video-lessons.png',
+      features: ['فيديوهات تعليمية', 'شروحات عملية', 'محتوى تفاعلي', 'أمثلة تطبيقية']
+    },
+    {
+      title: 'رفع الطلاب المجمع',
+      description: 'رفع وإدارة بيانات الطلاب بشكل مجمع وسريع',
+      image: '/teacher-features/bulk-student-upload.png',
+      features: ['رفع CSV', 'استيراد البيانات', 'معالجة مجمعة', 'التحقق من البيانات']
+    },
+    {
+      title: 'محتوى الصفوف',
+      description: 'إدارة وتنظيم المحتوى التعليمي لجميع المراحل الدراسية',
+      image: '/teacher-features/grade-content.png',
+      features: ['محتوى متدرج', 'مواد تعليمية', 'تنظيم المناهج', 'متابعة المقرر']
+    },
+    {
+      title: 'محتوى الصف الحادي عشر',
+      description: 'محتوى تعليمي متخصص للصف الحادي عشر مع مواضيع متقدمة',
+      image: '/teacher-features/grade11-content.png',
+      features: ['مناهج متقدمة', 'مشاريع تطبيقية', 'اختبارات تفاعلية', 'تقييم شامل']
+    },
+    {
+      title: 'دروس VLAN',
+      description: 'تعلم وتدريس تقنيات الشبكات الافتراضية VLAN بطريقة تفاعلية',
+      image: '/teacher-features/vlan-lessons.png',
+      features: ['تكوين VLAN', 'الشبكات الافتراضية', 'التطبيق العملي', 'أمثلة حقيقية']
+    },
+    {
+      title: 'شبكة نظير إلى نظير',
+      description: 'تعلم وتدريس شبكات P2P والاتصال المباشر بين الأجهزة',
+      image: '/teacher-features/peer-to-peer.png',
+      features: ['شبكات P2P', 'الاتصال المباشر', 'مشاركة الملفات', 'بروتوكولات الشبكة']
+    },
+    {
+      title: 'أمان الشبكات اللاسلكية',
+      description: 'تدريس مفاهيم أمان الشبكات اللاسلكية وبروتوكولات الحماية',
+      image: '/teacher-features/wireless-security.png',
+      features: ['بروتوكولات WPA', 'أمان الشبكات', 'تشفير البيانات', 'الحماية المتقدمة']
     }
   ];
 
@@ -39,6 +83,18 @@ const TeacherFeaturesSlider: React.FC = () => {
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const nextEnlargedImage = () => {
+    if (enlargedImageIndex !== null) {
+      setEnlargedImageIndex((prev) => prev === null ? 0 : (prev + 1) % slides.length);
+    }
+  };
+
+  const prevEnlargedImage = () => {
+    if (enlargedImageIndex !== null) {
+      setEnlargedImageIndex((prev) => prev === null ? 0 : (prev - 1 + slides.length) % slides.length);
+    }
   };
 
   return (
@@ -89,23 +145,24 @@ const TeacherFeaturesSlider: React.FC = () => {
                 <div className="flex-1 flex items-center justify-center p-6 md:p-8 relative overflow-hidden">
                   {/* Animated Background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100"></div>
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-200 rounded-full opacity-20 animate-float"></div>
-                  <div className="absolute bottom-0 left-0 w-20 h-20 bg-indigo-200 rounded-full opacity-20 animate-float" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
                   
                   <div className="relative z-10 group">
-                    <div className="relative transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                      <img
-                        src={slide.image}
-                        alt={slide.title}
-                        className="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover shadow-2xl border-4 border-white"
-                      />
-                      {/* Floating Dots */}
-                      <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-400 rounded-full animate-bounce"></div>
-                      <div className="absolute -bottom-3 -left-3 w-3 h-3 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
-                    </div>
-                    
-                    {/* Orbit Ring */}
-                    <div className="absolute inset-0 border-2 border-blue-200 rounded-full animate-spin-slow opacity-20"></div>
+                     <div className="relative transform transition-all duration-500 group-hover:scale-105">
+                       <img
+                         src={slide.image}
+                         alt={slide.title}
+                         onClick={() => setEnlargedImageIndex(index)}
+                         className="max-w-full max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] w-auto h-auto rounded-2xl object-contain shadow-2xl border-4 border-white bg-white/10 cursor-pointer hover:shadow-3xl transition-shadow duration-300"
+                       />
+                        {/* Teacher Elements - pointer-events-none to allow clicking through */}
+                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-blue-400 rounded-full animate-bounce pointer-events-none"></div>
+                        <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-indigo-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
+                      </div>
+                     
+                     {/* Orbit Ring - pointer-events-none to allow clicking through */}
+                     <div className="absolute inset-0 border-2 border-blue-200 rounded-full animate-spin-slow opacity-20 pointer-events-none"></div>
                   </div>
                 </div>
               </div>
@@ -142,6 +199,57 @@ const TeacherFeaturesSlider: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Image Enlargement Dialog */}
+      <Dialog open={enlargedImageIndex !== null} onOpenChange={() => setEnlargedImageIndex(null)}>
+        <DialogContent className="max-w-6xl max-h-[95vh] p-0 bg-black/95 border-none overflow-hidden">
+          <div className="relative h-full">
+            {/* Close Button */}
+            <button
+              onClick={() => setEnlargedImageIndex(null)}
+              className="absolute top-6 right-6 z-50 bg-red-500/80 hover:bg-red-500 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-lg border-2 border-white/20"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
+            {/* Navigation Arrows */}
+            <button
+              onClick={prevEnlargedImage}
+              className="absolute left-6 top-1/2 transform -translate-y-1/2 z-50 bg-gray-900/80 hover:bg-gray-900 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-xl border-2 border-white/30"
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </button>
+            <button
+              onClick={nextEnlargedImage}
+              className="absolute right-6 top-1/2 transform -translate-y-1/2 z-50 bg-gray-900/80 hover:bg-gray-900 text-white p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-xl border-2 border-white/30"
+            >
+              <ChevronRight className="h-8 w-8" />
+            </button>
+
+            {/* Image Container */}
+            {enlargedImageIndex !== null && (
+              <div className="w-full h-full flex items-center justify-center p-6">
+                <div className="text-center">
+                  <img
+                    src={slides[enlargedImageIndex].image}
+                    alt={slides[enlargedImageIndex].title}
+                    className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+                  />
+                  <h3 className="text-white text-xl font-bold mt-4">{slides[enlargedImageIndex].title}</h3>
+                  <p className="text-white/80 text-sm mt-2">{slides[enlargedImageIndex].description}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Image Counter */}
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full">
+              <span className="text-white text-sm">
+                {enlargedImageIndex !== null ? enlargedImageIndex + 1 : 0} / {slides.length}
+              </span>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
