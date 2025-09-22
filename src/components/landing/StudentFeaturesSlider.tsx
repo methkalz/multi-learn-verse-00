@@ -228,13 +228,13 @@ const StudentFeaturesSlider: React.FC = () => {
         {/* Enhanced Navigation - Positioned on the edges */}
         <button
           onClick={prevSlide}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 bg-white hover:bg-green-50 text-green-600 p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110 border-2 border-green-100 z-20"
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 bg-white hover:bg-green-50 text-green-600 p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110 border-2 border-green-100 z-50"
         >
           <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 bg-white hover:bg-green-50 text-green-600 p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110 border-2 border-green-100 z-20"
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 bg-white hover:bg-green-50 text-green-600 p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110 border-2 border-green-100 z-50"
         >
           <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
