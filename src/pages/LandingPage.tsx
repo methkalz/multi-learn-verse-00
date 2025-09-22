@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Play, CheckCircle, Star, Gamepad2, Users, Monitor, BookOpen } from 'lucide-react';
 import TypewriterEffect from '@/components/TypewriterEffect';
+import AnimatedCounter from '@/components/ui/AnimatedCounter';
 import WhatsAppButton from '@/components/landing/WhatsAppButton';
 import TeacherFeaturesSlider from '@/components/landing/TeacherFeaturesSlider';
 import StudentFeaturesSlider from '@/components/landing/StudentFeaturesSlider';
@@ -112,19 +113,29 @@ const LandingPage: React.FC = () => {
               {/* الإحصائيات */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
                 {[{
-                number: '1000+',
-                label: 'طالب نشط'
+                number: 500,
+                suffix: '+',
+                label: 'مواد تفاعلية',
+                duration: 2000
               }, {
-                number: '50+',
-                label: 'معلم متميز'
+                number: 50,
+                suffix: '+',
+                label: 'معلم متميز',
+                duration: 1500
               }, {
-                number: '25+',
-                label: 'مدرسة شريكة'
+                number: 25,
+                suffix: '+',
+                label: 'مدرسة شريكة',
+                duration: 1800
               }, {
-                number: '98%',
-                label: 'نسبة الرضا'
+                number: 98,
+                suffix: '%',
+                label: 'نسبة الرضا',
+                duration: 2500
               }].map((stat, index) => <div key={index} className="text-center">
-                    <div className="text-2xl md:text-3xl font-light text-gray-900 mb-2">{stat.number}</div>
+                    <div className="text-2xl md:text-3xl font-light text-gray-900 mb-2">
+                      <AnimatedCounter end={stat.number} duration={stat.duration} suffix={stat.suffix} />
+                    </div>
                     <div className="text-gray-600 text-sm">{stat.label}</div>
                   </div>)}
               </div>
