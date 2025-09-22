@@ -131,7 +131,7 @@ const LandingPage: React.FC = () => {
 
               {/* أزرار العمل */}
               <div className="flex gap-4 justify-center flex-wrap mb-20">
-                <Button size="lg" onClick={() => window.open('https://wa.me/972528359103?text=مرحبا.. معني بالحصول على تفاصيل أكثر عن النظام المميز', '_blank')} className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md transition-colors font-medium">
+                <Button size="lg" onClick={() => window.open('https://api.whatsapp.com/send/?phone=972528359103&text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D8%B1%D8%BA%D8%A8+%D9%81%D9%8A+%D9%85%D8%B9%D8%B1%D9%81%D8%A9+%D8%A7%D9%84%D9%85%D8%B2%D9%8A%D8%AF+%D8%B9%D9%86+%D9%85%D9%86%D8%B5%D8%A9+%D8%A7%D9%84%D8%AA%D9%82%D9%86%D9%8A%D8%A9+%D8%A8%D8%A8%D8%B3%D8%A7%D8%B7%D8%A9+%D9%84%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85+%D8%A7%D9%84%D8%A5%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A&type=phone_number&app_absent=0', '_blank')} className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md transition-colors font-medium">
                   اطلب الآن
                   <ArrowRight className="mr-2 h-4 w-4" />
                 </Button>
@@ -292,7 +292,7 @@ const LandingPage: React.FC = () => {
               <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
                 <h3 className="text-xl font-medium text-gray-900 mb-4">📞 للتواصل والاستفسار</h3>
                 <p className="text-lg text-gray-700 mb-6">يونس عمارنة: 0528359103</p>
-                <Button size="lg" onClick={() => window.open('https://wa.me/972528359103?text=مرحبا.. معني بالحصول على تفاصيل أكثر عن النظام المميز', '_blank')} className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 rounded-md transition-colors font-medium text-lg">
+                <Button size="lg" onClick={() => window.open('https://api.whatsapp.com/send/?phone=972528359103&text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D8%B1%D8%BA%D8%A8+%D9%81%D9%8A+%D9%85%D8%B9%D8%B1%D9%81%D8%A9+%D8%A7%D9%84%D9%85%D8%B2%D9%8A%D8%AF+%D8%B9%D9%86+%D9%85%D9%86%D8%B5%D8%A9+%D8%A7%D9%84%D8%AA%D9%82%D9%86%D9%8A%D8%A9+%D8%A8%D8%A8%D8%B3%D8%A7%D8%B7%D8%A9+%D9%84%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85+%D8%A7%D9%84%D8%A5%D9%84%D9%83%D8%AA%D8%B1%D9%88%D9%86%D9%8A&type=phone_number&app_absent=0', '_blank')} className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 rounded-md transition-colors font-medium text-lg">
                   اطلب الآن
                   <ArrowRight className="mr-3 h-5 w-5" />
                 </Button>
