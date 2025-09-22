@@ -25,6 +25,48 @@ const StudentFeaturesSlider: React.FC = () => {
       description: 'مهام قصيرة وفيديوهات عملية التنفيذ مفتوح للشباب، متابعة النشاطات، ومشاريع متقدمة مع فيديوهات تعليمية',
       image: '/student-features/student-dashboard.png',
       features: ['مشاريع تخرج', 'فيديوهات', 'مقدمة الشبكات', 'مشاريع متقدمة', 'فيديوهات تعليمية']
+    },
+    {
+      title: 'التدريب العملي للشبكات',
+      description: 'تعلم تكوين الشبكات وأوامر Router في بيئة تفاعلية مع أمثلة عملية',
+      image: '/student-features/networking-labs.png',
+      features: ['أوامر Router', 'بروتوكولات الشبكة', 'التطبيق العملي', 'محاكاة الشبكات']
+    },
+    {
+      title: 'إدارة المحتوى التعليمي',
+      description: 'نظام شامل لتنظيم وإدارة المواد التعليمية والأنشطة الطلابية',
+      image: '/student-features/content-management.png',
+      features: ['تنظيم المواد', 'متابعة التقدم', 'الأنشطة التفاعلية', 'التقييم المستمر']
+    },
+    {
+      title: 'نظرة عامة على الصفوف',
+      description: 'عرض شامل لجميع المستويات الدراسية مع الإحصائيات والتقدم',
+      image: '/student-features/grade-overview.png',
+      features: ['إحصائيات شاملة', 'متابعة الأداء', 'مقارنة المستويات', 'تقارير مفصلة']
+    },
+    {
+      title: 'نظام الإنجازات',
+      description: 'صفحة تحفيزية لعرض إنجازات الطلاب ومكافآتهم',
+      image: '/student-features/achievement-page.png',
+      features: ['نقاط الإنجاز', 'الجوائز والمكافآت', 'التحديات', 'التشجيع المستمر']
+    },
+    {
+      title: 'المفاهيم والتعريفات',
+      description: 'مكتبة تفاعلية للمصطلحات التقنية والتعريفات المهمة',
+      image: '/student-features/learning-definitions.png',
+      features: ['قاموس تقني', 'أمثلة توضيحية', 'بحث سريع', 'تصنيفات منظمة']
+    },
+    {
+      title: 'ألعاب تعليمية تفاعلية',
+      description: 'ألعاب مطابقة الكلمات والمفاهيم لتعزيز التعلم بطريقة ممتعة',
+      image: '/student-features/word-matching-games.png',
+      features: ['ألعاب مطابقة', 'مستويات متدرجة', 'تحديات تنافسية', 'تعلم تفاعلي']
+    },
+    {
+      title: 'محرر المستندات',
+      description: 'أداة قوية لكتابة وتحرير التقارير والمشاريع بشكل احترافي',
+      image: '/student-features/document-editor.png',
+      features: ['تحرير متقدم', 'تنسيق احترافي', 'مشاركة الملفات', 'حفظ تلقائي']
     }
   ];
 
