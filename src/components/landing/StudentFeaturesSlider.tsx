@@ -131,7 +131,7 @@ const StudentFeaturesSlider: React.FC = () => {
             >
               {/* Mobile Layout */}
               <div className="flex flex-col h-full px-1 sm:px-2 md:hidden">
-                <div className="flex-1 p-2 sm:p-4 flex flex-col justify-center relative">
+                <div className="flex-1 p-2 sm:p-4 flex flex-col justify-center items-center text-center relative">
                   {/* Decorative Elements */}
                   <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 bg-green-100 rounded-full opacity-30 animate-pulse"></div>
                   <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-6 h-6 bg-emerald-200 rounded-full opacity-20 animate-bounce"></div>
@@ -148,7 +148,7 @@ const StudentFeaturesSlider: React.FC = () => {
                     </p>
                     <ul className="space-y-1">
                       {slide.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
+                        <li key={idx} className="flex items-center justify-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
                           <div className="w-1 h-1 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full ml-1 flex-shrink-0 animate-pulse"></div>
                           <span className="text-sm font-medium">{feature}</span>
                         </li>
