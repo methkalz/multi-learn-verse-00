@@ -36,7 +36,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate }) => {
   }, [targetDate]);
 
   const TimeUnit: React.FC<{ value: number; label: string }> = ({ value, label }) => (
-    <div className="bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div className="bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-center">
       <div className="text-center">
         <div className="text-3xl font-bold text-gray-900 mb-2 font-mono">
           {value.toString().padStart(2, '0')}
