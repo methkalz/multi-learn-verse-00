@@ -317,7 +317,7 @@ const LandingPage: React.FC = () => {
                   className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 rounded-2xl transition-all duration-300 font-medium text-lg w-full max-w-xs mx-auto block shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
                 >
                   اطلب الآن
-                  <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 hover:translate-x-1 animate-bounce" style={{animationDuration: '2s'}} />
                 </Button>
               </div>
             </div>
