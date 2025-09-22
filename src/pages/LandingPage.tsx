@@ -296,7 +296,7 @@ const LandingPage: React.FC = () => {
                   <h3 className="text-xl font-bold text-gray-900 mb-4">تجربة مجانية</h3>
                   <p className="text-gray-600 leading-relaxed">تجربة مجانية لمدة أسبوعين كاملين مع إمكانية الوصول لجميع الميزات</p>
                 </div>
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Heart className="h-8 w-8 text-white" />
                   </div>
