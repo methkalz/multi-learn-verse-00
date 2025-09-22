@@ -182,7 +182,7 @@ const LandingPage: React.FC = () => {
                 ميزات للإدارة
               </h2>
               <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center">
                 متابعة شاملة وتحليل دقيق لتحسين الأداء التعليمي
               </p>
             </div>
