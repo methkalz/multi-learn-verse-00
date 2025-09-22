@@ -211,7 +211,7 @@ const LandingPage: React.FC = () => {
               gradeNumber: '10',
               bgColor: 'from-blue-50 to-blue-100',
               borderColor: 'border-blue-200',
-              features: ['نظام ويندوز', 'مقدمة الشبكات', 'مشاريع مصغرة', 'فيديوهات تعليمية']
+              features: ['مشاريع مصغرة', 'ألعاب تفاعلية', 'دروس شيقة', 'رسوم متحركة']
             }, {
               grade: 'الصف الحادي عشر',
               description: 'المادة المطلوبة (70%) لامتحان البجروت',
@@ -220,7 +220,7 @@ const LandingPage: React.FC = () => {
               gradeNumber: '11',
               bgColor: 'from-green-50 to-green-100',
               borderColor: 'border-green-200',
-              features: ['منهج البجروت', '70% من المطلوب', 'تحضير شامل', 'امتحانات تجريبية']
+              features: ['محتوى البجروت', 'دروس متقدمة', 'ألعاب تحفيزية', 'امتحانات تفاعلية']
             }, {
               grade: 'الصف الثاني عشر',
               description: 'مهام قصيرة وفيديوهات عملية لتنفيذ مشروع التخرج، مع فحص نسبة التشابه',
@@ -229,7 +229,7 @@ const LandingPage: React.FC = () => {
               gradeNumber: '12',
               bgColor: 'from-purple-50 to-purple-100',
               borderColor: 'border-purple-200',
-              features: ['مشروع التخرج', 'فيديوهات عملية', 'فحص التشابه', 'متابعة مستمرة']
+              features: ['مشروع التخرج', 'فيديوهات عملية', 'Packet Tracer', 'فحص التشابه']
             }].map((item, index) => <div key={index} className={`relative bg-gradient-to-br ${item.bgColor} p-8 border ${item.borderColor} rounded-3xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden group`}>
                   {/* Decorative background elements */}
                   <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -translate-y-10 translate-x-10"></div>
