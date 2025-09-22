@@ -69,9 +69,7 @@ const LandingPage: React.FC = () => {
                 </h2>
               </div>
               
-              <p className="text-lg md:text-xl text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed font-medium">
-                منصة واحدة تقدم كل ما تحتاجه
-              </p>
+              
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl text-center border border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
