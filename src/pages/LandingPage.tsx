@@ -72,7 +72,7 @@ const LandingPage: React.FC = () => {
               
               
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16 mt-24">
                 <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 pt-12 pb-6 px-6 rounded-2xl text-center border border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                   <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                     <BookOpen className="h-8 w-8 text-white" />
