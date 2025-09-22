@@ -4,27 +4,23 @@ export const useTrafficLightEffect = () => {
   const [activeBox, setActiveBox] = useState(0);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout;
+    let currentBox = 0;
 
-    const scheduleNext = (currentBox: number) => {
-      // Fourth box (index 3) stays lit for 2000ms, others for 800ms
-      const delay = currentBox === 3 ? 2000 : 800;
-      
-      timeoutId = setTimeout(() => {
-        setActiveBox((prev) => {
-          const next = prev < 3 ? prev + 1 : 0;
-          scheduleNext(next);
-          return next;
-        });
-      }, delay);
+    const updateBox = () => {
+      setActiveBox(currentBox);
+      currentBox = currentBox < 3 ? currentBox + 1 : 0;
     };
 
-    // Start the cycle
-    scheduleNext(0);
+    // Start immediately
+    updateBox();
+    
+    // Continue with regular interval
+    intervalId = setInterval(updateBox, 1000);
 
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     };
   }, []);
