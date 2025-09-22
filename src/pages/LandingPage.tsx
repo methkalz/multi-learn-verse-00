@@ -73,26 +73,26 @@ const LandingPage: React.FC = () => {
               
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl text-center border border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 pt-12 pb-6 px-6 rounded-2xl text-center border border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                     <BookOpen className="h-8 w-8 text-white" />
                   </div>
                   <span className="text-gray-700 font-medium">مواد تعليمية جاهزة</span>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl text-center border border-green-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div className="relative bg-gradient-to-br from-green-50 to-green-100 pt-12 pb-6 px-6 rounded-2xl text-center border border-green-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
                     <Monitor className="h-8 w-8 text-white" />
                   </div>
                   <span className="text-gray-700 font-medium">بنك امتحانات بجروت</span>
                 </div>
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl text-center border border-purple-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div className="relative bg-gradient-to-br from-purple-50 to-purple-100 pt-12 pb-6 px-6 rounded-2xl text-center border border-purple-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
                     <Gamepad2 className="h-8 w-8 text-white" />
                   </div>
                   <span className="text-gray-700 font-medium">ألعاب تعليمية محفزة</span>
                 </div>
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl text-center border border-orange-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div className="relative bg-gradient-to-br from-orange-50 to-orange-100 pt-12 pb-6 px-6 rounded-2xl text-center border border-orange-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
                     <Users className="h-8 w-8 text-white" />
                   </div>
                   <span className="text-gray-700 font-medium">تقارير تفصيلية فورية</span>
