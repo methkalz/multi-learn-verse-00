@@ -102,6 +102,20 @@ const TeacherFeaturesSlider: React.FC = () => {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl sm:rounded-3xl"></div>
       
+      {/* Enhanced Navigation - Outside the overflow container */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-blue-50 text-blue-600 p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110 border-2 border-blue-100 z-50"
+      >
+        <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+      </button>
+      <button
+        onClick={nextSlide}
+        className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-blue-50 text-blue-600 p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110 border-2 border-blue-100 z-50"
+      >
+        <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+      </button>
+      
       <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-blue-100">
         <div className="relative h-[24rem] sm:h-80 md:h-96 px-6 sm:px-8 md:px-16"> {/* Fixed height for mobile */}
           {slides.map((slide, index) => (
@@ -225,20 +239,6 @@ const TeacherFeaturesSlider: React.FC = () => {
             </div>
           ))}
         </div>
-
-        {/* Enhanced Navigation - Positioned on the edges */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 bg-white hover:bg-blue-50 text-blue-600 p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110 border-2 border-blue-100 z-50"
-        >
-          <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 bg-white hover:bg-blue-50 text-blue-600 p-2 sm:p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110 border-2 border-blue-100 z-50"
-        >
-          <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-        </button>
 
         {/* Enhanced Dots */}
         <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1 sm:space-x-2">
