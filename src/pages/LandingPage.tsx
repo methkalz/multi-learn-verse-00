@@ -65,7 +65,7 @@ const LandingPage: React.FC = () => {
               {/* العنوان المتحرك */}
               <div className="mb-16">
                 <h2 className="text-xl md:text-2xl font-normal text-gray-700 mb-8 leading-relaxed text-center">
-                  <TypewriterEffect texts={["ارتقِ بمستوى طلابك ووفر وقتك مع منصة تعليمية وإدارية شاملة وذكية", "صُممت خصيصًا لدعم المدارس والمعلمين والطلاب والإدارة", "نلتزم بتحسين معدل نجاح الطلاب في امتحانات البجروت"]} typeSpeed={60} deleteSpeed={30} pauseDuration={3500} />
+                  <TypewriterEffect texts={["ارتقِ بمستوى طلابك ووفر وقتك مع منصة تعليمية وإدارية شاملة وذكية", "صُممت خصيصًا لدعم المدارس والمعلمين والطلاب والإدارة", "يعمل على تحسين معدل نجاح الطلاب في امتحانات البجروت"]} typeSpeed={60} deleteSpeed={30} pauseDuration={3500} />
                 </h2>
               </div>
               
