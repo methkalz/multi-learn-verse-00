@@ -58,13 +58,13 @@ const LandingPage: React.FC = () => {
               {/* الشعار والعنوان */}
               <div className="mb-16">
                 <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="شعار المنصة" className="h-20 w-auto mx-auto mb-12" />
-                <h1 className="text-4xl md:text-6xl font-light text-gray-900 mb-6 tracking-tight text-center">نظام تعليمي وإداري ذكي لتخصص الحوسبة</h1>
+                <h1 className="text-4xl text-gray-900 mb-6 tracking-tight text-center md:text-5xl font-normal">نظام تعليمي وإداري ذكي لتخصص الحوسبة</h1>
                 <div className="w-16 h-px bg-gray-300 mx-auto mb-12"></div>
               </div>
               
               {/* العنوان المتحرك */}
               <div className="mb-16">
-                <h2 className="text-xl md:text-2xl font-normal text-gray-700 mb-8 leading-relaxed">
+                <h2 className="text-xl md:text-2xl font-normal text-gray-700 mb-8 leading-relaxed text-center">
                   <TypewriterEffect texts={["ارتقِ بمستوى طلابك ووفر وقتك مع منصة تعليمية وإدارية شاملة وذكية", "صُممت خصيصًا لدعم المدارس والمعلمين والطلاب والإدارة", "نلتزم بتحسين معدل نجاح الطلاب في امتحانات البجروت"]} typeSpeed={60} deleteSpeed={30} pauseDuration={3500} />
                 </h2>
               </div>
