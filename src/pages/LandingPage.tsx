@@ -194,7 +194,7 @@ const LandingPage: React.FC = () => {
         <section id="content" className="py-24 bg-white">
           <div className="container mx-auto px-6">
             <div className="text-center mb-20">
-              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6">
+              <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-6 text-center">
                 المحتوى حسب الصفوف
               </h2>
               <div className="w-12 h-px bg-gray-300 mx-auto mb-8"></div>
