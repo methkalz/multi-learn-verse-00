@@ -115,54 +115,109 @@ const StudentFeaturesSlider: React.FC = () => {
                     : 'opacity-0 scale-95 rotate-1'
               }`}
             >
-              <div className="flex flex-col h-full px-1 sm:px-2">
-                <div className="flex-1 p-2 sm:p-4 md:p-6 lg:p-8 flex flex-col justify-center relative">
+              {/* Mobile Layout */}
+              <div className="flex flex-col h-full px-1 sm:px-2 md:hidden">
+                <div className="flex-1 p-2 sm:p-4 flex flex-col justify-center relative">
                   {/* Decorative Elements */}
-                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-16 sm:h-16 bg-green-100 rounded-full opacity-30 animate-pulse"></div>
-                  <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-6 h-6 sm:w-12 sm:h-12 bg-emerald-200 rounded-full opacity-20 animate-bounce"></div>
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 bg-green-100 rounded-full opacity-30 animate-pulse"></div>
+                  <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-6 h-6 bg-emerald-200 rounded-full opacity-20 animate-bounce"></div>
                   
                   <div className="relative z-10">
-                    <div className="inline-block px-2 py-1 sm:px-4 sm:py-2 bg-green-100 text-green-800 rounded-full text-xs sm:text-sm font-medium mb-2 sm:mb-4 animate-fade-in">
+                    <div className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium mb-2 animate-fade-in">
                       للطالب
                     </div>
-                    <h3 className="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 md:mb-4 animate-slide-up leading-tight">
+                    <h3 className="text-sm font-bold text-gray-900 mb-1 animate-slide-up leading-tight">
                       {slide.title}
                     </h3>
-                    <p className="text-gray-600 mb-2 sm:mb-3 md:mb-6 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                    <p className="text-gray-600 mb-2 text-xs leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
                       {slide.description}
                     </p>
-                    <ul className="space-y-1 sm:space-y-2 md:space-y-3">
+                    <ul className="space-y-1">
                       {slide.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
-                          <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full ml-1 sm:ml-2 flex-shrink-0 animate-pulse"></div>
-                          <span className="text-xs sm:text-sm md:text-base font-medium">{feature}</span>
+                          <div className="w-1 h-1 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full ml-1 flex-shrink-0 animate-pulse"></div>
+                          <span className="text-xs font-medium">{feature}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 </div>
                 
-                <div className="flex-shrink-0 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden">
+                <div className="flex-shrink-0 flex items-center justify-center p-2 relative overflow-hidden">
                   {/* Animated Background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100"></div>
-                  <div className="absolute top-0 right-0 w-16 h-16 sm:w-32 sm:h-32 bg-green-200 rounded-full opacity-20 animate-pulse"></div>
-                  <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-24 sm:h-24 bg-emerald-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-green-200 rounded-full opacity-20 animate-pulse"></div>
+                  <div className="absolute bottom-0 left-0 w-12 h-12 bg-emerald-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
                   
-                  <div className="relative z-10 group w-full max-w-[200px] sm:max-w-[300px] md:max-w-none">
+                  <div className="relative z-10 group w-full max-w-[200px]">
                      <div className="relative transform transition-all duration-500 group-hover:scale-105">
                        <img
                          src={slide.image}
                          alt={slide.title}
                          onClick={() => setEnlargedImageIndex(index)}
-                         className="w-full max-h-[8rem] sm:max-h-[12rem] md:max-h-[16rem] lg:max-h-[20rem] xl:max-h-[24rem] object-contain rounded-lg sm:rounded-xl md:rounded-2xl shadow-xl border border-white bg-white/10 cursor-pointer hover:shadow-2xl transition-shadow duration-300"
+                         className="w-full max-h-[8rem] object-contain rounded-lg shadow-xl border border-white bg-white/10 cursor-pointer hover:shadow-2xl transition-shadow duration-300"
                        />
                         {/* Student Elements - pointer-events-none to allow clicking through */}
-                        <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-3 h-3 sm:w-5 sm:h-5 bg-green-400 rounded-full animate-bounce pointer-events-none"></div>
-                        <div className="absolute -bottom-1 -left-1 sm:-bottom-3 sm:-left-3 w-2 h-2 sm:w-4 sm:h-4 bg-emerald-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-bounce pointer-events-none"></div>
+                        <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-emerald-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
                       </div>
                      
                      {/* Orbit Ring - pointer-events-none to allow clicking through */}
-                     <div className="absolute inset-0 border border-green-200 sm:border-2 rounded-full animate-spin-slow opacity-20 pointer-events-none"></div>
+                     <div className="absolute inset-0 border border-green-200 rounded-full animate-spin-slow opacity-20 pointer-events-none"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden md:flex md:items-center h-full px-8">
+                <div className="grid grid-cols-2 gap-8 w-full items-center">
+                  {/* Left side - Text content */}
+                  <div className="space-y-6">
+                    <div className="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium animate-fade-in">
+                      للطالب
+                    </div>
+                    <div>
+                      <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 animate-slide-up leading-tight">
+                        {slide.title}
+                      </h3>
+                      <p className="text-gray-600 mb-6 text-base lg:text-lg leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                        {slide.description}
+                      </p>
+                    </div>
+                    
+                    <ul className="space-y-3">
+                      {slide.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
+                          <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full ml-2 flex-shrink-0 animate-pulse"></div>
+                          <span className="text-base font-medium">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Right side - Image */}
+                  <div className="flex justify-center relative">
+                    {/* Animated Background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 rounded-2xl"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-green-200 rounded-full opacity-20 animate-pulse"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-emerald-200 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    
+                    <div className="relative z-10 group">
+                       <div className="relative transform transition-all duration-500 group-hover:scale-105">
+                         <img
+                           src={slide.image}
+                           alt={slide.title}
+                           onClick={() => setEnlargedImageIndex(index)}
+                           className="w-full max-w-lg h-80 object-contain rounded-xl shadow-xl border border-white bg-white/10 cursor-pointer hover:shadow-2xl transition-shadow duration-300"
+                         />
+                          {/* Student Elements - pointer-events-none to allow clicking through */}
+                          <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-400 rounded-full animate-bounce pointer-events-none"></div>
+                          <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-emerald-400 rounded-full animate-bounce pointer-events-none" style={{ animationDelay: '0.5s' }}></div>
+                        </div>
+                       
+                       {/* Orbit Ring - pointer-events-none to allow clicking through */}
+                       <div className="absolute inset-0 border-2 border-green-200 rounded-full animate-spin-slow opacity-20 pointer-events-none"></div>
+                    </div>
                   </div>
                 </div>
               </div>
