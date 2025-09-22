@@ -84,7 +84,7 @@ const StudentFeaturesSlider: React.FC = () => {
                     <ul className="space-y-3">
                       {slide.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center text-gray-700 animate-slide-left" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
-                          <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full ml-8 flex-shrink-0 animate-pulse"></div>
+                          <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full ml-4 flex-shrink-0 animate-pulse"></div>
                           <span className="text-base font-medium">{feature}</span>
                         </li>
                       ))}
