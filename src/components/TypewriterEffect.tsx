@@ -105,14 +105,16 @@ const TypewriterEffect = ({
   /**
    * Render the typewriter effect
    * 
-   * Returns a span element containing the current display text and an animated cursor.
-   * The cursor uses CSS animation defined in the global styles for blinking effect.
+   * Returns a div container with fixed height containing the current display text and an animated cursor.
+   * The fixed height prevents layout shifts when text length changes.
    */
   return (
-    <span className={`text-center ${className}`}>
-      {displayText}
-      <span className="cursor-blink text-primary">|</span>
-    </span>
+    <div className={`text-center min-h-[120px] flex items-center justify-center ${className}`}>
+      <span className="leading-relaxed">
+        {displayText}
+        <span className="cursor-blink text-primary">|</span>
+      </span>
+    </div>
   );
 };
 
