@@ -103,7 +103,7 @@ const StudentFeaturesSlider: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl sm:rounded-3xl"></div>
       
       <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-green-100">
-        <div className="relative h-[24rem] sm:h-80 md:h-96 px-2 sm:px-8 md:px-16">
+        <div className="relative h-[24rem] sm:h-80 md:h-96 px-6 sm:px-8 md:px-16">
           {slides.map((slide, index) => (
             <div
               key={index}
@@ -228,13 +228,13 @@ const StudentFeaturesSlider: React.FC = () => {
         {/* Enhanced Navigation */}
         <button
           onClick={prevSlide}
-          className="absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 bg-white hover:bg-green-50 text-green-600 p-1.5 sm:p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-green-100 z-20"
+          className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-green-50 text-green-600 p-1.5 sm:p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-green-100 z-20"
         >
           <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 bg-white hover:bg-green-50 text-green-600 p-1.5 sm:p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-green-100 z-20"
+          className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-green-50 text-green-600 p-1.5 sm:p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110 border border-green-100 z-20"
         >
           <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
