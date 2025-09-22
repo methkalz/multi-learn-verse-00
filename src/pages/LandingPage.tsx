@@ -63,7 +63,7 @@ const LandingPage: React.FC = () => {
               {/* الشعار والعنوان */}
               <div className="mb-16">
                 <img src="/lovable-uploads/f942a38c-ddca-45fc-82fc-239e22268abe.png" alt="شعار المنصة" className="h-20 w-auto mx-auto mb-12" />
-                <h1 className="text-4xl md:text-6xl font-light text-gray-900 mb-6 tracking-tight">
+                <h1 className="text-4xl md:text-6xl font-light text-gray-900 mb-6 tracking-tight text-center">
                   نظام تعليمي وإداري ذكي لتخصص الحوسبة
                 </h1>
                 <div className="w-16 h-px bg-gray-300 mx-auto mb-12"></div>
