@@ -87,20 +87,20 @@ const AdminFeaturesSlider: React.FC = () => {
                   <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-6 h-6 bg-indigo-200 rounded-full opacity-20 animate-bounce"></div>
                   
                   <div className="relative z-10">
-                    <div className="inline-block px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium mb-2 animate-fade-in">
+                    <div className="inline-block px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium mb-2 animate-fade-in">
                       للإدارة
                     </div>
-                    <h3 className="text-sm font-bold text-gray-900 mb-1 animate-slide-up leading-tight">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 animate-slide-up leading-tight">
                       {slide.title}
                     </h3>
-                    <p className="text-gray-600 mb-2 text-xs leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                    <p className="text-gray-600 mb-3 text-sm leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
                       {slide.description}
                     </p>
                     <ul className="space-y-1">
                       {slide.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center text-gray-700 animate-slide-right" style={{ animationDelay: `${0.2 + idx * 0.1}s` }}>
                           <div className="w-1 h-1 bg-gradient-to-r from-purple-400 to-indigo-600 rounded-full ml-1 flex-shrink-0 animate-pulse"></div>
-                          <span className="text-xs font-medium">{feature}</span>
+                          <span className="text-sm font-medium">{feature}</span>
                         </li>
                       ))}
                     </ul>
