@@ -293,7 +293,7 @@ const LandingPage: React.FC = () => {
                   <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Gift className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">تجربة مجانية</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">تجربة مجانية</h3>
                   <p className="text-gray-600 leading-relaxed">تجربة مجانية لمدة أسبوعين كاملين مع إمكانية الوصول لجميع الميزات</p>
                 </div>
                 <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 text-center">
